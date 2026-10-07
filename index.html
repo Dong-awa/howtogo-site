@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>HowToGo | 问道 — 我的世界道路标记与实时导航</title>
+    <meta name="description" content="问道（HowToGo）是一个 Minecraft 1.21.1 / NeoForge 的纯客户端模组：在 Xaero 世界地图上画路，然后像用地图软件一样选目的地、选交通方式、看路线再出发。支持机械动力铁路与 MTR 线路自动识别。">
+    <meta name="theme-color" content="#f4f8ff">
+    <link rel="icon" href="assets/img/mod-icon.png" type="image/png">
+    <link rel="stylesheet" href="assets/css/site.css">
+    <meta property="og:title" content="HowToGo | 问道">
+    <meta property="og:description" content="在 Xaero 世界地图上画路，像用地图软件一样导航。">
+    <meta property="og:type" content="website">
+</head>
+
+<body>
+    <header class="site-header">
+        <div class="wrap">
+            <a class="brand" href="index.html">
+                <img class="brand-mark" src="assets/img/mod-icon.png" alt="">
+                <span>问道<small>HowToGo</small></span>
+            </a>
+            <nav class="nav" id="nav">
+                <a href="index.html" aria-current="page">首页</a>
+                <a href="features.html">功能介绍</a>
+                <a href="wiki/index.html">Wiki 教程</a>
+                <a href="#install">安装</a>
+            </nav>
+            <div class="header-actions">
+                <button class="icon-btn" type="button" data-theme-toggle aria-label="切换深色 / 浅色">
+                    <svg data-theme-icon="light" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2" stroke-linecap="round">
+                        <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>
+                    </svg>
+                    <svg data-theme-icon="dark" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2" stroke-linecap="round" style="display:none">
+                        <circle cx="12" cy="12" r="4"/>
+                        <path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4"/>
+                    </svg>
+                </button>
+                <button class="icon-btn nav-toggle" type="button" aria-label="打开菜单" aria-expanded="false">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                         stroke-linecap="round">
+                        <path d="M4 7h16M4 12h16M4 17h16"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- ============================================================ hero -->
+        <section class="hero">
+            <div class="wrap">
+                <div class="hero-copy reveal">
+                    <span class="eyebrow">Minecraft 1.21.1 · NeoForge · 纯客户端</span>
+                    <h1>在地图上画路，<br>然后像用<span>地图软件</span>一样出发</h1>
+                    <p class="hero-lead">
+                        问道（HowToGo）把 Xaero 世界地图变成一张真正能用的路网：画路、标记地点、
+                        选目的地、选交通方式、看路线预览、跟着 HUD 走到终点。
+                        机械动力的铁轨和 MTR 的线路会被自动读进来，不用你一格一格画。
+                    </p>
+                    <div class="hero-meta">
+                        <span class="chip"><i class="dot"></i>Xaero 世界地图</span>
+                        <span class="chip"><i class="dot"></i>机械动力铁路</span>
+                        <span class="chip"><i class="dot"></i>MTR 线路</span>
+                        <span class="chip"><i class="dot"></i>无需装在服务器</span>
+                    </div>
+                    <div class="btn-row">
+                        <a class="btn btn-primary" href="wiki/install.html">
+                            5 分钟上手
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                 stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M5 12h14M13 6l6 6-6 6"/>
+                            </svg>
+                        </a>
+                        <a class="btn btn-ghost" href="features.html">看看它都能做什么</a>
+                    </div>
+                </div>
+
+                <div class="hero-visual reveal" data-delay="120">
+                    <div class="map-card">
+                        <div class="map-canvas">
+                            <svg viewBox="0 0 560 372" role="img"
+                                 aria-label="世界地图上的道路、线路、地点与导航 HUD 示意图">
+                                <!-- 底图：地形面 -->
+                                <path d="M0 250c70-22 128 6 196-14s118-58 196-44 168 26 168 26v154H0z"
+                                      fill="#cfe4ff" opacity="0.55"/>
+                                <path d="M0 300c96-14 150 12 232-4s150-30 328-10v86H0z"
+                                      fill="#bcd8ff" opacity="0.5"/>
+
+                                <!-- 小路 -->
+                                <path d="M28 322c58-20 74-64 118-84s88-8 122-34" fill="none" stroke="#c8a24a"
+                                      stroke-width="2.6" stroke-linecap="round" opacity="0.85"/>
+                                <!-- 公路 -->
+                                <path d="M18 118c74 6 96 44 168 44s128-40 206-30 108 44 156 48" fill="none"
+                                      stroke="#3fd07a" stroke-width="4.6" stroke-linecap="round"/>
+                                <!-- 高速 -->
+                                <path d="M60 358c-8-92 34-150 96-196S288 96 320 34" fill="none" stroke="#3fa9f5"
+                                      stroke-width="7.4" stroke-linecap="round"/>
+                                <!-- 水路 -->
+                                <path d="M0 214c94-16 126 22 214 10s150-40 216-24 130 22 130 22" fill="none"
+                                      stroke="#2f6fe0" stroke-width="5.6" stroke-linecap="round" opacity="0.9"/>
+                                <!-- 铁路（虚线） -->
+                                <path d="M0 262h556" fill="none" stroke="#ffa028" stroke-width="4"
+                                      stroke-dasharray="11 8" stroke-linecap="round"/>
+
+                                <!-- 公共交通线路：MTR 只读线路 -->
+                                <path d="M96 96c84 46 150 26 218 58s104 74 178 84" fill="none" stroke="#1d4ed8"
+                                      stroke-width="3.2" stroke-linecap="round" opacity="0.55"/>
+
+                                <!-- 规划出的路线 -->
+                                <path d="M118 330c34-58 12-96 62-124s86-16 124-52 66-58 132-64" fill="none"
+                                      stroke="#2563eb" stroke-width="6.6" stroke-linecap="round"/>
+                                <circle cx="118" cy="330" r="8.5" fill="#ffffff" stroke="#2563eb" stroke-width="5"/>
+                                <circle cx="436" cy="90" r="10" fill="#2563eb"/>
+                                <circle cx="436" cy="90" r="4" fill="#ffffff"/>
+                                <circle cx="436" cy="90" r="17" fill="none" stroke="#2563eb" stroke-width="2"
+                                        opacity="0.35"/>
+
+                                <!-- 站点与换乘 -->
+                                <circle cx="246" cy="182" r="5" fill="#ffffff" stroke="#1d4ed8" stroke-width="3"/>
+                                <circle cx="312" cy="144" r="5" fill="#ffffff" stroke="#1d4ed8" stroke-width="3"/>
+                                <rect x="352" y="106" width="12" height="12" rx="3" fill="#ff8a1f"/>
+
+                                <!-- 地点 -->
+                                <rect x="150" y="238" width="11" height="11" rx="3" fill="#ffd23f"/>
+                                <rect x="466" y="238" width="11" height="11" rx="3" fill="#ffd23f"/>
+                                <text x="166" y="248" font-family="Segoe UI, sans-serif" font-size="12.5"
+                                      fill="#38507a">贸易站</text>
+                                <text x="410" y="230" font-family="Segoe UI, sans-serif" font-size="12.5"
+                                      fill="#38507a">矿场</text>
+                                <text x="252" y="222" font-family="Segoe UI, sans-serif" font-size="12.5"
+                                      fill="#1d4ed8">2 号线</text>
+                            </svg>
+
+                            <div class="map-panel" aria-hidden="true">
+                                <b>地图显示</b>
+                                <div class="row"><i class="sw"></i>高速</div>
+                                <div class="row"><i class="sw"></i>公路</div>
+                                <div class="row"><i class="sw off"></i>小路</div>
+                                <div class="row"><i class="sw"></i>公共交通线路</div>
+                            </div>
+
+                            <div class="map-hud" aria-hidden="true">
+                                <span class="arrow">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                         stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M9 20V9a3 3 0 0 1 3-3h3"/>
+                                        <path d="M12 3l3.5 3L12 9"/>
+                                    </svg>
+                                </span>
+                                <span class="txt">
+                                    <strong>前方 120 米 右转</strong>
+                                    <span>前往 矿场 · 剩余 840 米 · 约 1分 40秒</span>
+                                </span>
+                                <span class="bar"><i></i></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================================================== quick start -->
+        <section class="section section-soft">
+            <div class="wrap">
+                <div class="section-head reveal">
+                    <span class="eyebrow">快速开始</span>
+                    <h2>三步，从画第一条路到跟着导航走</h2>
+                    <p>问道是纯客户端模组，装在自己的客户端即可，服务器上什么都不用加。</p>
+                </div>
+                <div class="steps">
+                    <div class="step reveal">
+                        <h3>装好前置，进游戏</h3>
+                        <p>把 <strong>Xaero's World Map</strong> 与问道放进 <code>mods/</code>。机械动力、MTR 都是可选的：
+                            装了就会被自动读进来，没装也不影响其它功能。</p>
+                    </div>
+                    <div class="step reveal" data-delay="80">
+                        <h3>打开世界地图，按 <kbd>R</kbd> 开始画路</h3>
+                        <p>左键落点、右键结束，<kbd>&lt;</kbd> <kbd>&gt;</kbd> 换等级（高速 / 公路 / 小路 / 铁路 / 水路 / 冰道），
+                            按 <kbd>N</kbd> 命名，按 <kbd>P</kbd> 标地点。离得近的节点与路段会自动吸附。</p>
+                    </div>
+                    <div class="step reveal" data-delay="160">
+                        <h3>选个目的地，出发</h3>
+                        <p>按 <kbd>Ctrl</kbd> + 左键直接在地图上点目的地，或拿导航仪右键打开选择界面。
+                            先看路线预览与预计时间，再按「导航到这里」，剩下的交给 HUD 与语音播报。</p>
+                    </div>
+                </div>
+                <div class="btn-row reveal" style="justify-content:center;margin-top:34px">
+                    <a class="btn btn-primary" href="wiki/install.html">阅读安装教程</a>
+                    <a class="btn btn-ghost" href="wiki/index.html">浏览全部 Wiki</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================================================== features -->
+        <section class="section">
+            <div class="wrap">
+                <div class="section-head reveal">
+                    <span class="eyebrow">功能</span>
+                    <h2>一张地图，一条路网，一次说走就走</h2>
+                    <p>从画路到出发之间，不该隔着十几次界面切换。</p>
+                </div>
+                <div class="grid grid-3">
+                    <article class="card reveal">
+                        <div class="card-ico">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                 stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 20c4-2 5-6 9-7s5-3 7-7"/>
+                                <circle cx="4" cy="20" r="2"/>
+                                <circle cx="20" cy="6" r="2"/>
+                            </svg>
+                        </div>
+                        <h3>画路与维护</h3>
+                        <p>六个道路等级、自动吸附、整条命名、地点标记，撤销重做 64 步。
+                            在路段中间落点会真正拆分路段并在交点建立节点。</p>
+                        <ul class="card-list">
+                            <li>路段交叉、差一格没接上，只要「看着连上了」就会被自动修好</li>
+                            <li>地点分四类：地点 / 资源点 / 商店 / 站点</li>
+                        </ul>
+                    </article>
+
+                    <article class="card reveal" data-delay="60">
+                        <div class="card-ico">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                 stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M3 11l18-8-8 18-2.5-7.5z"/>
+                            </svg>
+                        </div>
+                        <h3>实时导航</h3>
+                        <p>步行 / 驾车 / 公共交通，三种方式走的道路不同，所以同一组起终点会得到不同的路线。</p>
+                        <ul class="card-list">
+                            <li>最快时间 ↔ 最短距离，可避开某类道路，可优先大路</li>
+                            <li>先预览后出发；不拉直线，绕远或走不通就直说</li>
+                            <li>HUD 面板 + 语音播报（转弯前、现在转弯、到达、偏航）</li>
+                        </ul>
+                    </article>
+
+                    <article class="card reveal" data-delay="120">
+                        <div class="card-ico">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                 stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="4" y="4" width="16" height="12" rx="3"/>
+                                <path d="M4 12h16M8 20h8M9 16v4M15 16v4"/>
+                            </svg>
+                        </div>
+                        <h3>公共交通线路</h3>
+                        <p>在世界地图上按 <kbd>L</kbd> 打开线路配置：左列线路、中列站点顺序、右列可加的站点，
+                            一屏建完一条线路。</p>
+                        <ul class="card-list">
+                            <li>站点来源：自己标记的站点 + 机械动力车站 + MTR 车站</li>
+                            <li>接不上一站的站点直接标红，出发前就能看见</li>
+                            <li>换乘站在两条线共用时显示为橙色方块</li>
+                        </ul>
+                    </article>
+
+                    <article class="card reveal">
+                        <div class="card-ico">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                 stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M3 17h18"/>
+                                <path d="M6 17V9a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8"/>
+                                <path d="M9 7V4h6v3"/>
+                            </svg>
+                        </div>
+                        <h3>机械动力铁路</h3>
+                        <p>装了 Create，它的铁轨会以曲线形式自动画到地图上，无需手画；读不到轨道图时回退为扫描轨道方块。</p>
+                        <ul class="card-list">
+                            <li>车站成为可导航的目的地</li>
+                            <li>铁路只读，但可以整条命名，名字存在单独的文件里</li>
+                            <li>画路时可以吸附到铁轨上，把路正好接上去</li>
+                        </ul>
+                    </article>
+
+                    <article class="card reveal" data-delay="60">
+                        <div class="card-ico">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                 stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="9"/>
+                                <path d="M12 3v18M3 12h18"/>
+                            </svg>
+                        </div>
+                        <h3>MTR 线路识别</h3>
+                        <p>装了 MTR，它的车站与线路会被读成问道自己的站点与线路：列车 / 缆车算铁路，船算水路。</p>
+                        <ul class="card-list">
+                            <li>每条线路都能选择「沿这条线标记轨道」，让车程沿 MTR 真正铺的轨道计算</li>
+                            <li>只读线路可一键「复制为我的」再随意修改</li>
+                            <li>走出 MTR 同步范围也不会丢：读到过的车站、线路、轨道都会被记住</li>
+                        </ul>
+                    </article>
+
+                    <article class="card reveal" data-delay="120">
+                        <div class="card-ico">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                 stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 7h10M4 12h16M4 17h7"/>
+                                <circle cx="18" cy="7" r="2"/>
+                            </svg>
+                        </div>
+                        <h3>看得清的地图</h3>
+                        <p>左上角的「地图显示」面板可以逐个开关道路等级、地点类型与公共交通线路，面板还能拖着走。</p>
+                        <ul class="card-list">
+                            <li>缩小地图时按等级自动取舍：小路 → 公路 → 水路 → 铁路，高速与冰道永不隐藏</li>
+                            <li>名字的大小跟着缩放走，线上名字顺着线的方向写</li>
+                            <li>面板是屏幕覆盖层，不会被地图上的线路与文字盖住</li>
+                        </ul>
+                    </article>
+                </div>
+                <div class="btn-row reveal" style="justify-content:center;margin-top:38px">
+                    <a class="btn btn-ghost" href="features.html">完整功能列表</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- ======================================================= install -->
+        <section class="section section-soft" id="install">
+            <div class="wrap">
+                <div class="section-head reveal">
+                    <span class="eyebrow">安装</span>
+                    <h2>需要什么，装到哪里</h2>
+                    <p>问道是纯客户端模组：只装在客户端，服务器上不需要安装，也不会要求服务器装任何东西。</p>
+                </div>
+                <div class="grid grid-2" style="align-items:start">
+                    <div class="table-wrap reveal">
+                        <table>
+                            <thead>
+                            <tr>
+                                <th>模组</th>
+                                <th>必要性</th>
+                                <th>作用</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td><strong>Xaero's World Map</strong></td>
+                                <td>必需</td>
+                                <td>所有道路与路线都画在它上面</td>
+                            </tr>
+                            <tr>
+                                <td>XaeroLib</td>
+                                <td>必需</td>
+                                <td>随 World Map 一起提供</td>
+                            </tr>
+                            <tr>
+                                <td>Xaero's Minimap</td>
+                                <td>可选</td>
+                                <td>路标点可作为目的地</td>
+                            </tr>
+                            <tr>
+                                <td>Create 机械动力</td>
+                                <td>可选</td>
+                                <td>铁轨与车站自动识别</td>
+                            </tr>
+                            <tr>
+                                <td>MTR</td>
+                                <td>可选</td>
+                                <td>车站与线路自动识别</td>
+                            </tr>
+                            <tr>
+                                <td>MCPhone</td>
+                                <td>可选</td>
+                                <td>手机里多一个「问道导航」应用</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="reveal" data-delay="80">
+                        <div class="callout">
+                            <span class="ico">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                     stroke-linecap="round">
+                                    <circle cx="12" cy="12" r="9"/>
+                                    <path d="M12 8h.01M11 12h1v4h1"/>
+                                </svg>
+                            </span>
+                            <div>
+                                <p><strong>支持的版本：</strong>Minecraft <strong>1.21.1</strong>，NeoForge
+                                    <strong>21.1.x</strong>（21.1.0 ~ 21.1.x）。</p>
+                                <p>可选模组全部通过注册名或反射读取，因此版本不合也不会让游戏起不来——最差的结果是那个图层为空。</p>
+                            </div>
+                        </div>
+                        <div class="callout warn">
+                            <span class="ico">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                     stroke-linecap="round">
+                                    <path d="M12 4l9 16H3z"/>
+                                    <path d="M12 10v4M12 17h.01"/>
+                                </svg>
+                            </span>
+                            <div>
+                                <p>数据存在客户端的 <code>config/howtogo/</code> 下，<strong>按存档 / 服务器分开</strong>：
+                                    单人存档按存档名，多人按服务器地址。换服务器不会串数据。</p>
+                            </div>
+                        </div>
+                        <div class="btn-row">
+                            <a class="btn btn-primary" href="wiki/install.html">安装与首次设置</a>
+                            <a class="btn btn-ghost" href="wiki/config.html">配置项一览</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================== wiki -->
+        <section class="section">
+            <div class="wrap">
+                <div class="section-head reveal">
+                    <span class="eyebrow">Wiki</span>
+                    <h2>教程按你上手时会遇到的顺序排好</h2>
+                    <p>从安装、画路，到导航、公交线路、机械动力与 MTR，再到配置与常见问题。</p>
+                </div>
+                <div class="grid grid-3">
+                    <a class="card reveal" href="wiki/install.html">
+                        <h3>安装与前置</h3>
+                        <p>版本要求、装到哪里、第一次进游戏要检查什么。</p>
+                    </a>
+                    <a class="card reveal" data-delay="50" href="wiki/roads.html">
+                        <h3>画路、命名与地点</h3>
+                        <p>六个等级、吸附规则、命名、地点类型、撤销与删除。</p>
+                    </a>
+                    <a class="card reveal" data-delay="100" href="wiki/navigate.html">
+                        <h3>导航与 HUD</h3>
+                        <p>目的地来源、交通方式、路线偏好、播报与偏航重算。</p>
+                    </a>
+                    <a class="card reveal" href="wiki/transit.html">
+                        <h3>公共交通线路</h3>
+                        <p>线路配置界面怎么用、站点为什么报红、换乘怎么算。</p>
+                    </a>
+                    <a class="card reveal" data-delay="50" href="wiki/create.html">
+                        <h3>机械动力铁路</h3>
+                        <p>自动识别的两个来源、命名、车站与吸附。</p>
+                    </a>
+                    <a class="card reveal" data-delay="100" href="wiki/mtr.html">
+                        <h3>MTR 集成</h3>
+                        <p>读了什么、只读的边界在哪、轨道标记开关怎么用。</p>
+                    </a>
+                </div>
+                <div class="btn-row reveal" style="justify-content:center;margin-top:38px">
+                    <a class="btn btn-primary" href="wiki/index.html">进入 Wiki 首页</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="wrap">
+            <div class="footer-grid">
+                <div>
+                    <a class="brand" href="index.html" style="margin-bottom:12px">
+                        <img class="brand-mark" src="assets/img/mod-icon.png" alt="">
+                        <span>问道<small>HowToGo</small></span>
+                    </a>
+                    <p style="margin:0;color:var(--muted);max-width:32em">
+                        我的世界道路标记与实时导航。纯客户端，开源（MIT）。
+                    </p>
+                </div>
+                <div>
+                    <h5>文档</h5>
+                    <a href="wiki/index.html">Wiki 首页</a>
+                    <a href="wiki/install.html">安装与前置</a>
+                    <a href="wiki/navigate.html">导航与 HUD</a>
+                    <a href="wiki/faq.html">常见问题</a>
+                    <a href="wiki/changelog.html">更新日志</a>
+                </div>
+                <div>
+                    <h5>项目</h5>
+                    <a href="features.html">功能介绍</a>
+                    <a href="wiki/config.html">配置与数据文件</a>
+                    <a href="wiki/display.html">地图显示与缩放</a>
+                    <a href="wiki/mtr.html">MTR 集成</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>© <span data-year>2025</span> DongSZ · HowToGo | 问道</span>
+                <span>Minecraft 与 Xaero's World Map 为各自权利人所有，本模组不随附分发它们的文件。</span>
+            </div>
+        </div>
+    </footer>
+
+    <script src="assets/js/site.js"></script>
+</body>
+
+</html>

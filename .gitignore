@@ -1,0 +1,7 @@
+# 压缩包与归档
+*.zip
+*.tar.gz
+
+# 系统与编辑器临时文件
+Thumbs.db
+.DS_Store

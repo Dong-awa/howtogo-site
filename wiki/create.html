@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>机械动力铁路 — HowToGo | 问道 Wiki</title>
+    <meta name="description" content="问道（HowToGo）自动识别机械动力铁路：两个数据来源（Create 轨道图与方块扫描）、为什么不需要依赖、只读铁路怎么命名、吸附到铁轨、车站作为目的地，以及全部相关配置项。">
+    <meta name="theme-color" content="#f4f8ff">
+    <link rel="icon" href="../assets/img/mod-icon.png" type="image/png">
+    <link rel="stylesheet" href="../assets/css/site.css">
+</head>
+
+<body>
+    <header class="site-header">
+        <div class="wrap">
+            <a class="brand" href="../index.html">
+                <img class="brand-mark" src="../assets/img/mod-icon.png" alt="">
+                <span>问道<small>HowToGo</small></span>
+            </a>
+            <nav class="nav" id="nav">
+                <a href="../index.html">首页</a>
+                <a href="../features.html">功能介绍</a>
+                <a href="index.html" aria-current="page">Wiki 教程</a>
+                <a href="../index.html#install">安装</a>
+            </nav>
+            <div class="header-actions">
+                <button class="icon-btn" type="button" data-theme-toggle aria-label="切换深色 / 浅色">
+                    <svg data-theme-icon="light" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2" stroke-linecap="round">
+                        <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>
+                    </svg>
+                    <svg data-theme-icon="dark" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2" stroke-linecap="round" style="display:none">
+                        <circle cx="12" cy="12" r="4"/>
+                        <path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4"/>
+                    </svg>
+                </button>
+                <button class="icon-btn nav-toggle" type="button" aria-label="打开菜单" aria-expanded="false">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                         stroke-linecap="round">
+                        <path d="M4 7h16M4 12h16M4 17h16"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="wrap">
+        <div class="wiki">
+            <aside class="wiki-side">
+                <div class="side-search">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                         stroke-linecap="round">
+                        <circle cx="11" cy="11" r="7"/>
+                        <path d="M20 20l-3.5-3.5"/>
+                    </svg>
+                    <input type="search" placeholder="搜索教程…" data-wiki-search aria-label="搜索教程">
+                </div>
+                <h4>开始</h4>
+                <a href="index.html" data-wiki-link data-keywords="目录 首页 索引">Wiki 首页</a>
+                <a href="install.html" data-wiki-link data-keywords="安装 前置 版本 下载 首次">安装与前置</a>
+                <h4>基础</h4>
+                <a href="roads.html" data-wiki-link data-keywords="画路 等级 吸附 命名 地点 撤销 删除 单行道 方向 箭头">画路、命名与地点</a>
+                <a href="navigate.html" data-wiki-link data-keywords="导航 目的地 交通方式 偏好 语音 HUD 偏航">导航与 HUD</a>
+                <h4>进阶</h4>
+                <a href="transit.html" data-wiki-link data-keywords="公共交通 线路 站点 换乘 等车 线路配置">公共交通线路</a>
+                <a href="create.html" data-wiki-link data-keywords="机械动力 create 铁路 铁轨 车站 命名" aria-current="page">机械动力铁路</a>
+                <a href="mtr.html" data-wiki-link data-keywords="MTR 铁路 线路 只读 轨道标记 复制">MTR 集成</a>
+                <a href="display.html" data-wiki-link data-keywords="显示 面板 缩放 隐藏 图层 名字 字号">地图显示与缩放</a>
+                <h4>参考</h4>
+                <a href="config.html" data-wiki-link data-keywords="配置 文件 toml 数据 存档 备份">配置与数据文件</a>
+                <a href="faq.html" data-wiki-link data-keywords="常见问题 限制 报错 没有路线 语音">常见问题与限制</a>
+                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.0 0.1.0">更新日志</a>
+            </aside>
+
+            <main class="wiki-body">
+                <nav class="breadcrumb">
+                    <a href="../index.html">首页</a><span>/</span>
+                    <a href="index.html">Wiki 教程</a><span>/</span><span>机械动力铁路</span>
+                </nav>
+
+                <h1>机械动力铁路</h1>
+                <p class="lead">
+                    装了 Create（机械动力）之后，你铺的铁路会被<strong>自动识别、自动画在地图上</strong>，一格都不用重画。
+                    它会立刻参与规划：公共交通里<strong>类型为「铁路」的线路</strong>就跑在它上面，
+                    它的车站可以直接作为导航目的地，画路时还能把路的端点吸附到铁轨上。
+                </p>
+
+                <h2 id="what">装了机械动力，铁路自己就画出来</h2>
+                <p>
+                    不需要任何开关去「开启识别」——装了就认。铁路图层是<strong>只读的机器图层</strong>：
+                    它不属于道路网络，不会被存进你的路网文件，也不会跟你画的线冲突：问道手画的铁路与自动识别的铁路
+                    在渲染与规划里是同一层，按位置自然接上。
+                </p>
+                <p>
+                    谁能在它上面走：<strong>只有铁路</strong>。步行与驾车都不走铁轨（这正是「交通方式」的意义所在），
+                    而是公共交通中一条类型为铁路的线路——你编排的线路决定在哪上车、在哪下车，
+                    问道就在这张路网（你画的铁路 + 自动识别的铁轨）上把这一段算出来。所以铁轨自动画出来之后，
+                    你要做的只是<a href="transit.html">编排一条铁路线路</a>，把车站按顺序填进去。
+                </p>
+                <p>
+                    整个图层有一个总开关：配置项 <code>create_train_tracks</code>（默认 <code>true</code>）。
+                    关掉它，图层在下一次客户端 tick 就空了，铁路、车站一起消失；你的手画路网一点不受影响，
+                    重新打开也会立刻回来。
+                </p>
+
+                <h2 id="sources">两个来源，同时只有一个生效</h2>
+                <p>
+                    问道按固定的优先级取数据，<strong>两个来源不会重复计数</strong>，任何一个时刻图层只有一个来源：
+                </p>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>来源</th>
+                            <th>读到的是什么</th>
+                            <th>画出来什么样</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td><strong>① Create 的轨道图</strong><br>（优先）</td>
+                            <td>Create 客户端自己的轨道网络（<code>CreateClient.RAILWAYS</code>）：它的节点坐标、它自己的贝塞尔曲线，还有带名字的车站。</td>
+                            <td>弯道是<strong>平滑曲线</strong>，而且位置就是 Create 认为的位置，不是方块中心。</td>
+                        </tr>
+                        <tr>
+                            <td><strong>② 方块扫描</strong><br>（回退）</td>
+                            <td>扫描附近的 <code>create:track</code> 方块，按每个方块自己的 <code>shape</code> 属性判断它往哪个轴延伸。</td>
+                            <td>一格一格连起来，斜向与弯道是<strong>阶梯状</strong>的；车站也读不到名字。</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p>
+                    什么时候会回退到扫描：没装 Create、Create 改了类名或包名、或者它的轨道图还没同步到客户端。
+                    当前用的是哪一种，日志里说得明明白白，前缀是 <code>[HowToGo] Create track layer</code>：
+                    <code>from Create's graph</code> 是轨道图，<code>from the block scan</code> 是方块扫描，后面还跟着节点数、边数、
+                    其中曲线多少条、路段数与车站数。读不出任何东西时，图层只是空的——没有报错，也没有半张地图。
+                </p>
+
+                <h2 id="reflect">靠注册名识别，不引用任何 Create 类</h2>
+                <p>
+                    方块是<strong>按注册名</strong>认的（默认 <code>create:track</code>、<code>create:track_station</code>），
+                    Create 的轨道图则是<strong>反射</strong>读的，每一个句柄只按名字查一次并做好保护。
+                    所以问道的构建脚本里<strong>没有任何 Create 依赖</strong>：Create 换版本、改包名，问道最多是读不到并回退，
+                    而不是编译不过或者直接崩。你甚至可以把轨道方块的名字换成附属模组的（见下方配置表）。
+                </p>
+
+                <h2 id="readonly">铁路只读，但可以命名</h2>
+                <p>
+                    那段几何属于 Create，所以问道<strong>不提供</strong>在铁路上移动节点、拆分、删除、改等级：
+                    下一次读取（最多一秒后）就会把它重新读一遍，你的改动会被无声地覆盖，那比不提供更糟。
+                    唯一可以改的是<strong>名字</strong>，而且它存在一个单独的文件里：
+                    <code>config/howtogo/&lt;存档&gt;/&lt;维度&gt;-rail-names.json</code>，不写进道路网络。
+                </p>
+                <div class="callout">
+                    <span class="ico">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                             stroke-linecap="round">
+                            <circle cx="12" cy="12" r="9"/>
+                            <path d="M12 8h.01M11 12h1v4h1"/>
+                        </svg>
+                    </span>
+                    <div>
+                        <p>名字不绑在路段 id 上——铁路图层每秒重建，路段 id 每次都会重排。名字绑在<strong>那一段的两个端点坐标</strong>上，
+                            所以重建、重载、甚至在两个数据来源之间来回切换，名字都不会丢。</p>
+                    </div>
+                </div>
+                <p>命名与选中都按<strong>整条铁路线</strong>生效，和手画的道路一致：</p>
+                <ul>
+                    <li><kbd>Shift</kbd> + 点击铁轨：选中<strong>整条线</strong>并高亮它（点在普通道路上时选中的是那一条路）。</li>
+                    <li><kbd>N</kbd>：给选中的整条铁路线起名；光标停在铁轨上时也能直接命名。</li>
+                    <li>名字随地图缩放显示，颜色是<strong>浅蓝色</strong>——道路名是白色系，一眼就能分清哪条是机器画的。</li>
+                </ul>
+                <p>这些操作和其他编辑动作一样，需要先在世界地图上按 <kbd>R</kbd> 进入编辑模式。</p>
+
+                <h2 id="snap">画路时可以吸附到铁轨</h2>
+                <p>
+                    编辑模式下，如果光标附近没有你手画的道路，吸附就会落到铁轨上——于是你可以把一条路的端点
+                    正好接在铁轨上，让「走到车站」这一段路真的接得上。<kbd>Alt</kbd> 仍然可以自由放置，不吸附任何东西。
+                </p>
+                <p>
+                    注意吸附<strong>只取位置</strong>：出现黄色吸附环，把点放在那个位置，不会拆分铁轨，也不会把铁轨接到你的路上。
+                    铁轨不是编辑器拥有的几何，能改的只有它的名字。
+                </p>
+
+                <h2 id="stations">车站算作地点</h2>
+                <p>
+                    <code>create:track_station</code> 的位置会成为<strong>目的地</strong>，出现在「选择目的地」界面里单独的一类
+                    「机械动力车站」，也能作为公共交通线路的一站（只读，见 <a href="transit.html">公共交通线路</a>）。
+                    在地图上它和你的地点一样是黄色方块，名字与地点同色。
+                </p>
+                <p>
+                    车站名取自 Create——也就是玩家给车站起的那个名字。回退到方块扫描时拿不到名字（名字不在世界的方块里），
+                    这时就按坐标显示成「车站 x, z」，宁可显示得笨一点，也不去猜一个不是它的名字。
+                </p>
+
+                <h2 id="config">配置项一览</h2>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>键</th>
+                            <th>默认</th>
+                            <th>说明</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td><code>create_train_tracks</code></td>
+                            <td><code>true</code></td>
+                            <td>整个铁路图层的总开关。关掉后图层在下一个 tick 清空，只读，随时可以再打开。</td>
+                        </tr>
+                        <tr>
+                            <td><code>create_track_block_ids</code></td>
+                            <td><code>["create:track"]</code></td>
+                            <td>当作「铁轨」的方块注册名，可以加附属模组的轨道方块。Create 隐形的 <code>create:fake_track</code>（地图用轨道标记）<strong>故意不含在内</strong>：它是标记而不是轨道面，包进来会在没有轨道的地方画出线。</td>
+                        </tr>
+                        <tr>
+                            <td><code>create_station_block_ids</code></td>
+                            <td><code>["create:track_station"]</code></td>
+                            <td>位置会成为目的地的方块注册名，单独列在「机械动力车站」这一类里。</td>
+                        </tr>
+                        <tr>
+                            <td><code>create_track_scan_radius</code></td>
+                            <td><code>192</code>（16~512）</td>
+                            <td>回退扫描时以玩家为中心读多远的区块，单位是格。范围是<strong>方形</strong>而不是圆形，因为区块本来就是方的。一遍扫描的代价随半径的<strong>平方</strong>增长——但那只是「扫完一圈要更久」，每次真正做多少由下一项封顶。</td>
+                        </tr>
+                        <tr>
+                            <td><code>create_track_chunks_per_second</code></td>
+                            <td><code>20</code>（1~512）</td>
+                            <td>一秒一批，最多读几个区块，<strong>由近到远</strong>按环形推进。默认半径下，一批 20 个大约半分钟扫完一整圈，而<strong>你脚下的那个区块每秒必读</strong>，所以随手铺的轨道立刻就能看到。卡顿就调小；想更快扫完就调大。读出 Create 轨道图时这项不生效——那条路根本不扫方块。</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="callout">
+                    <span class="ico">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                             stroke-linecap="round">
+                            <circle cx="12" cy="12" r="9"/>
+                            <path d="M12 8h.01M11 12h1v4h1"/>
+                        </svg>
+                    </span>
+                    <div>
+                        <p>扫描之所以便宜，是因为它先看区块里每个 section 的<strong>调色板</strong>：一个不含铁轨的 section 只花一次判断，
+                            只有调色板里真的出现铁轨的 section 才会逐格走一遍。这也是为什么远处的铁路会「慢慢长出来」而不是一次性出现。</p>
+                    </div>
+                </div>
+
+                <div class="wiki-nav">
+                    <a class="prev" href="transit.html">
+                        <small>上一页</small>
+                        <strong>公共交通线路</strong>
+                    </a>
+                    <a class="next" href="mtr.html">
+                        <small>下一页</small>
+                        <strong>MTR 集成</strong>
+                    </a>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <footer class="site-footer">
+        <div class="wrap">
+            <div class="footer-grid">
+                <div>
+                    <a class="brand" href="../index.html" style="margin-bottom:12px">
+                        <img class="brand-mark" src="../assets/img/mod-icon.png" alt="">
+                        <span>问道<small>HowToGo</small></span>
+                    </a>
+                    <p style="margin:0;color:var(--muted);max-width:32em">
+                        我的世界道路标记与实时导航。纯客户端，开源（MIT）。
+                    </p>
+                </div>
+                <div>
+                    <h5>文档</h5>
+                    <a href="index.html">Wiki 首页</a>
+                    <a href="install.html">安装与前置</a>
+                    <a href="navigate.html">导航与 HUD</a>
+                    <a href="faq.html">常见问题</a>
+                    <a href="changelog.html">更新日志</a>
+                </div>
+                <div>
+                    <h5>项目</h5>
+                    <a href="../features.html">功能介绍</a>
+                    <a href="config.html">配置与数据文件</a>
+                    <a href="display.html">地图显示与缩放</a>
+                    <a href="mtr.html">MTR 集成</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>© <span data-year>2025</span> DongSZ · HowToGo | 问道</span>
+                <span>Minecraft 与 Xaero's World Map 为各自权利人所有，本模组不随附分发它们的文件。</span>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../assets/js/site.js"></script>
+</body>
+
+</html>

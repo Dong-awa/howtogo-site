@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>功能介绍 — HowToGo | 问道</title>
+    <meta name="description" content="问道（HowToGo）完整功能列表：道路绘制与维护、实时导航、公共交通线路、机械动力铁路自动识别、MTR 集成、地图显示与缩放规则、目的地来源与数据存放。">
+    <meta name="theme-color" content="#f4f8ff">
+    <link rel="icon" href="assets/img/mod-icon.png" type="image/png">
+    <link rel="stylesheet" href="assets/css/site.css">
+</head>
+
+<body>
+    <header class="site-header">
+        <div class="wrap">
+            <a class="brand" href="index.html">
+                <img class="brand-mark" src="assets/img/mod-icon.png" alt="">
+                <span>问道<small>HowToGo</small></span>
+            </a>
+            <nav class="nav" id="nav">
+                <a href="index.html">首页</a>
+                <a href="features.html" aria-current="page">功能介绍</a>
+                <a href="wiki/index.html">Wiki 教程</a>
+                <a href="index.html#install">安装</a>
+            </nav>
+            <div class="header-actions">
+                <button class="icon-btn" type="button" data-theme-toggle aria-label="切换深色 / 浅色">
+                    <svg data-theme-icon="light" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2" stroke-linecap="round">
+                        <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>
+                    </svg>
+                    <svg data-theme-icon="dark" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2" stroke-linecap="round" style="display:none">
+                        <circle cx="12" cy="12" r="4"/>
+                        <path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4"/>
+                    </svg>
+                </button>
+                <button class="icon-btn nav-toggle" type="button" aria-label="打开菜单" aria-expanded="false">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                         stroke-linecap="round">
+                        <path d="M4 7h16M4 12h16M4 17h16"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="section">
+            <div class="wrap wrap-narrow">
+                <div class="reveal">
+                    <span class="eyebrow">功能介绍</span>
+                    <h1 style="margin-bottom:.4em">它到底做了什么</h1>
+                    <p style="font-size:1.06rem;color:var(--muted)">
+                        一句话：把 Xaero 世界地图变成一张<strong>能规划、能导航</strong>的路网。
+                        下面是全部功能，以及每一条背后的取舍——因为「为什么不那样做」往往比功能本身更重要。
+                    </p>
+                </div>
+
+                <!-- ================================================= 画路 -->
+                <h2 id="roads" class="reveal">画路与维护</h2>
+                <div class="reveal">
+                    <p>
+                        在世界地图上直接画折线，六个等级：<strong>高速 / 公路 / 小路 / 铁路 / 水路 / 冰道</strong>。
+                        颜色与线宽各不相同，一眼就能读出「这是快路还是小路」。
+                    </p>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                            <tr>
+                                <th>等级</th>
+                                <th>颜色</th>
+                                <th>标称宽度</th>
+                                <th>谁会走</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>高速</td>
+                                <td>亮蓝</td>
+                                <td>7 格</td>
+                                <td>步行、驾车</td>
+                            </tr>
+                            <tr>
+                                <td>公路</td>
+                                <td>绿</td>
+                                <td>5 格</td>
+                                <td>步行、驾车</td>
+                            </tr>
+                            <tr>
+                                <td>小路</td>
+                                <td>土黄</td>
+                                <td>3 格</td>
+                                <td>步行</td>
+                            </tr>
+                            <tr>
+                                <td>铁路</td>
+                                <td>橙</td>
+                                <td>4 格</td>
+                                <td>公共交通</td>
+                            </tr>
+                            <tr>
+                                <td>水路</td>
+                                <td>深蓝</td>
+                                <td>6 格</td>
+                                <td>公共交通（船）</td>
+                            </tr>
+                            <tr>
+                                <td>冰道</td>
+                                <td>浅蓝</td>
+                                <td>5 格</td>
+                                <td>步行、公共交通</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <ul>
+                        <li><strong>吸附</strong>：靠近已有节点或路段时自动吸附；按 <kbd>Alt</kbd> 自由放置。附近没有手画道路时，
+                            会吸附到自动识别的铁轨上，让你把路正好接在铁轨上。</li>
+                        <li><strong>在路段中间落点会真正拆分路段</strong>，并在交点建立节点——拓扑是真的，不是看起来像。</li>
+                        <li><strong>命名</strong>：一条路（含所有转折段）共用一个名字，地图上每条路只显示一次标签。
+                            名字宽度超过整条路时整条不画，避免它读起来像在标注旁边的东西。</li>
+                        <li><strong>地点标记</strong>：四种类别（地点 / 资源点 / 商店 / 站点）。类别只影响显示与缩放取舍，不影响导航；
+                            只有「站点」必须建在道路上。</li>
+                        <li><strong>撤销 / 重做</strong> 64 步；节点可以拖动，路段可以整体改等级或删除。</li>
+                        <li><strong>单行道</strong>：<kbd>O</kbd> 让选中（或光标所在）的那条路在
+                            <strong>双向 / 顺向单行 / 逆向单行</strong>之间循环，地图上沿路画出箭头指明方向。
+                            按整条街生效，弯道两侧方向一致，而且步行、驾车、公共交通都遵守它。</li>
+                        <li><strong>把「看着连上」变成真的连上</strong>：两条路交叉而过、或差一格没接上，本来是不通的；
+                            开启 <code>repair_road_joins</code>（默认开）会先把这种地方修好再规划。</li>
+                    </ul>
+                    <p><a href="wiki/roads.html">详细教程：画路、命名与地点 →</a></p>
+                </div>
+
+                <!-- ================================================= 导航 -->
+                <h2 id="navigate" class="reveal">实时导航</h2>
+                <div class="reveal">
+                    <p>
+                        三种交通方式走的道路不同，所以<strong>同一组起终点会得到不同的路线</strong>。
+                        选好目的地、方式与偏好之后，路线先画在地图上给你看，确认了再出发。
+                    </p>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                            <tr>
+                                <th>交通方式</th>
+                                <th>可走的等级</th>
+                                <th>速度表（格 / 秒）</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>步行</td>
+                                <td>高速、公路、小路、冰道</td>
+                                <td>4.0 ~ 5.6</td>
+                            </tr>
+                            <tr>
+                                <td>驾车</td>
+                                <td>高速、公路</td>
+                                <td>公路 9</td>
+                            </tr>
+                            <tr>
+                                <td>公共交通</td>
+                                <td>铁路、水路、冰道</td>
+                                <td>铁路 / 水路 8，冰道 40，另加等车时间</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <ul>
+                        <li><strong>路线偏好</strong>：最快时间 ↔ 最短距离；可以避开某些等级（例如不想走水路）；
+                            可以「优先大路」，让小路代价 ×1.6，只在必要时才走。</li>
+                        <li><strong>先预览再出发</strong>：预览会显示目的地与预计时间；没有可走的连接时直说「没有可用的道路连接」。</li>
+                        <li><strong>不绕远、不拉直线</strong>：所选方式比走路更慢、或该方式无解时，会说明原因并改为按步行规划；
+                            接驳段（首末离开路网的那一段）有距离上限——驾车与公共交通 64 格、步行 4096 格
+                            （实际上等于没有上限：没路时人本来就直线走，只是按离开路面的速度计时）——
+                            超过上限时宁可报「没有路线」，也不画一条横穿地图的直线。</li>
+                        <li><strong>转向提示</strong>：HUD 显示转向箭头、剩余距离与时间、进度条；播报距离按路况缩放
+                            （步行 50m、公路驾车 100m、高速驾车 300m、铁路 300m、冰道 500m）。</li>
+                        <li><strong>转弯判定要求朝向</strong>：与路口齐平时，只有大致转向该方向（≤45°）才算转过，
+                            直行穿过路口不会被误判为「转过一个路口」。</li>
+                        <li><strong>语音播报</strong>（可选）：转弯前、现在转弯、到达、偏离路线，使用 Minecraft 原版 TTS。</li>
+                        <li><strong>偏航重算</strong>：只有离开当前道路超过该等级的容差之后才重新规划，不会每走一步都重算。</li>
+                    </ul>
+                    <p><a href="wiki/navigate.html">详细教程：导航与 HUD →</a></p>
+                </div>
+
+                <!-- ================================================= 公交 -->
+                <h2 id="transit" class="reveal">公共交通线路</h2>
+                <div class="reveal">
+                    <p>
+                        按线路走，而不是按「最近的车站」走。线路配置界面一屏三列：左列线路、中列站点顺序、
+                        右列所有可加进来的站点——一条六站线路不该是十几次界面切换。
+                    </p>
+                    <ul>
+                        <li><strong>线路有自己的类型</strong>（铁路 / 水路 / 公路 / 冰道），决定它能在哪些道路上跑。
+                            中列里接不上一站的站点会<strong>显示为红色</strong>，所以在保存之前你就能看见「这条线跑不通」。</li>
+                        <li><strong>站点有三个来源</strong>：自己标记的站点（可改）、机械动力车站（只读）、MTR 车站（只读）。
+                            只读的理由很简单：它们的名字与类型属于那个模组，在这里改会得到一条描述着「不存在的车站」的线路。</li>
+                        <li><strong>规划</strong>：站点是有向图的节点，相邻两站之间是边，用 Dijkstra 求最省时间或最短的走法。</li>
+                        <li><strong>没有可用线路就如实回答</strong>「没有公共交通路线」，不会假装成公交把你送到最近的一段轨道上。</li>
+                        <li><strong>等车时间</strong>：每次登乘计一次（首次乘车也算，换乘再计一次），同时参与搜索与预计时间。</li>
+                        <li><strong>换乘站</strong>：被两条及以上线路共用的站点会画成橙色方块，尺寸与普通站点相同；
+                            只有屏幕上真的重叠时才融合成一个，拉近看就分开。</li>
+                    </ul>
+                    <p><a href="wiki/transit.html">详细教程：公共交通线路 →</a></p>
+                </div>
+
+                <!-- ================================================= Create -->
+                <h2 id="create" class="reveal">机械动力铁路（自动识别）</h2>
+                <div class="reveal">
+                    <p>
+                        装了 Create，它的铁轨会自己出现在地图上，弯道是曲线而不是阶梯。数据优先来自 Create 自己的轨道网络，
+                        读不到时回退为扫描轨道方块——两种来源同时只有一种生效，不会重复计数。
+                    </p>
+                    <ul>
+                        <li><strong>不引用任何 Create 类</strong>：靠方块注册名识别，所以 Create 改名或换版本不会让问道编译不过。
+                            日志里的 <code>[HowToGo] Create track layer:</code> 会告诉你当前用的是哪种来源。</li>
+                        <li><strong>铁路只读，但可以命名</strong>：几何属于 Create，动了下一秒就被覆盖；名字是唯一可以改的东西，
+                            存在单独的文件里，并且绑在路段两端坐标上，所以重建与重载都不会丢。</li>
+                        <li><strong>整条线一起操作</strong>：<kbd>Shift</kbd> 点击选中整条铁路线，<kbd>N</kbd> 命名时整条线共用一个名字。</li>
+                        <li><strong>车站就是目的地</strong>：Create 的车站会出现在目的地列表的「机械动力车站」一类里，
+                            站名用玩家给车站起的名字。</li>
+                        <li><strong>画路时可以吸附到铁轨</strong>，把一条路的端点正好接上去；吸附只取位置，不会拆分铁路。</li>
+                    </ul>
+                    <p><a href="wiki/create.html">详细教程：机械动力铁路 →</a></p>
+                </div>
+
+                <!-- ================================================= MTR -->
+                <h2 id="mtr" class="reveal">MTR 集成（自动识别）</h2>
+                <div class="reveal">
+                    <p>
+                        装了 MTR，它的车站与线路会被读成问道自己的站点与公共交通线路：列车与缆车算铁路，船算水路，
+                        其它类型（例如飞机）不猜、直接不处理。
+                    </p>
+                    <ul>
+                        <li><strong>MTR 只把玩家附近的数据发给客户端</strong>，所以任何一次读取都只是一个窗口。
+                            问道把每次读到的<strong>合并记住</strong>：走出同步范围后线路不会凭空消失。</li>
+                        <li><strong>站点取站台的中点</strong>而不是车站区域中心——大站的中心离轨道很远，而车停的是站台。</li>
+                        <li><strong>每条线路可以自己决定要不要标记轨道</strong>。MTR 的协议里没有「这条线走哪段轨道」这个信息，
+                            问道是反推的：对相邻站点对在 MTR 的轨道上规划一次，走过的轨道就是这条线实际走的轨道，
+                            再以只读的铁路 / 水路道路标上去，让车程沿着 MTR 真正铺的轨道计算。</li>
+                        <li><strong>只读，但能拿走</strong>：MTR 的线路在列表里带 <code>[MTR]</code> 标记，
+                            按「复制为我的」就得到一份可以随意改的副本。</li>
+                    </ul>
+                    <p><a href="wiki/mtr.html">详细教程：MTR 集成 →</a></p>
+                </div>
+
+                <!-- ================================================= 显示 -->
+                <h2 id="display" class="reveal">地图显示与缩放</h2>
+                <div class="reveal">
+                    <p>
+                        左上角的「地图显示」面板可以逐个开关道路等级、地点类型与公共交通线路，面板本身可以拖着走、可以卷起。
+                        面板是<strong>屏幕覆盖层</strong>，所以不会被地图画出来的线路、标记与文字盖住。
+                    </p>
+                    <ul>
+                        <li><strong>缩小地图时自动取舍</strong>：小路 → 公路 → 水路 → 铁路依次被舍去，
+                            <strong>高速与冰道永不隐藏</strong>——缩小看地图，看的就是「哪儿有快路」。</li>
+                        <li>地点这边先舍商店，再舍站点，再舍普通地点，<strong>资源点最后才舍</strong>——它本来就是值得专程去的东西。</li>
+                        <li><strong>公共交通线路从不因为缩小而消失</strong>：它是地图上唯一不能由道路推出来的东西。</li>
+                        <li><strong>名字的大小跟着缩放走</strong>：缩小时按比例变小；放大时增长得很慢，因为名字是标签不是测量结果。
+                            名字与它标注的目标一起缩放，所以缩小的时候名字会自动贴近标记。</li>
+                        <li><strong>线上名字顺着线的方向写</strong>，地点名保持水平——点标签和线的标签不是一回事。</li>
+                        <li>开关与缩放规则走同一个入口，所以面板上的开关和缩放规则不可能互相矛盾。</li>
+                    </ul>
+                    <p><a href="wiki/display.html">详细教程：地图显示与缩放 →</a></p>
+                </div>
+
+                <!-- ================================================= 目的地 -->
+                <h2 id="destinations" class="reveal">目的地从哪来</h2>
+                <div class="reveal">
+                    <p>选择目的地界面把所有能去的地方汇成一列，按来源分开：</p>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                            <tr>
+                                <th>来源</th>
+                                <th>内容</th>
+                                <th>能不能改</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>你标记的地点</td>
+                                <td>任何位置的 POI（含标为「站点」的）</td>
+                                <td>可以改名、改类别、删除</td>
+                            </tr>
+                            <tr>
+                                <td>机械动力车站</td>
+                                <td>Create 的车站</td>
+                                <td>只读（名字来自 Create）</td>
+                            </tr>
+                            <tr>
+                                <td>MTR 车站</td>
+                                <td>MTR 的车站</td>
+                                <td>只读</td>
+                            </tr>
+                            <tr>
+                                <td>Xaero 路标点</td>
+                                <td>小地图上插的路标点（需要装 Xaero's Minimap）</td>
+                                <td>只读</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p>
+                        列表上方有搜索框；界面里同时可以切换交通方式、路线偏好与语音，改动会记住。
+                        界面<strong>不暂停游戏</strong>——它是地图，不是菜单。
+                    </p>
+                </div>
+
+                <!-- ================================================= 兼容 -->
+                <h2 id="compat" class="reveal">兼容性与数据</h2>
+                <div class="reveal">
+                    <ul>
+                        <li><strong>纯客户端</strong>：服务器上不需要安装，也不会要求服务器装任何东西。代价是别的玩家看不到你画的路。</li>
+                        <li><strong>可选模组全部是「软」依赖</strong>：通过方块注册名或反射读取，没装就是对应图层为空，其它功能照常。</li>
+                        <li><strong>数据按存档分开</strong>：单人按存档名（<code>sp_</code>）、多人按服务器地址（<code>mp_</code>），
+                            文件名里带维度。备份整个 <code>config/howtogo/</code> 目录即可搬家。</li>
+                        <li><strong>不写别人的数据</strong>：机械动力与 MTR 的图层从不写进你的文件，你的路网也不会被它们改写。</li>
+                    </ul>
+                    <div class="callout">
+                        <span class="ico">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                 stroke-linecap="round">
+                                <circle cx="12" cy="12" r="9"/>
+                                <path d="M12 8h.01M11 12h1v4h1"/>
+                            </svg>
+                        </span>
+                        <div>
+                            <p>还没装？<a href="wiki/install.html">看安装教程</a>；想直接动手，
+                                去 <a href="wiki/index.html">Wiki 首页</a> 按顺序读三篇就能用起来。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="wrap">
+            <div class="footer-grid">
+                <div>
+                    <a class="brand" href="index.html" style="margin-bottom:12px">
+                        <img class="brand-mark" src="assets/img/mod-icon.png" alt="">
+                        <span>问道<small>HowToGo</small></span>
+                    </a>
+                    <p style="margin:0;color:var(--muted);max-width:32em">
+                        我的世界道路标记与实时导航。纯客户端，开源（MIT）。
+                    </p>
+                </div>
+                <div>
+                    <h5>文档</h5>
+                    <a href="wiki/index.html">Wiki 首页</a>
+                    <a href="wiki/install.html">安装与前置</a>
+                    <a href="wiki/navigate.html">导航与 HUD</a>
+                    <a href="wiki/faq.html">常见问题</a>
+                    <a href="wiki/changelog.html">更新日志</a>
+                </div>
+                <div>
+                    <h5>项目</h5>
+                    <a href="features.html">功能介绍</a>
+                    <a href="wiki/config.html">配置与数据文件</a>
+                    <a href="wiki/display.html">地图显示与缩放</a>
+                    <a href="wiki/mtr.html">MTR 集成</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>© <span data-year>2025</span> DongSZ · HowToGo | 问道</span>
+                <span>Minecraft 与 Xaero's World Map 为各自权利人所有，本模组不随附分发它们的文件。</span>
+            </div>
+        </div>
+    </footer>
+
+    <script src="assets/js/site.js"></script>
+</body>
+
+</html>

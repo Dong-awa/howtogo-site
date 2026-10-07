@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MTR 集成 — HowToGo | 问道 Wiki</title>
+    <meta name="description" content="问道（HowToGo）的 MTR 集成教程：MTR 的车站与线路怎么读进来、为什么只读到附近却不会丢、线路类型怎么映射、站点为什么取站台、只读线路怎么复制、轨道标记开关的原理与关闭后的行为。">
+    <meta name="theme-color" content="#f4f8ff">
+    <link rel="icon" href="../assets/img/mod-icon.png" type="image/png">
+    <link rel="stylesheet" href="../assets/css/site.css">
+</head>
+
+<body>
+    <header class="site-header">
+        <div class="wrap">
+            <a class="brand" href="../index.html">
+                <img class="brand-mark" src="../assets/img/mod-icon.png" alt="">
+                <span>问道<small>HowToGo</small></span>
+            </a>
+            <nav class="nav" id="nav">
+                <a href="../index.html">首页</a>
+                <a href="../features.html">功能介绍</a>
+                <a href="index.html" aria-current="page">Wiki 教程</a>
+                <a href="../index.html#install">安装</a>
+            </nav>
+            <div class="header-actions">
+                <button class="icon-btn" type="button" data-theme-toggle aria-label="切换深色 / 浅色">
+                    <svg data-theme-icon="light" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2" stroke-linecap="round">
+                        <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>
+                    </svg>
+                    <svg data-theme-icon="dark" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2" stroke-linecap="round" style="display:none">
+                        <circle cx="12" cy="12" r="4"/>
+                        <path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4"/>
+                    </svg>
+                </button>
+                <button class="icon-btn nav-toggle" type="button" aria-label="打开菜单" aria-expanded="false">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                         stroke-linecap="round">
+                        <path d="M4 7h16M4 12h16M4 17h16"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="wrap">
+        <div class="wiki">
+            <aside class="wiki-side">
+                <div class="side-search">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                         stroke-linecap="round">
+                        <circle cx="11" cy="11" r="7"/>
+                        <path d="M20 20l-3.5-3.5"/>
+                    </svg>
+                    <input type="search" placeholder="搜索教程…" data-wiki-search aria-label="搜索教程">
+                </div>
+                <h4>开始</h4>
+                <a href="index.html" data-wiki-link data-keywords="目录 首页 索引">Wiki 首页</a>
+                <a href="install.html" data-wiki-link data-keywords="安装 前置 版本 下载 首次">安装与前置</a>
+                <h4>基础</h4>
+                <a href="roads.html" data-wiki-link data-keywords="画路 等级 吸附 命名 地点 撤销 删除 单行道 方向 箭头">画路、命名与地点</a>
+                <a href="navigate.html" data-wiki-link data-keywords="导航 目的地 交通方式 偏好 语音 HUD 偏航">导航与 HUD</a>
+                <h4>进阶</h4>
+                <a href="transit.html" data-wiki-link data-keywords="公共交通 线路 站点 换乘 等车 线路配置">公共交通线路</a>
+                <a href="create.html" data-wiki-link data-keywords="机械动力 create 铁路 铁轨 车站 命名">机械动力铁路</a>
+                <a href="mtr.html" data-wiki-link data-keywords="MTR 铁路 线路 只读 轨道标记 复制" aria-current="page">MTR 集成</a>
+                <a href="display.html" data-wiki-link data-keywords="显示 面板 缩放 隐藏 图层 名字 字号">地图显示与缩放</a>
+                <h4>参考</h4>
+                <a href="config.html" data-wiki-link data-keywords="配置 文件 toml 数据 存档 备份">配置与数据文件</a>
+                <a href="faq.html" data-wiki-link data-keywords="常见问题 限制 报错 没有路线 语音">常见问题与限制</a>
+                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.0 0.1.0">更新日志</a>
+            </aside>
+
+            <main class="wiki-body">
+                <nav class="breadcrumb">
+                    <a href="../index.html">首页</a><span>/</span>
+                    <a href="index.html">Wiki 教程</a><span>/</span><span>MTR 集成</span>
+                </nav>
+
+                <h1>MTR 集成</h1>
+                <p class="lead">
+                    装了 <strong>MTR（我的世界铁路）</strong> 时，问道会把它的车站与线路读进来，
+                    变成自己的站点与公共交通线路——你不必为了导航，把已经建好的地铁网络再手画一遍。
+                    这一切都是<strong>反射只读</strong>的：问道的代码里没有任何一个 MTR 的类，
+                    所以 MTR 没装、改了包名或换了版本，问道最多是读不到，不会编译不过，也不会崩。
+                </p>
+
+                <h2 id="what">读进来什么，变成什么</h2>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>MTR 那边</th>
+                            <th>问道这边</th>
+                            <th>说明</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>车站</td>
+                            <td>站点、导航目的地</td>
+                            <td>和机械动力车站一样，出现在目的地列表里自己的数据源下，可以直接选作终点。</td>
+                        </tr>
+                        <tr>
+                            <td>线路</td>
+                            <td>公共交通线路</td>
+                            <td>参与公共交通规划；在线路配置界面里以 <code>[MTR]</code> 标记、只读列出。</td>
+                        </tr>
+                        <tr>
+                            <td>轨道</td>
+                            <td>只读的铁路 / 水路道路</td>
+                            <td>只有把这条线的<strong>轨道标记</strong>点亮时才会标出来，并且从不写进你的路网。</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p>
+                    整个功能由配置项 <code>mtr_transit</code>（默认开）控制。关掉它，MTR 相关的一切立刻消失，
+                    其余功能一件不少；再打开，下一次读取就会把内容带回来。
+                </p>
+
+                <h2 id="window">只读到附近，但会记住</h2>
+                <p>
+                    MTR 把它的世界放在<strong>自己的服务端</strong>，只把玩家附近的数据发给客户端。所以任何一次读取
+                    都只是一个<strong>窗口</strong>，而这个窗口会随着你走开而合上。
+                </p>
+                <p>
+                    如果只拿当次读数用，那份读数就会把你的铁路一起带走：走远了，线路从规划与线路配置界面里消失，
+                    车站不再是目的地，标记轨道用的那批轨道也没了，连你刚刚坐过的那条线都算不出来。
+                    这不是读取方式有问题，而是让一次读数承担了它没有说的东西。所以问道把每次读到的东西
+                    <strong>合并保存</strong>下来——线路、车站、轨道三样都记——之后所有答案都从合并后的全量里取。
+                </p>
+                <ul>
+                    <li><strong>线路与车站</strong>按 MTR 自己的 id 记「最新的说法」：走回走过的地面会更新它们，
+                        走开则保留最后一次说法。一条线路只被「至少放了同样多站点」的读数替换，
+                        所以一个站点更少的窗口不会把线路缩成「此刻在范围内的那一截」。</li>
+                    <li><strong>轨道</strong>取的是「迄今为止发现过的轨道的并集」：轨道本来就是一段一段被发现的，
+                        所以是累加而不是替换。同一段轨道不会被收两遍（两端距离 1.5 格以内算同一段）。</li>
+                    <li>记忆有上限，但都开得很大：线路 512 条、车站 5000 个、轨道 2 万段。上限存在的意义是
+                        「不要无界增长」，不是「定期清理」——一个普通大小的铁路网络碰不到它。</li>
+                </ul>
+                <div class="callout">
+                    <span class="ico">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                             stroke-linecap="round">
+                            <circle cx="12" cy="12" r="9"/>
+                            <path d="M12 8h.01M11 12h1v4h1"/>
+                        </svg>
+                    </span>
+                    <div>
+                        <p>结论是两句话：<strong>走出同步范围不会让线路消失</strong>；
+                            但<strong>从没靠近过的线路，确实读不到</strong>。想让它出现，坐车或走路靠近一次即可。</p>
+                    </div>
+                </div>
+
+                <h2 id="lines">线路类型与站点</h2>
+                <p>MTR 的线路有很多种类型，问道只认识能对应到自己道路等级的那些，其余的<strong>不猜</strong>：</p>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>MTR 的线路类型</th>
+                            <th>问道的线路类型</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>列车、缆车</td>
+                            <td><strong>铁路</strong>线路（沿铁路规划）</td>
+                        </tr>
+                        <tr>
+                            <td>船</td>
+                            <td><strong>水路</strong>线路（沿水路规划）</td>
+                        </tr>
+                        <tr>
+                            <td>飞机，以及 MTR 以后新加的类型</td>
+                            <td>不处理，也不显示——硬套成铁路只会给出错误的行程</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p>
+                    <strong>站点取的是站台的中点</strong>，不是车站区域的中点。车站的中心是整片区域的中点，
+                    大站的这个点可能离轨道很远；而车停的是站台，所以站点落在站台的中间。只有读不到站台时，
+                    才退回区域中心。
+                </p>
+                <p>还有两条「不凑数」的规矩：</p>
+                <ul>
+                    <li>客户端还没收到的车站会被<strong>跳过</strong>，而不是随便找个位置顶替——一个标错的站点比少一个站点更糟。</li>
+                    <li>一条线路剩下<strong>不足两站</strong>时根本不会被列出来：一条没有行程可坐的线路，只会回答「没有路线」。</li>
+                </ul>
+
+                <h2 id="readonly">只读的边界与「复制为我的」</h2>
+                <p>
+                    MTR 的车站与线路属于 MTR。它们的名字、类型、站位都是 MTR 的数据，问道在这里改，
+                    只会得到一条描述着「不存在的车站」的线路。所以在线路配置界面里：
+                </p>
+                <ul>
+                    <li>MTR 的线路带 <code>[MTR]</code> 标记列出，<strong>站点与类型都不能改</strong>；</li>
+                    <li>但可以按行尾的 <strong>「复制为我的」</strong>，得到一份完全属于你的副本——站点顺序、类型、名字都可以随便改；</li>
+                    <li>站点列表里来自 MTR 的车站同样只读，它们的名字与类型仍然由 MTR 负责。</li>
+                </ul>
+                <p>
+                    打开线路配置界面的方式：在世界地图上按 <kbd>R</kbd> 进入编辑模式，再按 <kbd>L</kbd>。
+                    线路是路网的性质而不是某个选中物的性质，所以不需要先选中什么。
+                </p>
+
+                <h2 id="marks">轨道标记：为什么需要它</h2>
+                <p>
+                    要让公共交通的行程沿着 MTR 真正铺的轨道来算，就得知道<strong>这条线走的是哪几段轨道</strong>。
+                    问题是：MTR 的协议里<strong>没有「某条线路对应哪段轨道」这个信息</strong>——它发过来的是车站、线路和它自己的一堆轨道，
+                    但两者之间没有连线。
+                </p>
+                <p>所以问道是<strong>反推</strong>的：</p>
+                <ol>
+                    <li>取这条线路上<strong>每一对相邻的站点</strong>；</li>
+                    <li>在 MTR 的轨道上规划一次，从这一站走到下一站；</li>
+                    <li>走过的那些轨道，就是这条线实际走的那一段，以<strong>只读的铁路 / 水路道路</strong>的形式标上去。</li>
+                </ol>
+                <p>
+                    标出来的这些道路画在线路下方，会被规划当作<strong>可以通行的道路</strong>，
+                    但<strong>从不保存进你的路网，也从不可编辑</strong>——它们和 MTR 的线路本身一样，是只读图层。
+                    一条线的标记是它自己的类型：船线标出来的就是水路。
+                </p>
+
+                <h3>逐条线路的开关</h3>
+                <p>
+                    在线路配置界面里，每条 MTR 线路的行尾有一个小方块：
+                    <strong>点亮＝沿这条线标记轨道</strong>（方块里写着 <code>轨</code> 或 <code>水</code>，说明会标成哪种道路），
+                    <strong>熄灭＝不标记</strong>（方块里什么都没有，两个状态一眼能分清）。
+                    默认值来自配置项 <code>mtr_auto_route_marks</code>（默认开），而每条线给过的答案会<strong>单独记住</strong>
+                    （存在 <code>config/howtogo/mtr_line_marks.json</code>，按 MTR 的线路 id 记），
+                    所以一条条改过之后，下次进游戏还是你上次的选择。
+                </p>
+                <div class="grid grid-2">
+                    <div class="card">
+                        <h3>点亮：沿这条线标记轨道</h3>
+                        <p>
+                            问道把那几段轨道标成只读的铁路（或水路）道路，行程就沿着 MTR 真正铺的轨道来规划与计时。
+                            适合<strong>轨道是这条线自己独有</strong>的线路——绝大多数列车线都是这样。
+                        </p>
+                    </div>
+                    <div class="card">
+                        <h3>熄灭：不标记，站点改按你画的路匹配</h3>
+                        <p>
+                            这条线不贡献任何轨道，它的站点改按老规矩去匹配<strong>你自己画的路</strong>——
+                            这正是「线路本来就走在你已经画好的路或水路上」时想要的答案，比如在你自己挖的水道上跑的船线。
+                        </p>
+                    </div>
+                </div>
+                <div class="callout">
+                    <span class="ico">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                             stroke-linecap="round">
+                            <circle cx="12" cy="12" r="9"/>
+                            <path d="M12 8h.01M11 12h1v4h1"/>
+                        </svg>
+                    </span>
+                    <div>
+                        <p>轨道是<strong>为每条线都记着</strong>的，哪怕这条线的标记是熄灭的：
+                            开关管的是「要不要把这些轨道作为道路加进路网」，而这条线画在地图上时，
+                            仍然沿着它自己实际走的那段轨道来画。所以你现在点亮，它会立刻用上走出范围之前就已经记下的轨道。</p>
+                    </div>
+                </div>
+
+                <h2 id="interchange">换乘站</h2>
+                <p>
+                    MTR 的线路和你自己建的线路是同一批线路：某条 MTR 线路与另一条线路（不管是 MTR 的还是你的）
+                    共用同一个站点时，它同样参与<strong>换乘站</strong>的判定，在屏幕上画成橙色方块。
+                    换乘站是「两站及以上的线路经停」这件事的结果，与线路来自哪里无关；
+                    融合与分开的规则见 <a href="transit.html">公共交通线路</a>。
+                </p>
+                <p>
+                    公共交通的行程也可以由 MTR 的线路来承运：上车地点是你走去 MTR 车站的这一段步行，
+                    然后是 MTR 线路上的一段车程，需要换线时按换乘再算一次等车时间。规划本身仍在你自己的道路网上，
+                    所以「走不到的 MTR 车站」不会凭空出现在路线里。
+                </p>
+
+                <h2 id="limits">限制与排错</h2>
+                <ul>
+                    <li><strong>没装 MTR 时这一切都不存在，也没有任何副作用</strong>：图层为空，车站列表里没有这一项，其余功能照常。</li>
+                    <li>线路只覆盖<strong>玩家附近</strong>——但问道记得住，所以走开不会丢；从没靠近过的线路读不到。</li>
+                    <li>线路类型不认识（例如飞机）就<strong>直接不处理</strong>，不会退化成铁路。</li>
+                    <li>轨道标记是<strong>反推</strong>出来的：如果 MTR 的轨道在站点之间并不连通，
+                        那一对相邻站点之间就规划不过去，这段标记会缺失，线路图上就会出现断口。
+                        碰到这种情况，把该线的标记关掉，让它按你画的路走，通常是更好的答案。</li>
+                    <li>看不到 MTR 的线路时，先确认：<code>mtr_transit</code> 没有关；你确实靠近过那条线；
+                        目的地列表里能看到 MTR 车站。日志里 <code>[HowToGo] MTR import |</code> 开头的那一行会写明
+                        这次读到了多少站点、几条线路、跳过了几条，以及<strong>累计记住了多少</strong>——
+                        那是判断「到底没读到，还是只是没画出来」最快的一条线索。</li>
+                </ul>
+
+                <div class="wiki-nav">
+                    <a class="prev" href="create.html">
+                        <small>上一页</small>
+                        <strong>机械动力铁路</strong>
+                    </a>
+                    <a class="next" href="display.html">
+                        <small>下一页</small>
+                        <strong>地图显示与缩放</strong>
+                    </a>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <footer class="site-footer">
+        <div class="wrap">
+            <div class="footer-grid">
+                <div>
+                    <a class="brand" href="../index.html" style="margin-bottom:12px">
+                        <img class="brand-mark" src="../assets/img/mod-icon.png" alt="">
+                        <span>问道<small>HowToGo</small></span>
+                    </a>
+                    <p style="margin:0;color:var(--muted);max-width:32em">
+                        我的世界道路标记与实时导航。纯客户端，开源（MIT）。
+                    </p>
+                </div>
+                <div>
+                    <h5>文档</h5>
+                    <a href="index.html">Wiki 首页</a>
+                    <a href="install.html">安装与前置</a>
+                    <a href="navigate.html">导航与 HUD</a>
+                    <a href="faq.html">常见问题</a>
+                    <a href="changelog.html">更新日志</a>
+                </div>
+                <div>
+                    <h5>项目</h5>
+                    <a href="../features.html">功能介绍</a>
+                    <a href="config.html">配置与数据文件</a>
+                    <a href="display.html">地图显示与缩放</a>
+                    <a href="mtr.html">MTR 集成</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>© <span data-year>2025</span> DongSZ · HowToGo | 问道</span>
+                <span>Minecraft 与 Xaero's World Map 为各自权利人所有，本模组不随附分发它们的文件。</span>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../assets/js/site.js"></script>
+</body>
+
+</html>
