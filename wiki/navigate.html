@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>导航与 HUD — HowToGo | 问道 Wiki</title>
-    <meta name="description" content="问道导航教程：三种开始导航的方式、三种交通方式各自能走的道路等级与速度表、路线偏好、先预览再出发、无解时的回退规则、HUD 读数与转弯判定、语音播报与偏航重算。">
+    <meta name="description" content="问道导航教程：三种开始导航的方式、三种交通方式各自能走的道路等级与速度表、路线偏好（按等级权重）、高速上的搜索限制、先预览再出发、无解时的回退规则与驾车重计时、HUD 读数与转弯判定、语音播报与偏航容差。">
     <meta name="theme-color" content="#f4f8ff">
     <link rel="icon" href="../assets/img/mod-icon.png" type="image/png">
     <link rel="stylesheet" href="../assets/css/site.css">
@@ -68,10 +68,11 @@
                 <a href="create.html" data-wiki-link data-keywords="机械动力 create 铁路 铁轨 车站 命名">机械动力铁路</a>
                 <a href="mtr.html" data-wiki-link data-keywords="MTR 铁路 线路 只读 轨道标记 复制">MTR 集成</a>
                 <a href="display.html" data-wiki-link data-keywords="显示 面板 缩放 隐藏 图层 名字 字号">地图显示与缩放</a>
+                <a href="webmap.html" data-wiki-link data-keywords="浏览器地图 webmap 网页 端口 导出 PNG 离线">浏览器地图</a>
                 <h4>参考</h4>
                 <a href="config.html" data-wiki-link data-keywords="配置 文件 toml 数据 存档 备份">配置与数据文件</a>
                 <a href="faq.html" data-wiki-link data-keywords="常见问题 限制 报错 没有路线 语音">常见问题与限制</a>
-                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.0 0.1.0">更新日志</a>
+                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.1 0.2.0 0.1.0">更新日志</a>
             </aside>
 
             <main class="wiki-body">
@@ -175,7 +176,8 @@
                         <tbody>
                         <tr>
                             <td><strong>最快时间</strong> / <strong>最短距离</strong></td>
-                            <td>前者按每种路的实际速度给每条路计权；后者忽略速度，只跟最短的一串路走。</td>
+                            <td>前者按每种路的实际速度给每条路计代价；后者忽略速度，只跟最短的一串路走。
+                                两种度量都会应用下面「优先大路」的权重。</td>
                         </tr>
                         <tr>
                             <td>避开类型</td>
@@ -183,8 +185,9 @@
                         </tr>
                         <tr>
                             <td>优先大路</td>
-                            <td>小路代价 ×1.6（配置项 <code>prefer_major_roads</code>）：不禁止，只是不划算，
-                                只有当它是唯一通路或确实短得多时才走。</td>
+                            <td>按等级给代价乘一个权重（配置项 <code>prefer_major_roads</code>）：
+                                <strong>高速 1.0 / 公路 1.25 / 小路 1.8</strong>。1.25 的意思是「为了走高速，绕 25% 以内都值得」——
+                                不禁止任何等级，只是让次一等的路不那么划算，所以真的短得多的近路仍然会赢。</td>
                         </tr>
                         </tbody>
                     </table>
@@ -192,6 +195,31 @@
                 <p>
                     这三项都能在「选择目的地」界面里直接点，改完会写进 <code>route_preferences.json</code>，
                     下次打开还在；也可以在 <a href="config.html">客户端配置</a> 里改默认值。
+                </p>
+                <p>
+                    权重只乘在<strong>搜索的代价</strong>上，绝不碰速度：面板报的「约 X」始终来自路线自己记录的
+                    <strong>真实速度</strong>。选路用什么数字、报时就用真实速度——曾经的做法是把惩罚折进速度，
+                    两者当时能对上纯属巧合，谁顺手改动一行就会无声地坏掉。现在时间在结构上不可能再被偏好污染。
+                    两种度量走的是同一条计算，所以「最快」与「最短」下这个开关都生效。
+                </p>
+                <p>
+                    它以前对<strong>开车</strong>完全无效：那只是压在「小路」上的一个 1.6 倍惩罚，
+                    而车根本不许上小路（驾车只允许高速与公路），被罚的那一类恰好是开车永远用不到的那一类；
+                    剩下高速与公路同速同代价，勾了等于没勾。现在按等级给权重，开车才是这个开关真正有意义的场合。
+                </p>
+
+                <h2 id="highway">高速上的搜索限制</h2>
+                <p>
+                    <strong>高速上不许原路折返</strong>：回到刚走过的那一段，或者走上它与同两个节点之间的另一段
+                    （一条路被画成一来一往两段时就是这样），在搜索里直接不成立。其余转弯卡在
+                    <strong>100 度</strong>以内——这个上限留住了高速真正会有的每个弯：直角路口是 90 度、
+                    分隔式高速在中央分隔带端头的掉头匝道、以及向外弯出去的匝道，同时挡掉它不会有的发夹弯、
+                    折返与掉头。
+                </p>
+                <p>
+                    限制落在<strong>搜索</strong>里，而不是念白里：以前只是把「掉头」的提示改说成「继续前行到下一个路口」，
+                    路线本身照样能规划出一个发夹弯，于是一个人可能被告知「上了高速再原路折回来」。
+                    这条规矩对<strong>不是高速的路完全不影响</strong>：司机拐进小巷、行人沿小路折回来都是常事。
                 </p>
 
                 <h2 id="preview">先预览，再出发</h2>
@@ -211,6 +239,14 @@
                     <li><strong>比走路更慢，或该方式无解</strong>：会说明原因并改为按步行规划，
                         读数上会写着「… 比步行更慢（… vs …），已按步行规划」或「… 在此没有可用路线，已按步行规划」
                         （配置项 <code>fall_back_to_walking_when_slower</code>，默认开）。</li>
+                    <li><strong>驾车退回步行时，按「车走的时间 + 人走的时间」重新计时</strong>（0.2.1 起）：
+                        步行是唯一能离开路网的交通方式，所以无解时那条按步行规划出来的线是唯一能给出来的答案；
+                        但它每一段都按步行速度计时，连汽车明明开得动的公路也一样，于是「目的地离可开的道路一百多格、
+                        最后要走一段」的行程，预览里显示的时长会比真正会花的长得多。现在这条线<strong>本身不动</strong>
+                        （照旧是步行规划出来的那一条，最后那一段走走也照旧），只是<strong>按驾车重新配速</strong>：
+                        车能走的每一段按汽车在该等级道路上的速度算，走不了的那一段保持步行速度。
+                        <strong>公共交通不给这条</strong>：一趟行程不是「能坐就坐、不能坐就走」，一条线路拉不动这趟行程时，
+                        如实给步行，时间也照旧是步行的。</li>
                     <li><strong>公共交通是例外</strong>：一条真实存在的公交行程不会被替换掉。
                         步行只会作为替代方案给出，不会顶替那条行程——
                         否则你选了公共交通，却拿到一条全程步行的路线，跟没做这个功能一样。</li>
@@ -239,17 +275,80 @@
                 </p>
                 <p>
                     <strong>偏航才重算。</strong>只有当你离开当前所在等级道路的容差之后才会重新规划，
-                    容差按等级配置（<code>on_road_tolerance_blocks</code>，默认约等于该等级宽度的 1.6 倍，
-                    最低 4 格）。重算时面板显示「⚠ 已偏离路线，正在重新规划」。
+                    容差按等级配置（<code>on_road_tolerance_blocks</code>）。它量的从来不是路的宽度，
+                    而是「画笔那条中线多远还算在路上」——那条线是画在路中间的<strong>一条</strong>折线，
+                    所以分隔式高速的对向车道、路边的行人、飘离运河中线的船，明明都在走自己那条路，
+                    不该被判成偏航然后一路重新规划。重算时面板显示「⚠ 已偏离路线，正在重新规划」。
                     想停下来随时可以：选择目的地界面里有「停止导航」。
+                </p>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>道路等级</th>
+                            <th>默认容差（格）</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>高速</td>
+                            <td><code>24</code></td>
+                        </tr>
+                        <tr>
+                            <td>公路</td>
+                            <td><code>16</code></td>
+                        </tr>
+                        <tr>
+                            <td>小路</td>
+                            <td><code>8</code></td>
+                        </tr>
+                        <tr>
+                            <td>铁路</td>
+                            <td><code>16</code></td>
+                        </tr>
+                        <tr>
+                            <td>水路</td>
+                            <td><code>32</code></td>
+                        </tr>
+                        <tr>
+                            <td>冰道</td>
+                            <td><code>12</code></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p>
+                    水路最大是故意的：船本来就不拴在一条线上，运河比任何街道都宽；小路最小也是故意的，
+                    小路本来就窄。每一级仍然可以在配置里改。
+                </p>
+                <div class="callout warn">
+                    <span class="ico">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                             stroke-linecap="round">
+                            <path d="M12 4l9 16H3z"/>
+                            <path d="M12 10v4M12 17h.01"/>
+                        </svg>
+                    </span>
+                    <div>
+                        <p><strong>已经写过 <code>howtogo-client.toml</code> 的实例不会被新默认值改写</strong>：
+                            NeoForge 只在文件不存在时写入默认值。想用新值，自己改
+                            <code>[on_road_tolerance_blocks]</code> 那一节，或者删掉它让游戏重写。</p>
+                    </div>
+                </div>
+                <p>
+                    <strong>行程停靠的站点周围 32 格算「就在站上」</strong>（<code>station_snap_blocks</code>，1~256）。
+                    站台、站前广场、天桥离轨道中线几十格是常事，过去一走出路线容差就被判偏航；
+                    在这个半径内，行程就不再把你当成离开了路线。换乘站是几条线路的多个站点凑成的一个地点，
+                    <strong>每个站点周围各自生效</strong>，所以从一个站台走到另一个站台换乘也不会被判成偏离。
                 </p>
 
                 <h2 id="voice">语音播报</h2>
                 <p>
                     配置项 <code>voice_announcements</code>（默认关），或者「选择目的地」界面里的<strong>语音</strong>开关。
-                    打开后会播报四件事：转弯前、现在转弯、到达、偏离路线。
+                    打开后会播报这几件事：开始导航（「问道地图为您导航」）、转弯前、现在转弯、到达
+                    （「已到达目的地附近，本次导航结束」）、偏离路线。
                     它用的是 Minecraft 原版 TTS，因此音色由操作系统决定，详见
-                    <a href="faq.html">常见问题</a>
+                    <a href="faq.html">常见问题</a> 与
                     <a href="changelog.html">更新日志</a>。
                 </p>
                 <p>提示距离随路况缩放，避免「在 300 米后转弯」用在一条小路上，或「在 50 米后转弯」用在高速上：</p>

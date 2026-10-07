@@ -68,10 +68,11 @@
                 <a href="create.html" data-wiki-link data-keywords="机械动力 create 铁路 铁轨 车站 命名" aria-current="page">机械动力铁路</a>
                 <a href="mtr.html" data-wiki-link data-keywords="MTR 铁路 线路 只读 轨道标记 复制">MTR 集成</a>
                 <a href="display.html" data-wiki-link data-keywords="显示 面板 缩放 隐藏 图层 名字 字号">地图显示与缩放</a>
+                <a href="webmap.html" data-wiki-link data-keywords="浏览器地图 webmap 网页 端口 导出 PNG 离线">浏览器地图</a>
                 <h4>参考</h4>
                 <a href="config.html" data-wiki-link data-keywords="配置 文件 toml 数据 存档 备份">配置与数据文件</a>
                 <a href="faq.html" data-wiki-link data-keywords="常见问题 限制 报错 没有路线 语音">常见问题与限制</a>
-                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.0 0.1.0">更新日志</a>
+                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.1 0.2.0 0.1.0">更新日志</a>
             </aside>
 
             <main class="wiki-body">
@@ -183,6 +184,12 @@
                 <p>
                     注意吸附<strong>只取位置</strong>：出现黄色吸附环，把点放在那个位置，不会拆分铁轨，也不会把铁轨接到你的路上。
                     铁轨不是编辑器拥有的几何，能改的只有它的名字。
+                </p>
+                <p>
+                    另外，你给手画道路设的<strong>层</strong>（<kbd>N</kbd> 面板里的「道路：名称与层」，
+                    或编辑模式下用 <kbd>-</kbd> / <kbd>+</kbd> 加减正在画的层）是<strong>那条路自己的属性</strong>：
+                    它决定这条路是高架还是地下、地图从低层往高层画时谁压在谁上面，但不会写到 Create 的轨道上，
+                    也不会让只读的铁轨变得可编辑。想让一条路从铁轨上方跨过去，就把那条路画成高架；铁轨那边始终由 Create 负责。
                 </p>
 
                 <h2 id="stations">车站算作地点</h2>

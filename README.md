@@ -14,6 +14,7 @@
 │   ├── roads.html      # 道路系统
 │   ├── navigate.html   # 导航
 │   ├── display.html    # 显示与信息
+│   ├── webmap.html     # 浏览器地图（/howtogo webmap）
 │   ├── transit.html    # 公共交通
 │   ├── create.html     # 内容创作
 │   ├── mtr.html        # MTR 集成
@@ -29,16 +30,22 @@
 
 > `wiki/` 下的页面会随模组版本迭代增补，以仓库当前内容为准。
 
-## 服务器部署：`git pull` 即更新
+## 服务器部署：改仓库即改网页
 
-站点服务器以本仓库 `main` 分支为唯一内容来源：
+线上 `https://howtogo.dongsz.space` 由一台 nginx 服务器提供（宝塔面板，站点根目录 `/www/wwwroot/howtogo`），它**以本仓库 `main` 分支为唯一内容来源**：
+
+- 克隆放在 `/www/wwwroot/howtogo-src`（保留 `.git`，不对外）；
+- 同步脚本 `/www/server/howtogo-sync.sh` 执行 `git fetch` + `git reset --hard origin/main`，再用 `rsync --delete` 把工作区同步到网站根目录（排除 `.git`，保留面板生成的 `.user.ini`/`.htaccess`/`404.html`）；
+- 宝塔计划任务 `howtogo-site-sync` 每 **5 分钟**执行一次该脚本，所以往 `main` 推送后最多 5 分钟线上就会更新；
+- 静态站点，无需重启任何服务，也无需构建。
+
+手动立即更新（服务器上执行）：
 
 ```bash
-cd /path/to/site
-git pull --ff-only origin main
+bash /www/server/howtogo-sync.sh
 ```
 
-拉取完成后刷新浏览器即可看到最新内容——静态站点无需重启任何服务，也无需构建。
+同步记录写在 `/www/wwwroot/howtogo-sync.log`（只在确实有提交更新时追加一行）。
 
 ## 本地预览
 

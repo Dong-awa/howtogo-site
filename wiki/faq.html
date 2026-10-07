@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>常见问题与限制 — HowToGo | 问道 Wiki</title>
-    <meta name="description" content="问道（HowToGo）常见问题与已知限制：为什么报「没有路线」、为什么名字不显示、换乘站为什么不融合、MTR 为什么缺站、语音为什么读成中文、能否装在服务器上。">
+    <meta name="description" content="问道（HowToGo）常见问题与已知限制：为什么报「没有路线」、为什么以前老报「偏离路线」、怎么画高架与隧道、为什么日志里没有诊断输出（debug_log）、MTR 为什么缺站、换乘站为什么不融合、语音为什么读成中文、能否装在服务器上。">
     <meta name="theme-color" content="#f4f8ff">
     <link rel="icon" href="../assets/img/mod-icon.png" type="image/png">
     <link rel="stylesheet" href="../assets/css/site.css">
@@ -68,9 +68,11 @@
                 <a href="create.html" data-wiki-link data-keywords="机械动力 create 铁路 铁轨 车站 命名">机械动力铁路</a>
                 <a href="mtr.html" data-wiki-link data-keywords="MTR 铁路 线路 只读 轨道标记 复制">MTR 集成</a>
                 <a href="display.html" data-wiki-link data-keywords="显示 面板 缩放 隐藏 图层 名字 字号">地图显示与缩放</a>
+                <a href="webmap.html" data-wiki-link data-keywords="浏览器地图 webmap 网页 端口 导出 PNG 离线">浏览器地图</a>
                 <h4>参考</h4>
                 <a href="config.html" data-wiki-link data-keywords="配置 文件 toml 数据 存档 备份">配置与数据文件</a>
                 <a href="faq.html" data-wiki-link data-keywords="常见问题 限制 报错 没有路线 语音" aria-current="page">常见问题与限制</a>
+                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.1 0.2.0 0.1.0">更新日志</a>
             </aside>
 
             <main class="wiki-body">
@@ -143,6 +145,115 @@
                     界面会直接告诉你「站点必须建在道路上」。
                 </p>
 
+                <h2 id="route">路线、偏航与时间</h2>
+
+                <h3>为什么以前动不动就报「偏离路线」？</h3>
+                <p>
+                    「还算在路上」的容差原来按<strong>路宽</strong>算出来，而它量的从来不是路的宽度，
+                    是<strong>画笔那条线</strong>多远还算在路上——那条线是画在路中间的<em>一条</em>折线。
+                    所以分隔式高速的对向车道、路边的行人、飘离运河中线的船，明明都在走自己那条路，却被判成偏航，
+                    然后一路重新规划。0.2.1 把各等级的默认容差直接调大：
+                </p>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>等级</th>
+                            <th>旧默认</th>
+                            <th>新默认</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>高速</td>
+                            <td>11 格</td>
+                            <td><strong>24 格</strong></td>
+                        </tr>
+                        <tr>
+                            <td>公路</td>
+                            <td>8 格</td>
+                            <td><strong>16 格</strong></td>
+                        </tr>
+                        <tr>
+                            <td>小路</td>
+                            <td>5 格</td>
+                            <td><strong>8 格</strong></td>
+                        </tr>
+                        <tr>
+                            <td>铁路</td>
+                            <td>6 格</td>
+                            <td><strong>16 格</strong></td>
+                        </tr>
+                        <tr>
+                            <td>水路</td>
+                            <td>10 格</td>
+                            <td><strong>32 格</strong></td>
+                        </tr>
+                        <tr>
+                            <td>冰道</td>
+                            <td>8 格</td>
+                            <td><strong>12 格</strong></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p>
+                    都在 <code>on_road_tolerance_blocks</code> 里，每一级都能单独调。另外，
+                    <strong>行程停靠的站点周围 32 格</strong>（<code>station_snap_blocks</code>）算「就在站上」：
+                    站台、站前广场、天桥离轨道中线几十格是常事，而换乘站是几条线路的多个站点凑成的一个地点，
+                    <strong>每个站点周围各自生效</strong>，所以从一个站台走到另一个站台换乘也不会被判成偏离。
+                </p>
+                <p>
+                    注意：<strong>已经写过 <code>howtogo-client.toml</code> 的实例不会被新默认值改动</strong>——
+                    NeoForge 只在文件不存在时写入默认值。要享受新的默认值，就自己改那一节，
+                    或者把 <code>[on_road_tolerance_blocks]</code> 删掉让游戏重写。
+                    完整的配置说明见 <a href="config.html#roads">配置与数据文件</a>。
+                </p>
+
+                <h3>为什么时间估计曾经按步行算了一条驾车路线？</h3>
+                <p>
+                    所选方式在当前路网里无解时，问道会<strong>改用步行规划</strong>——步行是唯一能离开路网的交通方式，
+                    所以那是唯一能给出一条线的答案。问题在于：一条以步行规划出来的路线，<strong>每一段都按步行速度计时</strong>，
+                    连那两公里汽车明明开得动的公路也一样。于是「目的地离可开的道路一百多格、最后要走一段」这种行程，
+                    显示的时长比真正会花的时长长得多，而且是拿人的速度去算车要走的路。
+                </p>
+                <p>
+                    现在这条线<strong>本身不动</strong>（照旧是步行者规划出来的那一条，最后那一段走走也照旧），
+                    但会<strong>按驾车重新计时</strong>：车能走的每一段按汽车在该等级道路上的速度算，
+                    走不了的那一段保持步行速度，读出来就是「车走的时间 + 人走的时间」。
+                    <strong>公共交通不给这条</strong>：一条线路拉不动这趟行程时，如实给步行，时间也照旧按步行算。
+                    另外，驾车只是<strong>更慢</strong>（而不是无解）时，那条老规矩没变：说明原因并改为按步行规划。
+                </p>
+
+                <h2 id="draw">图层、高架与隧道</h2>
+
+                <h3>怎么让高架画在地面路之上？</h3>
+                <p>
+                    关键不是画的顺序，是<strong>层</strong>。在世界地图上按 <kbd>R</kbd> 进入编辑模式，按 <kbd>Shift</kbd> 选中一条路，
+                    再按 <kbd>N</kbd> 打开「道路：名称与层」，就能给整条路设一个层：正数是高架（<code>高架1层</code>），
+                    负数是地下（<code>地下1层</code>），范围 <code>-32 ~ +32</code>。地图现在<strong>从低层往高层画</strong>：
+                    高架压在自己跨过去的那条地面路之上、隧道在地面路之下——一张平面俯视图里，
+                    这是「谁在谁上面」唯一能画出来的方式。同一层内先画的还在先，所以这一改只动了那些本来就画反的路；
+                    网页地图本来就是这么画的，两边现在一致。
+                </p>
+                <p>
+                    当前层一直写在左下角的读数里（<code>道路层：高架1层</code>）。<kbd>Shift</kbd> 选中一条路时，
+                    读数还会报出<strong>它的层与全长</strong>——层是平面地图看不出来的那一半（桥还是隧道），
+                    全长是整条路的（带弯的路在数据里是好几段，报的是它们加起来，也就是地图高亮的那一整条）。
+                </p>
+
+                <h3>怎么用 - / + 画一条隧道？</h3>
+                <p>
+                    编辑模式里，<kbd>-</kbd> 把<strong>正在画的层</strong>往下调一层、<kbd>+</kbd> 往上调一层，
+                    接着画的路就都在那一层（隧道用负数）：按一下 <kbd>-</kbd> 就是地下 1 层，再按一下是地下 2 层，
+                    范围同样截在 <code>-32 ~ +32</code>。<kbd>=</kbd> 键与小键盘的 <kbd>-</kbd> <kbd>+</kbd> 同样有效。
+                </p>
+                <p>
+                    它<strong>只改接下来画在哪一层</strong>，不动已经画好的路，也没有撤销记录——绘制层是一个模式，不写进存档。
+                    要改已有的路（名称与层一起改、一起撤销）仍然用 <kbd>N</kbd> 面板。当前层始终写在左下角那行读数里，
+                    按一下就能看见它变；右下角的快捷键列表里也多了一行 <code>- / + 道路层</code>。
+                </p>
+
                 <h2 id="invisible">地图上看不到东西</h2>
 
                 <h3>为什么我画的路别人看不到？</h3>
@@ -175,10 +286,21 @@
 
                 <h3>MTR 的线路为什么有时「缺了几站」？</h3>
                 <p>
-                    MTR 把它的世界放在自己的服务端上，只把玩家<strong>附近</strong>的数据发给客户端，
-                    所以任何一次读取都只是一个窗口。问道会把每次读到的东西合并记住（线路、车站、轨道），
-                    所以你走出同步范围时线路不会凭空消失；但<strong>从没靠近过</strong>的车站确实读不到。
+                    MTR 把它的世界放在自己的服务端上，最基本的一次读取只是玩家<strong>附近</strong>的那一段窗口。
+                    不过这个窗口通常不是唯一来源：<strong>自己开图</strong>（单人存档 / 对局域网开放）时，问道会直接读
+                    MTR 正在模拟的<strong>整张铁路</strong>（配置项 <code>mtr_full_map</code>，默认开）；
+                    客户端与服务器都装了 <strong>MTR Map Overlay</strong> 时，它抓回的整张网络快照也会被读进来
+                    （<code>mtr_map_overlay</code>，默认开）。两者都够不着时（联机在别人的服务器、两边都没装 Map Overlay），
+                    才只有靠近过的内容——问道会把每次读到的东西合并记住（线路、车站、轨道），所以走出同步范围时线路不会凭空消失，
+                    但<strong>从没靠近过</strong>的车站确实读不到。
                     另外，剩余不足两站的线路根本不会被列出来——一条没有行程可坐的线路只会回答「没有路线」。
+                </p>
+                <p>
+                    还有一段历史值得交代：<strong>MTR 4.1 把入口类改名成了 <code>org.mtr.MTR</code></strong>
+                    （原来是 <code>org.mtr.Init</code> / <code>org.mtr.mod.Init</code>），而旧版问道的整图读取只试了后两个拼法，
+                    于是在 4.1 上它<strong>静默失效</strong>，模组退回窗口读取——玩家看到的就是「范围外的车站又读不到了」。
+                    0.2.1 起三个拼法都试，读取器要求 MTR <strong>4.0.4 及以上</strong>。
+                    详见 <a href="mtr.html#versions">支持哪些 MTR 版本</a>。
                 </p>
 
                 <h3>换乘站为什么变成一个大方块？为什么有的又没融合？</h3>
@@ -238,6 +360,27 @@
                     所以它是「按这张表算出来的时间」，不是对你这一趟的测量——表能不能代表你的世界，取决于你修的路像不像那张表。
                 </p>
 
+                <h2 id="log">日志与排查</h2>
+
+                <h3>为什么日志里没有本模组自己的测试输出了？</h3>
+                <p>
+                    因为 0.2.1 把它们收进了一个<strong>默认关闭</strong>的开关。以前它们混在日志里：
+                    铁路图层每秒一行、地图每秒一行、MTR 每次读入的统计、每次规划的路由算术、
+                    一条线路被画成直线段的几何报告……全是关于「模组自己怎么在跑」的测量，而不是关于玩家遇到了什么。
+                    这种行值得排查时打开，不值得开一整个会话。
+                </p>
+                <p>
+                    于是按同一把尺子处理：<strong>没人会再看的直接删掉</strong>（Xaero 地图投影的 P0 探针 <code>RoadDebug</code>
+                    与打开它的系统属性 <code>-Dhowtogo.debug</code>），<strong>还有复用价值的收进 <code>debug_log</code></strong>。
+                    想看到它们，就在 <code>config/howtogo-client.toml</code> 里把 <code>debug_log</code> 改成 <code>true</code>
+                    （模组配置界面里也能改），<strong>改完即时生效</strong>，不用重开游戏；关掉时连计数都不做。
+                </p>
+                <p>
+                    <strong>警告与错误，以及一次性的事件行不受影响</strong>：出问题一定要能看到，
+                    而加载 / 保存 / 切换出行方式 / 到达 / 偏航重新规划这些各是一次会话的记录，每一条都能对上玩家看到的一件事。
+                    完整的开关说明见 <a href="config.html#log">配置与数据文件</a>。
+                </p>
+
                 <h2 id="server">服务器与联机</h2>
 
                 <h3>能装在服务器上吗？</h3>
@@ -278,8 +421,15 @@
                             <td>接驳段超过上限（驾车与公共交通 64 格；步行 4096 格，实际等于没有上限）时不画直线，直接报「没有路线」。</td>
                         </tr>
                         <tr>
-                            <td>MTR 只给附近的数据</td>
-                            <td>读到过的会被记住，但<strong>从没靠近过</strong>的车站与线路确实读不到。</td>
+                            <td>MTR 的数据范围取决于玩法</td>
+                            <td>自己开图会读整张铁路；客户端与服务器都装了 MTR Map Overlay 时也能拿到整张快照。
+                                只有联机在别人的服务器、两边都没装它时，<strong>从没靠近过</strong>的车站与线路才确实读不到
+                                （读到过的会被记住）。</td>
+                        </tr>
+                        <tr>
+                            <td>模组自己的诊断默认不写日志</td>
+                            <td>铁路图层、地图耗时、MTR 读入统计、路由算术等由 <code>debug_log</code> 控制，默认关；
+                                警告、错误与一次性事件行一直写。</td>
                         </tr>
                         <tr>
                             <td>MTR 与机械动力的线路 / 轨道只读</td>
@@ -316,7 +466,9 @@
                     <div>
                         <p>这份清单是「已知」，不是「无解」：其中每一条背后都有一个具体的原因，
                             大多数能在<a href="config.html">配置</a>或路网本身里绕开。
-                            真遇到清单之外的行为，把日志里带 <code>[HowToGo]</code> 前缀的那几行一起报上来最有帮助。</p>
+                            真遇到清单之外的行为，先在配置里把 <code>debug_log</code> 打开（诊断默认不写），
+                            再把日志里带 <code>[HowToGo]</code> 前缀的那几行一起报上来最有帮助——
+                            警告与错误不用打开就在。</p>
                     </div>
                 </div>
 

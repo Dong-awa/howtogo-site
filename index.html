@@ -54,17 +54,19 @@
         <section class="hero">
             <div class="wrap">
                 <div class="hero-copy reveal">
-                    <span class="eyebrow">Minecraft 1.21.1 · NeoForge · 纯客户端</span>
+                    <span class="eyebrow">Minecraft 1.21.1 · NeoForge 21.1.x · v0.2.1 · 纯客户端</span>
                     <h1>在地图上画路，<br>然后像用<span>地图软件</span>一样出发</h1>
                     <p class="hero-lead">
                         问道（HowToGo）把 Xaero 世界地图变成一张真正能用的路网：画路、标记地点、
                         选目的地、选交通方式、看路线预览、跟着 HUD 走到终点。
-                        机械动力的铁轨和 MTR 的线路会被自动读进来，不用你一格一格画。
+                        机械动力的铁轨和 MTR 的线路会被自动读进来，不用你一格一格画；
+                        路网还能一键在浏览器里打开，按层看清高架与隧道，并导出成图片。
                     </p>
                     <div class="hero-meta">
                         <span class="chip"><i class="dot"></i>Xaero 世界地图</span>
                         <span class="chip"><i class="dot"></i>机械动力铁路</span>
                         <span class="chip"><i class="dot"></i>MTR 线路</span>
+                        <span class="chip"><i class="dot"></i>浏览器地图</span>
                         <span class="chip"><i class="dot"></i>无需装在服务器</span>
                     </div>
                     <div class="btn-row">
@@ -303,8 +305,28 @@
                         <p>左上角的「地图显示」面板可以逐个开关道路等级、地点类型与公共交通线路，面板还能拖着走。</p>
                         <ul class="card-list">
                             <li>缩小地图时按等级自动取舍：小路 → 公路 → 水路 → 铁路，高速与冰道永不隐藏</li>
+                            <li>道路<strong>按层叠放</strong>：高架压在自己跨过去的地面路之上，隧道在最下面</li>
                             <li>名字的大小跟着缩放走，线上名字顺着线的方向写</li>
                             <li>面板是屏幕覆盖层，不会被地图上的线路与文字盖住</li>
+                        </ul>
+                    </article>
+
+                    <article class="card reveal" data-delay="180">
+                        <div class="card-ico">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                 stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="9"/>
+                                <path d="M3 12h18"/>
+                                <path d="M12 3c2.6 2.6 2.6 15.4 0 18-2.6-2.6-2.6-15.4 0-18z"/>
+                            </svg>
+                        </div>
+                        <h3>浏览器地图</h3>
+                        <p><code>/howtogo webmap</code> 在本机开一个小服务，把当前维度的路网画成浏览器里的俯视地图，
+                            地址以可点击的链接发在聊天栏；细节见 <a href="wiki/webmap.html">浏览器地图</a>。</p>
+                        <ul class="card-list">
+                            <li>只监听 127.0.0.1：配置里没有能把它放到局域网上的开关</li>
+                            <li>页面与 html2canvas 都在 jar 里，离线可用，可导出 2 倍分辨率 PNG</li>
+                            <li>按道路等级与层过滤，状态栏报光标下最近的路或地点</li>
                         </ul>
                     </article>
                 </div>

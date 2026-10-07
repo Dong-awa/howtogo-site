@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>画路、命名与地点 — HowToGo | 问道 Wiki</title>
-    <meta name="description" content="问道画路教程：进入编辑模式、六个道路等级、吸附与拆分、选择与拖动节点、命名规则、四种地点类型、删除与撤销，以及 repair_road_joins 如何把看起来连上的路修好。">
+    <meta name="description" content="问道画路教程：进入编辑模式、六个道路等级、道路层（高架 / 地下）与连通规则、吸附与拆分、选择与拖动节点、命名规则、四种地点类型、删除与撤销，以及 repair_road_joins 如何把看起来连上的路修好。">
     <meta name="theme-color" content="#f4f8ff">
     <link rel="icon" href="../assets/img/mod-icon.png" type="image/png">
     <link rel="stylesheet" href="../assets/css/site.css">
@@ -68,10 +68,11 @@
                 <a href="create.html" data-wiki-link data-keywords="机械动力 create 铁路 铁轨 车站 命名">机械动力铁路</a>
                 <a href="mtr.html" data-wiki-link data-keywords="MTR 铁路 线路 只读 轨道标记 复制">MTR 集成</a>
                 <a href="display.html" data-wiki-link data-keywords="显示 面板 缩放 隐藏 图层 名字 字号">地图显示与缩放</a>
+                <a href="webmap.html" data-wiki-link data-keywords="浏览器地图 webmap 网页 端口 导出 PNG 离线">浏览器地图</a>
                 <h4>参考</h4>
                 <a href="config.html" data-wiki-link data-keywords="配置 文件 toml 数据 存档 备份">配置与数据文件</a>
                 <a href="faq.html" data-wiki-link data-keywords="常见问题 限制 报错 没有路线 语音">常见问题与限制</a>
-                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.0 0.1.0">更新日志</a>
+                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.1 0.2.0 0.1.0">更新日志</a>
             </aside>
 
             <main class="wiki-body">
@@ -89,11 +90,12 @@
                 <h2 id="enter">进入编辑模式</h2>
                 <p>
                     在世界地图上按 <kbd>R</kbd> 切换编辑模式。打开后，屏幕<strong>左下角</strong>显示当前绘制状态与路网统计
-                    （本段长度、总长、节点数、道路数），<strong>右下角</strong>竖排列出全部快捷键——不需要记住这一页。
+                    （<strong>当前道路层</strong>、本段长度、总长、节点数、道路数），<strong>右下角</strong>竖排列出全部快捷键
+                    （包括 <code>- / + 道路层</code>）——不需要记住这一页。
                 </p>
                 <p>
                     除 <kbd>Ctrl</kbd> + 左键在地图上选目的地之外，<strong>所有编辑操作都必须先按 <kbd>R</kbd></strong>：
-                    绘制、<kbd>Shift</kbd> 选中、命名、放地点、改等级、删除、撤销重做，都在这道门后面。
+                    绘制、<kbd>Shift</kbd> 选中、命名、改层、放地点、改等级、删除、撤销重做，都在这道门后面。
                     这样在世界地图上随手点一下不会把路画歪。
                 </p>
                 <div class="callout">
@@ -129,7 +131,8 @@
                         </tr>
                         <tr>
                             <td>右键</td>
-                            <td>结束当前折线。手上没有折线时，右键清除选择。</td>
+                            <td>结束当前折线。手上<strong>没有</strong>正在画的线时，<strong>按住右键拖动就是平移地图</strong>
+                                （走的是 Xaero 自己的平移，手感与平时一样）；右键<strong>单击不拖</strong>照旧清除选中。</td>
                         </tr>
                         </tbody>
                     </table>
@@ -193,8 +196,40 @@
                     </table>
                 </div>
                 <p>
-                    宽度不只是好看：它同时是「还算在路上」的默认容差（见 <a href="config.html">配置</a> 里的
-                    <code>on_road_tolerance_blocks</code>），所以一条七格宽的高速在偏航判定上比三格宽的小路宽容得多。
+                    宽度不只是好看：它决定这条路在地图上画多粗。但<strong>偏航容差不是按宽度算的</strong>——
+                    它量的是「画笔那条中线多远还算在路上」，而那条线是画在路中间的<strong>一条</strong>折线，
+                    所以容差按等级单独配置（<code>on_road_tolerance_blocks</code>，
+                    默认 高速 24 / 公路 16 / 小路 8 / 铁路 16 / 水路 32 / 冰道 12），
+                    详见 <a href="navigate.html#hud">导航与 HUD</a> 与 <a href="config.html">配置</a>。
+                </p>
+
+                <h2 id="layer">道路层：高架与地下</h2>
+                <p>
+                    地图是平面俯视图，画不出「谁在谁上面」，所以每一段路另有一个<strong>层</strong>。
+                    按 <kbd>N</kbd> 打开的面板标题是「道路：名称与层」：名称下面就是层数，
+                    范围 <code>-32 ~ +32</code>，默认 <code>0</code>。<code>0</code> 是<strong>地表</strong>，
+                    正数依次是「高架 1 层」「高架 2 层」……，负数依次是「地下 1 层」「地下 2 层」……
+                    面板里会实时写出你填的是哪一层。
+                </p>
+                <p>
+                    不想开面板时，编辑模式下直接按 <kbd>-</kbd> 与 <kbd>+</kbd> 加减<strong>正在画的层</strong>
+                    （<kbd>=</kbd> 键与小键盘的 <kbd>-</kbd> <kbd>+</kbd> 同样有效，层数在 <code>-32 ~ +32</code>
+                    之间截住）。它只改「接下来画的路画在哪一层」，不动已经画好的东西——所以一整条隧道填一次就够；
+                    要改已有的路，仍然走 <kbd>N</kbd> 面板（<kbd>Shift</kbd> 点击选中那条路，或者把光标放在路上按
+                    <kbd>N</kbd>），在那里名称与层一起改、一起撤销。当前层一直写在屏幕<strong>左下角</strong>那行读数里
+                    （<code>道路层：高架1层</code>），按一下就能看见数字跟着变；右下角的快捷键列表里也多了一行
+                    <code>- / + 道路层</code>。
+                </p>
+                <p><strong>层不改变道路在地图上的位置，它只决定哪里能连、哪里不能连：</strong></p>
+                <ul>
+                    <li><strong>有节点相连的路，无视层数，一律连通</strong>：在一个路口交汇就是交汇，
+                        桥墩接着引桥就是接着。</li>
+                    <li><strong>没有节点相连的路，只有同层才合并</strong>：两条路的端点差一两格时，同层会被当成同一个地点；
+                        一层在地表、一层在高架时不会被合并，所以桥还是桥、隧道还是隧道。</li>
+                </ul>
+                <p>
+                    想让只差一两格的两个端点算一个地点，就把它们画在同一个节点上（编辑器会吸附），
+                    或者明确放在同一层——同层的近似端点会被当作一个地点，一层在高架就不会。
                 </p>
 
                 <h2 id="snap">吸附、拆分与选择</h2>
@@ -237,7 +272,8 @@
                         </tr>
                         <tr>
                             <td>一个路段</td>
-                            <td>选中整条路段，可以改等级或删除它——不必重画。</td>
+                            <td>选中它所在的<strong>整条路</strong>（带弯的路是若干路段首尾相接的一条链，不分支的节点不算路口），
+                                可以改名、改等级、改层、标单行或删除它——不必重画。</td>
                         </tr>
                         <tr>
                             <td>自动识别的铁路上</td>
@@ -246,13 +282,24 @@
                         </tbody>
                     </table>
                 </div>
-                <p>选择是后面所有操作的入口：命名、改等级、删除，优先作用于选中的东西。</p>
-
-                <h2 id="name">命名</h2>
                 <p>
-                    按 <kbd>N</kbd> 命名，优先作用于选中项，没有选中时作用于光标所在处。命名的对象可以是
-                    整条道路、一个地点，也可以是整条自动识别的铁路线；界面标题会分别显示为「道路名称」「地点名称」
-                    与「铁路线名称（机械动力自动识别）」。
+                    选择是后面所有操作的入口：命名、改等级、改层、标单行、删除，优先作用于选中的东西。
+                    选中一条路之后，左下角的读数是<strong>四项</strong>：
+                    「已选道路：公路 · 双向 · 道路层：高架1层 · 全长 320 格」——
+                    层是平面地图看不出来的那一半（桥还是隧道），全长是<strong>整条路</strong>加起来
+                    （也就是地图上高亮的那一整条），不是光标底下那一段。
+                </p>
+
+                <h2 id="name">命名与改层</h2>
+                <p>
+                    按 <kbd>N</kbd> 打开编辑面板，优先作用于选中项，没有选中时作用于光标所在处。编辑的对象可以是
+                    整条道路、一个地点，也可以是整条自动识别的铁路线；界面标题会分别显示为「道路：名称与层」
+                    「地点名称」与「铁路线名称（机械动力自动识别）」。
+                </p>
+                <p>
+                    道路那一栏把<strong>名称与层放在同一处编辑</strong>：同一次确认、同一步撤销。填的层数不合法
+                    （不是数字或超出 <code>-32 ~ +32</code>）时面板不会关闭，而是把原因写在下面，改一下就行。
+                    层的作用见上面的 <a href="#layer">道路层</a>。
                 </p>
                 <ul>
                     <li><strong>一条路一个名字</strong>：折线的所有转折段共用同一个名字，地图上每条路只显示一次标签，
@@ -374,6 +421,13 @@
                 <p>
                     删除按 <kbd>Del</kbd> 或 <kbd>Backspace</kbd>，撤销 <kbd>Ctrl</kbd> + <kbd>Z</kbd>、
                     重做 <kbd>Ctrl</kbd> + <kbd>Y</kbd>，最多 64 步。这些同样都要求先按 <kbd>R</kbd> 进入编辑模式。
+                </p>
+                <p>
+                    <strong>删除删的是整条路，而不是光标底下那一段</strong>（0.2.1 起）。带弯的路在数据里是若干路段
+                    在「直通节点」处首尾相接，所以选中它时选中的是<strong>整条链</strong>：地图高亮的也是整条，
+                    改名、改等级、改层、标单行这些操作一直作用在整条链上，只有删除曾经是个例外——它只删掉光标所在的那一截，
+                    于是一条弯了两个弯的街要按三次删除键才删得掉。现在删除和别的操作问同一个问题：「这条链是什么」，
+                    然后整条链一起删；节点照旧按节点删，落在它上面的路段跟着走。
                 </p>
                 <p>
                     还有一个看不见但很重要的开关：<code>repair_road_joins</code>（默认开）。

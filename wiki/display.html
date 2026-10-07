@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>地图显示与缩放 — HowToGo | 问道 Wiki</title>
-    <meta name="description" content="问道（HowToGo）地图显示教程：左上角「地图显示」面板怎么用、每个开关管什么、缩小地图时道路与地点按什么顺序自动取舍、名字的字号与位置规则、地图上的标记分别是什么。">
+    <meta name="description" content="问道（HowToGo）地图显示教程：左上角「地图显示」面板怎么用、每个开关管什么、缩小地图时道路与地点按什么顺序自动取舍、道路的绘制顺序（按层与描边）、名字的字号与位置规则、地图上的标记分别是什么。">
     <meta name="theme-color" content="#f4f8ff">
     <link rel="icon" href="../assets/img/mod-icon.png" type="image/png">
     <link rel="stylesheet" href="../assets/css/site.css">
@@ -68,10 +68,11 @@
                 <a href="create.html" data-wiki-link data-keywords="机械动力 create 铁路 铁轨 车站 命名">机械动力铁路</a>
                 <a href="mtr.html" data-wiki-link data-keywords="MTR 铁路 线路 只读 轨道标记 复制">MTR 集成</a>
                 <a href="display.html" data-wiki-link data-keywords="显示 面板 缩放 隐藏 图层 名字 字号" aria-current="page">地图显示与缩放</a>
+                <a href="webmap.html" data-wiki-link data-keywords="浏览器地图 webmap 网页 端口 导出 PNG 离线">浏览器地图</a>
                 <h4>参考</h4>
                 <a href="config.html" data-wiki-link data-keywords="配置 文件 toml 数据 存档 备份">配置与数据文件</a>
                 <a href="faq.html" data-wiki-link data-keywords="常见问题 限制 报错 没有路线 语音">常见问题与限制</a>
-                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.0 0.1.0">更新日志</a>
+                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.1 0.2.0 0.1.0">更新日志</a>
             </aside>
 
             <main class="wiki-body">
@@ -275,6 +276,24 @@
                     </div>
                 </div>
 
+                <h2 id="draworder">画的先后：层与描边</h2>
+                <p>
+                    地图是俯视图，一定要有东西压在另一样上面，所以「谁先画」是一条明确的规则：
+                    <strong>路段按层从低往高画</strong>——高架（层 1）压在地面（层 0）之上，隧道（层 -1）在最下面，
+                    低层永远不会盖住高层。同一层里<strong>先画完所有描边、再画所有填充</strong>，
+                    所以十字路口看起来是一条路从另一条上跨过去，而不是两团颜色糊在一起；
+                    单向箭头跟着本层的填充画（所以桥也盖得住桥下的箭头），之后才是路口点、地点标记，最后是所有文字。
+                </p>
+                <p>
+                    以前画的顺序是路网内部的枚举顺序（一个按路段 id 哈希的顺序，与高度毫无关系），
+                    于是一座桥是被画在它所跨的路上面还是下面，取决于两条路段谁先被枚举到。现在这条规则是确定的，
+                    同一层里的先后不变，所以这一改只动了那些本来就画反的路。
+                </p>
+                <p>
+                    <strong>网页地图（<code>/howtogo webmap</code>）是同一套规则</strong>：同样从低层往高层画、
+                    同层先描边后填充、文字最后，所以屏幕上看到的遮挡关系，与导出的 PNG 一致。
+                </p>
+
                 <h2 id="names">名字的大小与位置</h2>
                 <p>
                     名字的<strong>字号跟着缩放走</strong>，但两个方向不一样：缩小时按比例变小，
@@ -373,9 +392,9 @@
                         <small>上一页</small>
                         <strong>MTR 集成</strong>
                     </a>
-                    <a class="next" href="config.html">
+                    <a class="next" href="webmap.html">
                         <small>下一页</small>
-                        <strong>配置与数据文件</strong>
+                        <strong>浏览器地图</strong>
                     </a>
                 </div>
             </main>

@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>公共交通线路 — HowToGo | 问道 Wiki</title>
-    <meta name="description" content="问道（HowToGo）公共交通线路教程：线路配置界面怎么用、线路类型（铁路/水路/冰道/公路）、站点为什么会标红、三种站点来源、只读线路与「复制为我的」、换乘站与等车时间。">
+    <meta name="description" content="问道（HowToGo）公共交通线路教程：线路配置界面怎么用、线路类型（铁路/水路/冰道/公路）、站点为什么会标红或标橙、三种站点来源、只读线路与「复制为我的」、换乘站与等车时间。">
     <meta name="theme-color" content="#f4f8ff">
     <link rel="icon" href="../assets/img/mod-icon.png" type="image/png">
     <link rel="stylesheet" href="../assets/css/site.css">
@@ -68,10 +68,11 @@
                 <a href="create.html" data-wiki-link data-keywords="机械动力 create 铁路 铁轨 车站 命名">机械动力铁路</a>
                 <a href="mtr.html" data-wiki-link data-keywords="MTR 铁路 线路 只读 轨道标记 复制">MTR 集成</a>
                 <a href="display.html" data-wiki-link data-keywords="显示 面板 缩放 隐藏 图层 名字 字号">地图显示与缩放</a>
+                <a href="webmap.html" data-wiki-link data-keywords="浏览器地图 webmap 网页 端口 导出 PNG 离线">浏览器地图</a>
                 <h4>参考</h4>
                 <a href="config.html" data-wiki-link data-keywords="配置 文件 toml 数据 存档 备份">配置与数据文件</a>
                 <a href="faq.html" data-wiki-link data-keywords="常见问题 限制 报错 没有路线 语音">常见问题与限制</a>
-                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.0 0.1.0">更新日志</a>
+                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.1 0.2.0 0.1.0">更新日志</a>
             </aside>
 
             <main class="wiki-body">
@@ -181,16 +182,38 @@
                     而一条跑在小路上的线路，只会被走到。类型不是装饰：它决定了规划时这条线能骑哪些道路。
                 </p>
 
-                <h2 id="broken">红色站点：走不通在保存前就看得见</h2>
+                <h2 id="broken">红色站点：真的断了才标红</h2>
                 <p>
                     中列里的站点如果<strong>接不上它的上一站</strong>，名字会画成<strong>红色</strong>，
-                    面板顶部同时出现一句「红色站点与上一站连不通（线路类型不对？）」。这不是提醒你数据没存，
-                    而是在说：以这条线<em>当前的类型</em>，从上一站到这一站没有一条可走的路。
+                    面板顶部同时出现一句「红色站点与上一站之间是断的：两站不在这条线路该走的同一段道路上」。
+                    这句话很短，说的却是一件很具体的事：以这条线<em>当前的类型</em>，
+                    两站分别落在<strong>该等级道路的两个连通片段</strong>上，中间没有路。
                 </p>
                 <p>
-                    判定方式与路线规划完全一样：每一个相邻对都按这条线自己的类型、自己在同一张路网上真实地规划一次，
-                    所以编辑器上标红的地方，就是规划时会拒绝的地方。没有它，类型写错的唯一症状只有一句「公共交通没有路线」，
-                    而那句话既不说哪条线，也不说哪一段。
+                    <strong>红色只表示真的不连通</strong>，不再表示「这一段规划不出车程」。早先的判定把两件事混在了一起：
+                    站台离轨道超过 64 格接驳上限、单行方向与站序相反、路由器兜底路径自己的取舍，
+                    都会让站名变红——线路明明是通的（游戏里车照跑），看起来却像断了。
+                    现在判定问的是「这两站通不通」，与「愿不愿意走这一段去上车」无关，
+                    所以<strong>不再受 64 格接驳上限约束</strong>；它另有一条 <strong>256 格</strong>的判定距离
+                    （一个车站的多个站台被合并成一个地点时，代表点离轨道上百格是常事）。
+                    超过 256 格就<strong>不判断</strong>：标题旁改给一句橙色提示
+                    「有些站点附近找不到这条线路该走的道路，连通性无法判断（不标红）」——
+                    把「不知道」和「断了」分开说，是这一版最重要的改动。
+                </p>
+                <p>
+                    单行仍然照旧判定，因为这是<strong>有向</strong>的可达性：单行方向与站序相反时，那一站照样标红。
+                </p>
+                <p>
+                    判定本身也换了做法：<strong>不再为每一对相邻站点规划一条完整路线，只在同一张图上问一次可达性</strong>——
+                    不计代价、不计接驳时间，只问走不走得到。编辑界面和真正的规划器走<strong>同一个入口</strong>
+                    （<code>RideRoads.forLine</code>），所以 MTR 的线路按它自己的轨道判定，
+                    界面上的红 / 橙和实际规划时得到的是同一个答案。
+                </p>
+                <p>
+                    判定结果按<strong>各来源自己的版本</strong>记账：手画路网的修订号、单行与楼层的改动计数、
+                    Create 轨道层与 MTR 轨道的版本号。于是拖动节点把两段接上、把一条路改成铁路、
+                    改掉一条街的单行方向，甚至 MTR 那边重新读了一遍轨道，红字都会<strong>自己刷新</strong>。
+                    （早先取的是合并出来那份路网的计数，而副本的修订号与来源无关，所以修好之后红字会一直挂着。）
                 </p>
 
                 <div class="callout warn">
@@ -203,7 +226,9 @@
                     </span>
                     <div>
                         <p>标红只说明<strong>相邻两站之间</strong>不通，不代表线路的其它部分有问题。把类型改对，
-                            或者把中间缺的那段路补上（见 <a href="roads.html">画路、命名与地点</a>），红字就会自己消失。</p>
+                            或者把中间缺的那段路补上（见 <a href="roads.html">画路、命名与地点</a>），红字就会自己消失。
+                            橙色提示是另一回事：它说的是<strong>判断不了</strong>，不是断了——通常意味着这两站附近
+                            压根没有这条线该走的等级的道路（例如一条水路线开在一片没有水路的世界里）。</p>
                     </div>
                 </div>
 

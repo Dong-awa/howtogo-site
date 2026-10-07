@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>配置与数据文件 — HowToGo | 问道 Wiki</title>
-    <meta name="description" content="问道（HowToGo）配置与数据文件详解：howtogo-client.toml 每一项配置的作用与默认值、route_preferences.json 运行时偏好、按存档分开放置的路网与线路文件、备份与搬家、手工改文件的注意事项。">
+    <meta name="description" content="问道（HowToGo）配置与数据文件详解：howtogo-client.toml 每一项配置的作用与默认值（含偏航容差、station_snap_blocks、debug_log、浏览器地图端口）、route_preferences.json 运行时偏好、按存档分开放置的路网与线路文件、备份与搬家、手工改文件的注意事项。">
     <meta name="theme-color" content="#f4f8ff">
     <link rel="icon" href="../assets/img/mod-icon.png" type="image/png">
     <link rel="stylesheet" href="../assets/css/site.css">
@@ -68,10 +68,11 @@
                 <a href="create.html" data-wiki-link data-keywords="机械动力 create 铁路 铁轨 车站 命名">机械动力铁路</a>
                 <a href="mtr.html" data-wiki-link data-keywords="MTR 铁路 线路 只读 轨道标记 复制">MTR 集成</a>
                 <a href="display.html" data-wiki-link data-keywords="显示 面板 缩放 隐藏 图层 名字 字号">地图显示与缩放</a>
+                <a href="webmap.html" data-wiki-link data-keywords="浏览器地图 webmap 网页 端口 导出 PNG 离线">浏览器地图</a>
                 <h4>参考</h4>
                 <a href="config.html" data-wiki-link data-keywords="配置 文件 toml 数据 存档 备份" aria-current="page">配置与数据文件</a>
                 <a href="faq.html" data-wiki-link data-keywords="常见问题 限制 报错 没有路线 语音">常见问题与限制</a>
-                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.0 0.1.0">更新日志</a>
+                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.1 0.2.0 0.1.0">更新日志</a>
             </aside>
 
             <main class="wiki-body">
@@ -82,8 +83,8 @@
 
                 <h1>配置与数据文件</h1>
                 <p class="lead">
-                    问道的东西分成两堆：<strong>配置</strong>是「我习惯怎么走」——默认交通方式、偏好、容差、要不要读机械动力和 MTR；
-                    <strong>数据</strong>是「我在这个世界修了什么」——路网、地点、线路。配置在
+                    问道的东西分成两堆：<strong>配置</strong>是「我习惯怎么走」——默认交通方式、偏好、容差、要不要读机械动力和 MTR，
+                    以及日志与浏览器地图怎么开；<strong>数据</strong>是「我在这个世界修了什么」——路网、地点、线路。配置在
                     <code>config/howtogo-client.toml</code>，数据在 <code>config/howtogo/</code>，
                     两堆都在你自己的客户端上，都按存档或按客户端分开，互相之间不会写坏。
                 </p>
@@ -153,9 +154,11 @@
                         <tr>
                             <td><code>prefer_major_roads</code></td>
                             <td><code>false</code></td>
-                            <td>开启后小路<strong>不是被禁掉，而是变贵</strong>（代价 ×1.6）：
-                                只要能绕开就走大路，绕不开或小路明显更短时仍然会走。
-                                直接禁掉小路会让一些行程无解，而玩家在地图上看不出原因，所以这里选了「劝退」而不是「禁止」。
+                            <td>开启后各等级<strong>不是被禁掉，而是按权重变贵</strong>：高速 ×1.0、公路 ×1.25、小路 ×1.8。
+                                权重只乘在<strong>搜索代价</strong>上、绝不碰速度，所以「最快时间」与「最短距离」两种口径都会生效
+                                （0.2.1 之前它只压在「小路」上，而车根本不许上小路——这个开关在开车时勾了等于没勾；
+                                「最短距离」口径下更是完全没用）。×1.25 的意思是「为了走高速，绕 25% 以内都值得」。
+                                直接禁掉某一级会让一些行程无解，而玩家在地图上看不出原因，所以这里选了「劝退」而不是「禁止」。
                             </td>
                         </tr>
                         <tr>
@@ -188,19 +191,35 @@
                                 把「看着连上、其实没连上」的路<strong>在规划之前</strong>修好。
                                 两条路穿过同一个节点是一条路；交叉而过、或差一格停住的两条路是两条，路由器不会从一条走到另一条。
                                 开启后：落在路段中间的节点会把路段<strong>拆开</strong>，交叉的两条路<strong>互相打断</strong>，
-                                然后把这些几乎重合的节点并成一个路口。只在「同一辆车两条路都走得通」且高度相近时才并，
-                                所以<strong>桥还是桥</strong>，不会把上下两层接在一起。关掉就完全按你画的样子走。
+                                然后把这些几乎重合的节点并成一个路口。只在「同一辆车两条路都走得通」<strong>且高度相近</strong>时才并，
+                                所以<strong>桥还是桥</strong>，不会把上下两层接在一起。0.2.1 起这个高度判断的容差
+                                <strong>随水平间距放大</strong>：两端水平差 3 格、垂直差 8 格是<strong>上坡的路，必须接</strong>；
+                                水平差 2 格、垂直差 36 格是<strong>桥，必须不接</strong>——固定容差两边都会错。
+                                关掉就完全按你画的样子走。
                             </td>
                         </tr>
                         <tr>
                             <td><code>on_road_tolerance_blocks.*</code></td>
-                            <td>按等级宽度</td>
+                            <td>高速 24 / 公路 16 / 小路 8<br>铁路 16 / 水路 32 / 冰道 12</td>
                             <td>
                                 一个等级一项（<code>highway</code> / <code>road</code> / <code>path</code> /
                                 <code>rail</code> / <code>water</code> / <code>ice</code>），
-                                表示「离画出来的线多远还算在这条路上」，单位是格。默认值约等于
-                                <strong>该等级线宽 ×1.6，最小 4 格</strong>；可调范围 1~128。
-                                宽的路本来就该比羊肠小道更宽容，所以它按等级分开，而不是一个数管全部。
+                                表示「离画出来的线多远还算在这条路上」，单位是格，可调范围 1~128。
+                                它量的<strong>不是路的宽度</strong>，而是画笔那条线——而那条线是画在路中间的<strong>一条</strong>折线，
+                                所以分隔式高速的对向车道、路边的行人、飘离运河中线的船，都在走自己那条路。
+                                0.2.1 把默认值整体调大（原来是高速 11 / 公路 8 / 小路 5 / 铁路 6 / 水路 10 / 冰道 8）：
+                                宽的路本来就该比羊肠小道更宽容，而水路最大是故意的——船本来就不拴在一条线上，运河比任何街道都宽；
+                                小路最小也是故意的，小路本来就窄。
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>station_snap_blocks</code></td>
+                            <td><code>32.0</code>（1~256）</td>
+                            <td>
+                                离<strong>行程停靠的某个站点</strong>多近算「就在站上」，单位是格；在这个半径内不判偏航。
+                                它同时是报站的距离基准。站台、站前广场、天桥离轨道中线几十格是常事，过去一走出路线容差就被判偏航。
+                                换乘站是几条线路的多个站点凑成的一个地点，<strong>每个站点周围各自生效</strong>，
+                                所以从一个站台走到另一个站台换乘也不会被判成偏离。
                             </td>
                         </tr>
                         </tbody>
@@ -210,6 +229,21 @@
                     容差只影响一件事：<strong>什么时候重新规划</strong>。只有当玩家离开「本该在的那条路」超过它的容差，
                     才会触发偏航重算；贴着路边走、或者走路时晃来晃去，都不该让你听见一遍又一遍的「已偏离路线」。
                 </p>
+
+                <div class="callout warn">
+                    <span class="ico">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                             stroke-linecap="round">
+                            <path d="M12 4l9 16H3z"/>
+                            <path d="M12 10v4M12 17h.01"/>
+                        </svg>
+                    </span>
+                    <div>
+                        <p><strong>已经写过 <code>howtogo-client.toml</code> 的实例不会被新默认值改动。</strong>
+                            NeoForge 只在文件不存在时写入默认值，所以从旧版本升上来的人，文件里仍是旧的一组容差。
+                            要享受新的默认值：自己改那一节，或者把整个 <code>[on_road_tolerance_blocks]</code> 删掉让游戏重写。</p>
+                    </div>
+                </div>
 
                 <h2 id="transit">公共交通与语音</h2>
                 <div class="table-wrap">
@@ -230,6 +264,20 @@
                                 中途换乘再算。这里没有时刻表可读，所以它是平均等待而不是发车时间——两分钟一班的车就是 60。
                                 它同时参与搜索和预计时间：省下 40 秒走路却多等两分钟车的方案，本来就没道理被推荐。
                                 如果你修的是「车永远停在那儿」的线路，填 <code>0</code> 是正当答案。
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>transit_board_only</code></td>
+                            <td><code>true</code></td>
+                            <td>
+                                公共交通导航是否<strong>只报站、不报转向</strong>：在车上的那一段不再提示左转右转，
+                                改说上车、到站、还有几站与在哪换乘；走到车站与下车之后的步行段照旧是普通转向提示。
+                                0.2.1 起默认改成<strong>开</strong>——乘客在车上做不了转向，能做的决定只有「哪一站下车」
+                                和换乘时「上哪条线」。「选择目的地」界面里有同一个开关。
+                                <strong>已经写过 <code>route_preferences.json</code> 或 <code>howtogo-client.toml</code>
+                                的实例不受影响</strong>：文件里的值优先，要回到新默认就在界面里打开它，
+                                或在 <code>route_preferences.json</code> 里把 <code>transitBoardOnly</code> 改成
+                                <code>true</code>、或删掉这一项（缺项按配置的默认算）。
                             </td>
                         </tr>
                         <tr>
@@ -330,9 +378,34 @@
                             <td><code>true</code></td>
                             <td>是否读取 MTR 的车站与线路，变成问道自己的站点与公共交通线路。
                                 读取是反射的、只在客户端发生，所以没装 MTR 时这一项不做任何事，两个方向都不需要依赖。
-                                MTR 的世界在它自己的服务端上，只把玩家附近的数据发给客户端，所以读到的永远是<strong>身边那一段</strong>，
-                                而不是整张路网；线路按类型映射，列车与缆车算铁路、船算水路，其它类型（飞机，或 MTR 以后新加的类型）
-                                <strong>不猜</strong>，直接不处理。</td>
+                                MTR 的世界在它自己的服务端上，最基本的一次读取只是玩家附近的那一段窗口；
+                                另外两种读取（自己开图读整张铁路、装了 MTR Map Overlay 读它抓回的整张快照）见下面两项。
+                                线路按类型映射，列车与缆车算铁路、船算水路，其它类型（飞机，或 MTR 以后新加的类型）
+                                <strong>不猜</strong>，直接不处理。细节见 <a href="mtr.html">MTR 集成</a>。</td>
+                        </tr>
+                        <tr>
+                            <td><code>mtr_full_map</code></td>
+                            <td><code>true</code></td>
+                            <td>自己开图时（单人存档，或把世界「对局域网开放」），是否直接读取 MTR 服务端此刻
+                                <strong>正在模拟的整张铁路</strong>——全部车站与线路，不受 192 格同步窗口限制。
+                                读取发生在 MTR 自己的线程上，只带回不可变的结果，<strong>从不写回</strong> MTR 的数据。
+                                联机在别人的服务器上时这一项无事可做：进程里根本没有那张网络。</td>
+                        </tr>
+                        <tr>
+                            <td><code>mtr_map_overlay</code></td>
+                            <td><code>true</code></td>
+                            <td>是否读取 <strong>MTR Map Overlay</strong>（模组 id <code>mtrmap</code>）从服务器抓回并缓存的那份
+                                <strong>整张网络快照</strong>（每条线、每个车站、每段轨道）。需要客户端与服务器都装了它。
+                                这是三种读取里唯一说得出「每条线走哪几段轨道」的一种，所以由它画出的线路沿着真正的铁路走。
+                                它只读服务器回答过的那份快照，抓不到就什么都不读（不会把 MTR 自己发的那段窗口读两遍）。</td>
+                        </tr>
+                        <tr>
+                            <td><code>mtr_station_merge_blocks</code></td>
+                            <td><code>256</code>（0~4096）</td>
+                            <td>两个 MTR 车站相距多少格以内<strong>算同一个车站</strong>（还要<strong>同名</strong>：忽略大小写与首尾空格）。
+                                MTR 把玩家拖出的每个区域都算一个车站，一个站台一个框建出来的车站会变成多个同名车站；
+                                合并后列表一条、地图一个标记、线路停一次，位置取所有站台的中点。没名字的车站从不合并；
+                                设成 <code>0</code> 就完全按 MTR 原样提供。</td>
                         </tr>
                         <tr>
                             <td><code>mtr_auto_route_marks</code></td>
@@ -351,6 +424,74 @@
                         </tbody>
                     </table>
                 </div>
+
+                <h2 id="webmap">浏览器地图</h2>
+                <p>
+                    <code>/howtogo webmap</code> 会在本机回环地址上开一个小的 HTTP 服务，把当前维度的路网送到浏览器里。
+                    用法、页面上的开关与导出见 <a href="webmap.html">浏览器地图</a>；配置里只有两项管它：
+                </p>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>键</th>
+                            <th>默认值</th>
+                            <th>说明</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td><code>webmap_auto_start</code></td>
+                            <td><code>false</code></td>
+                            <td>世界加载后是否<strong>自动</strong>启动这个服务，而不必等你敲 <code>/howtogo webmap</code>。
+                                它只监听 <code>127.0.0.1</code> 与 <code>::1</code> 两个回环地址，
+                                配置里<strong>没有任何</strong>能把它放到局域网上的开关，所以这一项只管「端口是不是提前开着」，
+                                不是关于暴露面的选择。默认关：一个没被要求就开监听端口的模组，会出现在没人想要的防火墙列表里。</td>
+                        </tr>
+                        <tr>
+                            <td><code>webmap_port</code></td>
+                            <td><code>7573</code>（1024~65535）</td>
+                            <td>服务的端口，页面地址形如 <code>http://127.0.0.1:&lt;端口&gt;/</code>。
+                                被占用时依次试后面 9 个，<strong>实际绑定的端口写在聊天消息里</strong>，所以回退之后书签也不会悄悄失效。
+                                填一个你记得住的数字，而不是一个「碰巧空着」的数字——端口是玩家要亲手敲的东西。</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2 id="log">日志</h2>
+                <p>
+                    日志里有两类东西。一类是<strong>警告与错误</strong>，以及一次性的事件行（加载 / 保存 / 注册 / 启用、
+                    切换出行方式、到达、偏航重新规划、某个模式回退到步行）——它们一直写，因为每一条都能对上玩家看到的某件事。
+                    另一类是<strong>本模组自己的诊断</strong>：铁路图层每秒一行、地图每秒一行、MTR 每次读入的统计、
+                    每次规划的路由算术、一条线路被画成直线段的几何报告、线路配置界面的统计、语音在说什么……
+                    它们是「模组自己怎么在跑」的测量，值得排查时打开，不值得开一整个会话。所以 0.2.1 把它们收进了一个开关：
+                </p>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>键</th>
+                            <th>默认值</th>
+                            <th>说明</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td><code>debug_log</code></td>
+                            <td><code>false</code></td>
+                            <td>是否把本模组自己的诊断写进日志。<strong>改完即时生效，不用重开游戏。</strong>
+                                关掉时<strong>连计数都不做</strong>：那些每元素调用的计数器在开关关掉的第一行就返回。
+                                警告与错误不受影响，照旧一直写。</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p>
+                    0.2.1 同时删掉了一个旧探针：Xaero 地图投影的 P0 测量（<code>RoadDebug</code>，每秒一行
+                    <code>[HowToGo/P0] ... RESIDUAL=...</code>），以及打开它的系统属性 <code>-Dhowtogo.debug</code>。
+                    它只用过一次，量出来的结论已经写进代码注释并由回归测试守着，所以连属性一起删了。
+                </p>
 
                 <h2 id="files">运行时偏好与数据文件</h2>
 
@@ -394,6 +535,11 @@
                             <td><code>config/howtogo/&lt;存档&gt;/&lt;维度&gt;-rail-names.json</code></td>
                             <td>自动识别铁路的<strong>名称</strong>。它必须单独放：铁路图层每秒重建、路段 id 每次重排，
                                 所以名字是按「路段两端的坐标」记的，而不是绑在 id 上。</td>
+                        </tr>
+                        <tr>
+                            <td><code>config/howtogo/mtr_line_marks.json</code></td>
+                            <td>MTR 线路逐条的<strong>轨道标记开关</strong>：在 <a href="transit.html">线路配置</a>界面里
+                                给每条 MTR 线路点过的答案（按 MTR 的线路 id 记），下次进游戏还是上次的选择。</td>
                         </tr>
                         <tr>
                             <td><code>config/howtogo/route_preferences.json</code></td>
@@ -449,9 +595,9 @@
                 </div>
 
                 <div class="wiki-nav">
-                    <a class="prev" href="display.html">
+                    <a class="prev" href="webmap.html">
                         <small>上一页</small>
-                        <strong>地图显示与缩放</strong>
+                        <strong>浏览器地图</strong>
                     </a>
                     <a class="next" href="faq.html">
                         <small>下一页</small>

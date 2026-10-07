@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>更新日志 — HowToGo | 问道 Wiki</title>
-    <meta name="description" content="问道（HowToGo）更新日志：0.2.0 新增 MTR 集成、公共交通线路、地图显示面板与单行道；0.1.0 首版的道路绘制与导航。">
+    <meta name="description" content="问道（HowToGo）更新日志：0.2.1 修复偏航容差、线路连通误报、MTR 4.1 整图读取并新增报站导航与自检；未发布加入地图按层叠放与浏览器地图；0.2.0 新增 MTR 集成、公共交通线路、地图显示面板与单行道；0.1.0 首版的道路绘制与导航。">
     <meta name="theme-color" content="#f4f8ff">
     <link rel="icon" href="../assets/img/mod-icon.png" type="image/png">
     <link rel="stylesheet" href="../assets/css/site.css">
@@ -68,11 +68,11 @@
                 <a href="create.html" data-wiki-link data-keywords="机械动力 create 铁路 铁轨 车站 命名">机械动力铁路</a>
                 <a href="mtr.html" data-wiki-link data-keywords="MTR 铁路 线路 只读 轨道标记 复制">MTR 集成</a>
                 <a href="display.html" data-wiki-link data-keywords="显示 面板 缩放 隐藏 图层 名字 字号">地图显示与缩放</a>
+                <a href="webmap.html" data-wiki-link data-keywords="浏览器地图 webmap 网页 端口 导出 PNG 离线">浏览器地图</a>
                 <h4>参考</h4>
                 <a href="config.html" data-wiki-link data-keywords="配置 文件 toml 数据 存档 备份">配置与数据文件</a>
                 <a href="faq.html" data-wiki-link data-keywords="常见问题 限制 报错 没有路线 语音">常见问题与限制</a>
-                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.0 0.1.0">更新日志</a>
-                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.0 0.1.0" aria-current="page">更新日志</a>
+                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.1 0.2.0 0.1.0" aria-current="page">更新日志</a>
             </aside>
 
             <main class="wiki-body">
@@ -86,6 +86,149 @@
                     每个版本只写玩家看得见的变化，以及<strong>为什么这么改</strong>——「为什么不那样做」往往比功能本身更值得读。
                     版本号按语义化版本：第二位动是新增功能，第三位动是修 bug 或只改显示。
                 </p>
+
+                <h2 id="unreleased">未发布</h2>
+
+                <h3>新增</h3>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>功能</th>
+                            <th>说明</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td><strong>地图上的路按层叠放</strong></td>
+                            <td>世界地图现在<strong>从低层往高层画</strong>路段，所以高架压在自己跨过去的那条地面路之上、
+                                隧道在地面路之下——一张平面俯视图里，这是「谁在谁上面」唯一能画出来的方式。
+                                以前画的顺序是路网内部的枚举顺序（一个按路段 id 哈希的 <code>HashMap</code> 的顺序，
+                                与高度毫无关系），于是一座桥画在上面还是下面取决于两条路段谁先被枚举到。
+                                同一层内的先后不变，所以这一改只动了那些本来就画反的路；网页地图本来就是这么画的，现在两边一致。</td>
+                        </tr>
+                        <tr>
+                            <td><strong>选中的路报出层与全长</strong></td>
+                            <td><kbd>Shift</kbd> 选中一条路后，左下角的读数是「已选道路：等级 · 方向 · 道路层：高架1层 ·
+                                全长 320 格」。层是平面地图看不出来的那一半（桥还是隧道），全长是<strong>整条路</strong>的
+                                （带弯的路在数据里是好几段，报的是它们加起来，也就是地图高亮的那一整条），不是光标底下那一段。
+                                网页地图的状态栏同样四项。</td>
+                        </tr>
+                        <tr>
+                            <td><strong><kbd>-</kbd> / <kbd>+</kbd> 直接加减正在画的层</strong></td>
+                            <td>以前只能按 <kbd>N</kbd> 打开面板填数字；现在画隧道时按一下 <kbd>-</kbd> 就下到地下 1 层，
+                                接着画的路都在那一层，层数截在 <code>-32 ~ +32</code>，<kbd>=</kbd> 键与小键盘的
+                                <kbd>-</kbd> <kbd>+</kbd> 同样有效。它<strong>只改接下来画在哪一层</strong>，
+                                不动已经画好的路（改已有的路仍然是 <kbd>N</kbd> 面板，名称与层一起改、一起撤销），
+                                也没有撤销记录——绘制层是一个模式，不写进存档。右下角的快捷键列表里多了一行
+                                <code>- / + 道路层</code>。</td>
+                        </tr>
+                        <tr>
+                            <td><strong>右键拖地图</strong></td>
+                            <td>编辑模式里左键被用来放点，地图就没有左键可拖。现在：地图上<strong>没有正在画的线</strong>
+                                （没有那条跟着光标走的紫色线）时，<strong>按住右键拖动就是平移地图</strong>，
+                                走的是 Xaero 自己的平移代码，手感与平时一样；一旦放下第一个点开始画，
+                                右键还是那个「结束这条线」的老功能；右键<strong>单击不拖</strong>照旧清除选中。</td>
+                        </tr>
+                        <tr>
+                            <td><strong>浏览器地图</strong>（<code>/howtogo webmap</code>）</td>
+                            <td>在 <code>127.0.0.1</code> 上开一个本地 HTTP 服务，把当前维度的路网画成一张俯视 2D 网页地图，
+                                并带一个<strong>导出 PNG</strong> 的按钮。地址以可点击的链接发在聊天栏里，点一下就在浏览器里打开；
+                                <code>/howtogo webmap stop</code> 关掉它，<code>status</code> 报地址、当前世界与维度、以及路网规模。
+                                页面、脚本与 html2canvas 全部打包在 jar 里，没有网络也能用；只监听本机回环地址。
+                                详见 <a href="webmap.html">浏览器地图</a>。</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>修复</h3>
+                <ul>
+                    <li><strong><code>/howtogo</code> 的帮助行不再显示成带 <code>%s</code> 的原文</strong>：
+                        帮助文案有五个占位符，而代码只传了一个参数，于是格式化失败、玩家看到的是模板本身。
+                        现在按占位符个数传参，并把 <code>webmap</code> 一起写进帮助。</li>
+                </ul>
+
+                <h2 id="v021">0.2.1 — 2026-10-06</h2>
+
+                <h3>修复</h3>
+                <ul>
+                    <li><strong>删除一条路现在删的是整条路，而不是光标底下那一段</strong>：带弯的路在数据里是若干路段在
+                        「直通节点」处首尾相接，所以选中它时选中的是<strong>整条链</strong>——地图高亮、改名、改等级、改层、
+                        标单行这些操作一直作用在整条链上，只有删除是个例外，于是删完以后地图仍旧把剩下的部分画成「已选中」，
+                        一条弯了两个弯的街得按三次删除键。现在删除和别的操作问同一个问题：「这条链是什么」，
+                        然后整条链一起删。</li>
+                    <li><strong>驾车到一个「终点还得走一段」的地方，时间不再按全程步行算</strong>：所选方式在当前路网无解时
+                        会退回按步行规划，而一条以步行规划出来的路线<strong>每一段都按步行速度计时</strong>，
+                        连那两公里汽车明明开得动的公路也一样。现在这条线<strong>本身不动</strong>，
+                        但<strong>按驾车重新计时</strong>：车能走的每一段按汽车速度算，走不了的那一段保持步行速度，
+                        也就是「车走的时间 + 人走的时间」。公共交通不给这条——一条线路拉不动这趟行程时，如实给步行，时间也照旧。</li>
+                    <li><strong>MTR 4.1 上「读整张地图」本来是悄悄失效的</strong>：4.1 把入口类改名成了
+                        <code>org.mtr.MTR</code>（原来是 <code>org.mtr.Init</code> / <code>org.mtr.mod.Init</code>），
+                        于是按类型找「持有 <code>Main</code> 的那个类」的两个旧拼法都不存在，整图读取报自己不可用，
+                        模组安静地退回「窗口 + 记忆」——玩家看到的是范围外的车站又读不到了。现在三个拼法都试，
+                        <code>org.mtr.MTR</code> 排在第一个。顺带补上回归测试的另一半：以前只核对窗口读取的握手，
+                        整图读取的一套名字从来没人查，这个 bug 才能一直存在。版本支持矩阵见 <a href="mtr.html#versions">MTR 集成</a>。</li>
+                    <li><strong>日志里不再有本模组自己的测试输出</strong>：铁路图层每秒一行、地图每秒一行、MTR 每次读入的统计、
+                        每次规划的路由算术、一条线路被画成直线段的几何报告等，收进新配置项 <code>debug_log</code>
+                        （默认关，改完即时生效，关掉时连计数都不做）；Xaero 地图投影的 P0 探针 <code>RoadDebug</code>
+                        与打开它的系统属性 <code>-Dhowtogo.debug</code> 直接删掉。警告、错误与一次性事件行不受影响。</li>
+                    <li><strong>偏航判定不再动不动就喊「偏离路线」</strong>：各等级的「还算在路上」容差直接调大
+                        （高速 24 / 公路 16 / 小路 8 / 铁路 16 / 水路 32 / 冰道 12，原来是按路宽算出来的
+                        高速 11 / 公路 8 / 小路 5 / 铁路 6 / 水路 10 / 冰道 8），并新增 <code>station_snap_blocks</code>
+                        （默认 32 格）：行程停靠的站点周围算「就在站上」，换乘站的每个站点各自生效。
+                        注意<strong>已经写过 <code>howtogo-client.toml</code> 的实例不会被新默认值改动</strong>。</li>
+                    <li><strong>公共交通线路里那行「与上一站不连通」不再误报</strong>：红色现在只表示<strong>真的不连通</strong>
+                        （两站分属该线路等级道路的两个连通片段），不再受 64 格接驳上限约束，改用 256 格判定距离，
+                        超过就<strong>不判断</strong>、标题旁改给一句橙色提示（<code>screen.howtogo.line_unjudged</code>）；
+                        单行方向与站序相反仍判红。顺带修好三处：修好轨道后红字不刷新（签名改取各来源自己的版本）、
+                        MTR 线路按自己的轨道判定（编辑界面与规划器走同一个入口）、判定由「逐对站点各规划一次」
+                        改成一次可达性查询。详见 <a href="transit.html#broken">公共交通线路</a>。</li>
+                    <li><strong>「优先大路」以前对开车完全无效</strong>：它原来只是压在「小路」上的一个 1.6 倍惩罚，
+                        而车根本不许上小路——被罚的那一类恰好是开车永远用不到的那一类，剩下的高速与公路速度相同、代价一样，
+                        勾了等于没勾；「最短距离」度量更是把惩罚整个丢掉。现在改成<strong>每类路一个权重、只乘在搜索代价上</strong>
+                        （高速 1.0 / 公路 1.25 / 小路 1.8），两种度量走同一条计算，所以两边都生效。</li>
+                    <li><strong>规划偏好的改动不再影响报出来的时间</strong>：原来是把惩罚<strong>折进速度</strong>（等效速度
+                        既用来算搜索代价，又离面板的「约 X」只差一步），两者当时能对上，只是因为那个被加权过的速度
+                        <strong>恰好没有传进路线自己的分段</strong>——这是巧合，不是不变量。现在权重只乘代价、绝不碰速度，
+                        报出的时间<strong>结构上不可能</strong>再被偏好污染。</li>
+                    <li><strong>规划时不再让高速拐超过 100 度的弯，也不许在高速上掉头</strong>：这条规矩落在<strong>搜索</strong>里，
+                        而不是在念白里，100 度留住了高速真正会有的每个弯（直角路口、中央分隔带端头的掉头匝道、向外弯出去的匝道），
+                        挡掉发夹弯与折返。同时补上两个漏洞：兜底搜索（<code>findNodeRoute</code>）以前不问这条规矩，
+                        于是「只有一条路可走、而那条路必须在高速上折返」的行程被锚定搜索拒掉后又被原样规划了出来；
+                        弯也以前只在路口读，现在按<strong>正在走的那一段</strong>自己的折线也问一次。</li>
+                </ul>
+
+                <h3>新增</h3>
+                <ul>
+                    <li><strong>公共交通的「报站式」导航</strong>（配置项 <code>transit_board_only</code>，默认开）：
+                        在车上的那一段不再提示左转右转，改说上车、到站、还有几站与在哪换乘；
+                        走到车站与下车之后的步行段照旧是普通转向提示。</li>
+                    <li><strong><code>/howtogo selftest</code>：对着当前这个世界自检</strong>（联机也能用、不需要权限）：
+                        一次问完世界数据、每条线路逐段连通判定（与线路配置界面同一个入口）、每条线路的行程、
+                        一趟 48 步的模拟乘车（把导航会说的话按顺序打出来），以及一次存档往返。
+                        明细同时写进日志，筛 <code>[HowToGo] selftest</code>。</li>
+                    <li><strong>三条客户端指令</strong>（<code>/htg</code> 是简写，联机可用、不需要服务器装本模组、不需要权限）：
+                        <code>/howtogo terminal</code>（打开导航终端）、<code>/howtogo stop</code>（结束导航）、
+                        <code>/howtogo mode [walk|drive|transit]</code>（切换出行方式，不带参数时循环）。</li>
+                    <li><strong>导航开始时和结束时各说一句</strong>（语音播报打开时）：开始说「问道地图为您导航」，
+                        到达说「已到达目的地附近，本次导航结束」。</li>
+                    <li><strong><code>tools/user-test/</code></strong>：真实游戏里的测试装备，
+                        以及一份自检盖不到、只能手点的玩家清单。</li>
+                    <li>配置新增 <code>mtr_full_map</code>（默认 <code>true</code>）与
+                        <code>mtr_station_merge_blocks</code>（默认 <code>256</code>）：前者让自己开图时读到整张铁路，
+                        后者把同名且相距不远的 MTR 车站合成一个地点。</li>
+                </ul>
+
+                <h3>改进</h3>
+                <ul>
+                    <li><strong>「只报站不报转向」默认改成开</strong>（<code>transit_board_only</code>）：
+                        它换掉的只有<strong>在车上</strong>那一段的念白，而乘客在车上做不了转向，能做的决定就是
+                        「哪一站下车」和在换乘站「上哪条线」，所以车上那一段给报站才是信息最多的那种。
+                        注意<strong>已经写过 <code>route_preferences.json</code> 或 <code>howtogo-client.toml</code>
+                        的实例不受影响</strong>：文件里的值优先，要回到新默认就在界面里把那个开关打开，
+                        或把那一项删掉。</li>
+                </ul>
 
                 <h2 id="v020">0.2.0 — 2026-10-03</h2>
 

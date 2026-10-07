@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>功能介绍 — HowToGo | 问道</title>
-    <meta name="description" content="问道（HowToGo）完整功能列表：道路绘制与维护、实时导航、公共交通线路、机械动力铁路自动识别、MTR 集成、地图显示与缩放规则、目的地来源与数据存放。">
+    <meta name="description" content="问道（HowToGo）完整功能列表：道路绘制与维护、实时导航、公共交通线路、机械动力铁路自动识别、MTR 集成、地图显示与按层叠放、浏览器地图（webmap）、目的地来源与数据存放。">
     <meta name="theme-color" content="#f4f8ff">
     <link rel="icon" href="assets/img/mod-icon.png" type="image/png">
     <link rel="stylesheet" href="assets/css/site.css">
@@ -53,6 +53,8 @@
                     <span class="eyebrow">功能介绍</span>
                     <h1 style="margin-bottom:.4em">它到底做了什么</h1>
                     <p style="font-size:1.06rem;color:var(--muted)">
+                        当前版本 <strong>v0.2.1</strong>，面向 Minecraft <strong>1.21.1</strong> /
+                        NeoForge <strong>21.1.x</strong>，纯客户端。
                         一句话：把 Xaero 世界地图变成一张<strong>能规划、能导航</strong>的路网。
                         下面是全部功能，以及每一条背后的取舍——因为「为什么不那样做」往往比功能本身更重要。
                     </p>
@@ -257,6 +259,13 @@
                     <ul>
                         <li><strong>缩小地图时自动取舍</strong>：小路 → 公路 → 水路 → 铁路依次被舍去，
                             <strong>高速与冰道永不隐藏</strong>——缩小看地图，看的就是「哪儿有快路」。</li>
+                        <li><strong>道路按层叠放</strong>：路段<strong>从低层往高层画</strong>，
+                            高架压在自己跨过去的那条地面路之上、隧道在地面路之下——一张平面俯视图里，
+                            这是「谁在谁上面」唯一能画出来的方式。同一层里的先后不变，
+                            浏览器地图与游戏里的地图走的是同一套层序。</li>
+                        <li>同一层里<strong>先画完所有描边、再画所有填充</strong>，
+                            所以十字路口看起来是一条路从另一条上跨过去，而不是两团颜色糊在一起；
+                            单向箭头跟着本层的填充画，桥也盖得住桥下的箭头。</li>
                         <li>地点这边先舍商店，再舍站点，再舍普通地点，<strong>资源点最后才舍</strong>——它本来就是值得专程去的东西。</li>
                         <li><strong>公共交通线路从不因为缩小而消失</strong>：它是地图上唯一不能由道路推出来的东西。</li>
                         <li><strong>名字的大小跟着缩放走</strong>：缩小时按比例变小；放大时增长得很慢，因为名字是标签不是测量结果。
@@ -265,6 +274,63 @@
                         <li>开关与缩放规则走同一个入口，所以面板上的开关和缩放规则不可能互相矛盾。</li>
                     </ul>
                     <p><a href="wiki/display.html">详细教程：地图显示与缩放 →</a></p>
+                </div>
+
+                <!-- ================================================= 浏览器地图 -->
+                <h2 id="webmap" class="reveal">浏览器地图（webmap）</h2>
+                <div class="reveal">
+                    <p>
+                        <code>/howtogo webmap</code> 在本机开一个小型 HTTP 服务，把<strong>当前维度的路网</strong>
+                        送到浏览器里，画成一张可平移缩放的俯视 2D 地图，并带一个<strong>导出 PNG</strong> 的按钮。
+                        地址以可点击的链接发在聊天栏，点一下就用浏览器打开——它读的始终是你自己的那份路网。
+                    </p>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                            <tr>
+                                <th>命令</th>
+                                <th>作用</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td><code>/howtogo webmap</code></td>
+                                <td>启动服务并发出可点击的地址；已经在运行则只报地址。</td>
+                            </tr>
+                            <tr>
+                                <td><code>/howtogo webmap stop</code></td>
+                                <td>停止服务并放开端口。</td>
+                            </tr>
+                            <tr>
+                                <td><code>/howtogo webmap status</code></td>
+                                <td>报地址、当前世界与维度，以及路网的节点 / 路段数与总长。</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <ul>
+                        <li><strong>只在本机可访问</strong>：只监听 <code>127.0.0.1</code> 与 <code>::1</code>，
+                            配置里<strong>没有任何能把它放到局域网上的开关</strong>——这张图画的是自己世界的坐标与地名。</li>
+                        <li><strong>离线可用</strong>：页面、样式、五个脚本与 html2canvas 1.4.1（MIT）都打包在 jar 里，
+                            运行期不请求任何外部资源。</li>
+                        <li><strong>只认一张固定的路径表</strong>：页面、样式、五个脚本、html2canvas 与两个 API，
+                            表以外的路径一律 404——没有目录，就没有目录穿越。</li>
+                        <li><strong>端口不是死的</strong>：默认 <code>7573</code>，被占用时依次试后面 9 个，
+                            <strong>实际绑定的端口写在聊天消息里</strong>，书签不会悄悄失效；
+                            <code>webmap_port</code> 可改，<code>webmap_auto_start</code>（默认关）可在世界加载后自动启动。</li>
+                        <li><strong>数据只在客户端主线程读</strong>：HTTP 线程从不碰路网对象，
+                            请求排进客户端刻的队列，由游戏线程摊平成一份<strong>不可变快照</strong>。
+                            等待 5 秒超时返回 503，所以「这个世界还没画路」和「游戏还在加载世界」是两个能分辨的答案。</li>
+                        <li><strong>遮挡按层与描边排</strong>：路段按 <code>layer</code> 从小到大画，
+                            高架压地面、隧道在最下；同一层先描边后填充，所以十字路口看得出谁跨过谁。</li>
+                        <li><strong>文字会挪位置，而不是压住别人</strong>：路名沿路旋转且永远不写成倒的，
+                            地点名默认在标记下方，被占了就依次试其它方向与更远一档，都放不下就不画。</li>
+                        <li><strong>导出的就是屏幕上那张图</strong>：用同一个绘制函数按 2 倍分辨率重画，
+                            带标题栏（世界、维度、时间、统计、图例）；html2canvas 不可用时退回直接导出画布。</li>
+                        <li><strong>自检覆盖它</strong>：<code>/howtogo selftest</code> 会在系统分配的端口上真的把服务开起来，
+                            取回页面、脚本、html2canvas 与 <code>/api/roads</code> 并核对份数。</li>
+                    </ul>
+                    <p><a href="wiki/webmap.html">详细教程：浏览器地图 →</a></p>
                 </div>
 
                 <!-- ================================================= 目的地 -->

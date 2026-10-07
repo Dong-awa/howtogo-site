@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Wiki 教程 — HowToGo | 问道</title>
-    <meta name="description" content="问道（HowToGo）使用教程：安装、画路、导航、公共交通线路、机械动力铁路、MTR 集成、地图显示、配置与常见问题。">
+    <meta name="description" content="问道（HowToGo）使用教程：安装、画路、导航、公共交通线路、机械动力铁路、MTR 集成、地图显示、浏览器地图、配置与常见问题。">
     <meta name="theme-color" content="#f4f8ff">
     <link rel="icon" href="../assets/img/mod-icon.png" type="image/png">
     <link rel="stylesheet" href="../assets/css/site.css">
@@ -68,10 +68,11 @@
                 <a href="create.html" data-wiki-link data-keywords="机械动力 create 铁路 铁轨 车站 命名">机械动力铁路</a>
                 <a href="mtr.html" data-wiki-link data-keywords="MTR 铁路 线路 只读 轨道标记 复制">MTR 集成</a>
                 <a href="display.html" data-wiki-link data-keywords="显示 面板 缩放 隐藏 图层 名字 字号">地图显示与缩放</a>
+                <a href="webmap.html" data-wiki-link data-keywords="浏览器地图 webmap 网页 端口 导出 PNG 离线">浏览器地图</a>
                 <h4>参考</h4>
                 <a href="config.html" data-wiki-link data-keywords="配置 文件 toml 数据 存档 备份">配置与数据文件</a>
                 <a href="faq.html" data-wiki-link data-keywords="常见问题 限制 报错 没有路线 语音">常见问题与限制</a>
-                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.0 0.1.0">更新日志</a>
+                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.1 0.2.0 0.1.0">更新日志</a>
             </aside>
 
             <main class="wiki-body">
@@ -104,6 +105,10 @@
                     <a class="card" href="faq.html">
                         <h3>出了问题先看这里</h3>
                         <p>「没有路线」「走不了水路」「语音读得像中文」这类问题的原因与解法。</p>
+                    </a>
+                    <a class="card" href="webmap.html" data-keywords="浏览器地图 webmap 网页 导出 PNG 端口">
+                        <h3>浏览器地图</h3>
+                        <p>用 <code>/howtogo webmap</code> 把当前维度的路网画成一张网页地图：拖动缩放、按等级与层过滤，并导出 PNG。</p>
                     </a>
                 </div>
 
@@ -143,7 +148,11 @@
                         </tr>
                         <tr>
                             <td><a href="display.html">地图显示与缩放</a></td>
-                            <td>地图显示面板、每类开关、缩放时的取舍顺序、名字与标记的显示规则。</td>
+                            <td>地图显示面板、每类开关、缩放时的取舍顺序、绘制顺序、名字与标记的显示规则。</td>
+                        </tr>
+                        <tr>
+                            <td><a href="webmap.html" data-keywords="浏览器地图 webmap 网页 导出 PNG 端口">浏览器地图</a></td>
+                            <td>用 <code>/howtogo webmap</code> 在浏览器里看当前维度的路网、按等级与层过滤、导出 PNG；只监听本机回环地址。</td>
                         </tr>
                         <tr>
                             <td><a href="config.html">配置与数据文件</a></td>
