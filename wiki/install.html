@@ -71,6 +71,7 @@
                 <a href="webmap.html" data-wiki-link data-keywords="浏览器地图 webmap 网页 端口 导出 PNG 离线">浏览器地图</a>
                 <h4>参考</h4>
                 <a href="config.html" data-wiki-link data-keywords="配置 文件 toml 数据 存档 备份">配置与数据文件</a>
+                <a href="migrate.html" data-wiki-link data-keywords="迁移 搬家 改名 换电脑 存档 服务器地址 数据 文件夹 sp_ mp_ 世界名 目录 备份 丢失">迁移地图数据</a>
                 <a href="faq.html" data-wiki-link data-keywords="常见问题 限制 报错 没有路线 语音">常见问题与限制</a>
                 <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.1 0.2.0 0.1.0">更新日志</a>
             </aside>
@@ -223,9 +224,10 @@
 
                 <h2 id="data">数据放在哪</h2>
                 <p>
-                    所有数据都在客户端的 <code>config/howtogo/</code> 下，<strong>按存档分开</strong>：
-                    单人存档按存档名（<code>sp_&lt;存档名&gt;</code>），多人服务器按服务器地址（<code>mp_&lt;地址&gt;</code>）。
-                    坐标只在一个维度里有意义，所以文件名里还带着维度。
+                    所有数据都在客户端的 <code>config/howtogo/</code> 下，<strong>按世界分开</strong>：
+                    单人存档按世界名（<code>sp_&lt;世界名&gt;</code>），多人服务器按服务器地址（<code>mp_&lt;地址&gt;</code>）。
+                    目录名里的空格、中文、端口冒号都会被换成下划线；改名、换地址或换电脑时怎么搬，见
+                    <a href="migrate.html">迁移地图数据</a>。坐标只在一个维度里有意义，所以文件名里还带着维度。
                 </p>
                 <div class="table-wrap">
                     <table>
@@ -267,6 +269,7 @@
                 <p>
                     想备份路网，复制整个 <code>config/howtogo/</code> 目录即可；想在不同电脑之间搬家，也是同一个目录。
                     反过来，删掉模组的 jar <strong>不会</strong>删掉这些文件——路网是你的数据，不是模组的缓存。
+                    单个世界的迁移（改世界名、换服务器地址、复制存档）见 <a href="migrate.html">迁移地图数据</a>。
                 </p>
 
                 <div class="callout warn">

@@ -19,6 +19,7 @@
 │   ├── create.html     # 内容创作
 │   ├── mtr.html        # MTR 集成
 │   ├── config.html     # 配置项
+│   ├── migrate.html    # 迁移地图数据（改名 / 换地址 / 换电脑）
 │   ├── faq.html        # 常见问题
 │   └── changelog.html  # 更新日志
 ├── assets/             # 静态资源

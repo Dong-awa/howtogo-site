@@ -71,6 +71,7 @@
                 <a href="webmap.html" data-wiki-link data-keywords="浏览器地图 webmap 网页 端口 导出 PNG 离线">浏览器地图</a>
                 <h4>参考</h4>
                 <a href="config.html" data-wiki-link data-keywords="配置 文件 toml 数据 存档 备份">配置与数据文件</a>
+                <a href="migrate.html" data-wiki-link data-keywords="迁移 搬家 改名 换电脑 存档 服务器地址 数据 文件夹 sp_ mp_ 世界名 目录 备份 丢失">迁移地图数据</a>
                 <a href="faq.html" data-wiki-link data-keywords="常见问题 限制 报错 没有路线 语音" aria-current="page">常见问题与限制</a>
                 <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.1 0.2.0 0.1.0">更新日志</a>
             </aside>
@@ -394,6 +395,15 @@
                     数据在你的 <code>config/howtogo/</code> 里，要带走就复制这个目录。
                 </p>
 
+                <h3>改了存档名、服务器地址或换了电脑，路去哪了？</h3>
+                <p>
+                    数据没有丢，只是没有跟着名字走：问道按「世界名 / 服务器地址」决定读哪个目录，
+                    改 <code>saves/</code> 里的文件夹名不算改世界名，但改世界名、换服务器地址或换游戏实例以后，
+                    它会去新目录找，于是看到一张空地图。旧目录还留在 <code>config/howtogo/</code> 里，
+                    按 <a href="migrate.html">迁移地图数据</a> 把它复制到新目录即可。
+                    另外，删掉模组 jar <strong>不会</strong>删掉这些文件。
+                </p>
+
                 <h2 id="limits">已知限制清单</h2>
                 <div class="table-wrap">
                     <table>
@@ -473,9 +483,9 @@
                 </div>
 
                 <div class="wiki-nav">
-                    <a class="prev" href="config.html">
+                    <a class="prev" href="migrate.html">
                         <small>上一页</small>
-                        <strong>配置与数据文件</strong>
+                        <strong>迁移地图数据</strong>
                     </a>
                     <a class="next" href="index.html">
                         <small>下一页</small>

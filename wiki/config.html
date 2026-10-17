@@ -71,6 +71,7 @@
                 <a href="webmap.html" data-wiki-link data-keywords="浏览器地图 webmap 网页 端口 导出 PNG 离线">浏览器地图</a>
                 <h4>参考</h4>
                 <a href="config.html" data-wiki-link data-keywords="配置 文件 toml 数据 存档 备份" aria-current="page">配置与数据文件</a>
+                <a href="migrate.html" data-wiki-link data-keywords="迁移 搬家 改名 换电脑 存档 服务器地址 数据 文件夹 sp_ mp_ 世界名 目录 备份 丢失">迁移地图数据</a>
                 <a href="faq.html" data-wiki-link data-keywords="常见问题 限制 报错 没有路线 语音">常见问题与限制</a>
                 <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.1 0.2.0 0.1.0">更新日志</a>
             </aside>
@@ -509,9 +510,11 @@
 
                 <h3 id="file-list">文件都在哪</h3>
                 <p>
-                    路网、线路和名字都在 <code>config/howtogo/</code> 下，首先<strong>按存档分开</strong>：
-                    单人存档按存档名（<code>sp_&lt;存档名&gt;</code>），多人服务器按服务器地址（<code>mp_&lt;地址&gt;</code>）。
-                    坐标只在一个维度里才有意义，所以文件名里还带着维度。
+                    路网、线路和名字都在 <code>config/howtogo/</code> 下，首先<strong>按世界分开</strong>：
+                    单人存档按世界名（<code>sp_&lt;世界名&gt;</code>），多人服务器按服务器地址（<code>mp_&lt;地址&gt;</code>）。
+                    目录名里只保留字母、数字与 <code>.</code> <code>_</code> <code>-</code>，其余字符各换成一个下划线，
+                    所以中文世界名会变成一串下划线。坐标只在一个维度里才有意义，所以文件名里还带着维度；
+                    改名、换地址、换电脑时目录怎么跟着变，见 <a href="migrate.html">迁移地图数据</a>。
                 </p>
                 <div class="table-wrap">
                     <table>
@@ -535,6 +538,12 @@
                             <td><code>config/howtogo/&lt;存档&gt;/&lt;维度&gt;-rail-names.json</code></td>
                             <td>自动识别铁路的<strong>名称</strong>。它必须单独放：铁路图层每秒重建、路段 id 每次重排，
                                 所以名字是按「路段两端的坐标」记的，而不是绑在 id 上。</td>
+                        </tr>
+                        <tr>
+                            <td><code>config/howtogo/&lt;存档&gt;/.world</code></td>
+                            <td>这个目录属于哪个世界（原始世界名）。用来区分<strong>清洗后同名</strong>的中文世界名：
+                                不带哈希的目录由它记录归属，后来「清洗后同名、名字却不同」的世界才会拿到带短哈希的目录。
+                                详见 <a href="migrate.html">迁移地图数据</a>。</td>
                         </tr>
                         <tr>
                             <td><code>config/howtogo/mtr_line_marks.json</code></td>
@@ -569,6 +578,11 @@
                     反过来，删掉模组的 jar <strong>不会</strong>删掉这些文件——路网是你的数据，不是模组的缓存。
                 </p>
                 <p>
+                    搬家要分情况：只改 <code>saves/</code> 里的存档文件夹名<strong>不用动数据</strong>；
+                    改了世界名、换了服务器地址，或者复制存档以后想让副本独立，目录名会跟着变，
+                    需要把 JSON 搬到新目录。每种情况的做法见 <a href="migrate.html">迁移地图数据</a>。
+                </p>
+                <p>
                     数据是<strong>客户端本地</strong>的：服务器上没有它，别的玩家也没有它。这既是「不用求服主」的原因，
                     也是「别人看不到你画的路」的原因。
                 </p>
@@ -599,9 +613,9 @@
                         <small>上一页</small>
                         <strong>浏览器地图</strong>
                     </a>
-                    <a class="next" href="faq.html">
+                    <a class="next" href="migrate.html">
                         <small>下一页</small>
-                        <strong>常见问题与限制</strong>
+                        <strong>迁移地图数据</strong>
                     </a>
                 </div>
             </main>
