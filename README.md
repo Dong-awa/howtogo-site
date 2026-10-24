@@ -1,6 +1,6 @@
 # HowToGo | 问道 —— 官方网站与 Wiki
 
-本仓库是 [HowToGo | 问道](https://howtogo.dongsz.space) 官方网站与 Wiki 的**源仓库**。站点为纯静态页面（HTML + CSS + 原生 JavaScript），没有构建步骤；线上服务器直接从本仓库拉取内容对外提供访问。
+本仓库是 [HowToGo | 问道](https://howtogo.dongsz.top) 官方网站与 Wiki 的**源仓库**。站点为纯静态页面（HTML + CSS + 原生 JavaScript），没有构建步骤；线上服务器直接从本仓库拉取内容对外提供访问。
 
 ## 目录结构
 
@@ -34,7 +34,7 @@
 
 ## 服务器部署：改仓库即改网页
 
-线上 `https://howtogo.dongsz.space` 由一台 nginx 服务器提供（宝塔面板，站点根目录 `/www/wwwroot/howtogo`），它**以本仓库 `main` 分支为唯一内容来源**：
+线上 `https://howtogo.dongsz.top` 由一台 nginx 服务器提供（宝塔面板，站点根目录 `/www/wwwroot/howtogo`），它**以本仓库 `main` 分支为唯一内容来源**：
 
 - 克隆放在 `/www/wwwroot/howtogo-src`（保留 `.git`，不对外）；
 - 同步脚本 `/www/server/howtogo-sync.sh` 执行 `git fetch` + `git reset --hard origin/main`，再用 `rsync --delete` 把工作区同步到网站根目录（排除 `.git`，保留面板生成的 `.user.ini`/`.htaccess`/`404.html`）；
