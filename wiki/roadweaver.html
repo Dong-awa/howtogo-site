@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>阡陌交通 — HowToGo | 问道 Wiki</title>
+    <meta name="description" content="问道（HowToGo）对阡陌交通（RoadWeaver）的支持：自动生成的道路读进来、画在世界地图上、参与寻路，它连接的村落与小屋成为目的地；只读边界、缺口补线、别名、整图读取与五个配置项。">
+    <meta name="theme-color" content="#f4f8ff">
+    <link rel="icon" href="../assets/img/mod-icon.png" type="image/png">
+    <link rel="stylesheet" href="../assets/css/site.css">
+</head>
+
+<body>
+    <header class="site-header">
+        <div class="wrap">
+            <a class="brand" href="../index.html">
+                <img class="brand-mark" src="../assets/img/mod-icon.png" alt="">
+                <span>问道<small>HowToGo</small></span>
+            </a>
+            <nav class="nav" id="nav">
+                <a href="../index.html">首页</a>
+                <a href="../features.html">功能介绍</a>
+                <a href="index.html" aria-current="page">Wiki 教程</a>
+                <a href="../index.html#install">安装</a>
+            </nav>
+            <div class="header-actions">
+                <button class="icon-btn" type="button" data-theme-toggle aria-label="切换深色 / 浅色">
+                    <svg data-theme-icon="light" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2" stroke-linecap="round">
+                        <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>
+                    </svg>
+                    <svg data-theme-icon="dark" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2" stroke-linecap="round" style="display:none">
+                        <circle cx="12" cy="12" r="4"/>
+                        <path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4"/>
+                    </svg>
+                </button>
+                <button class="icon-btn nav-toggle" type="button" aria-label="打开菜单" aria-expanded="false">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                         stroke-linecap="round">
+                        <path d="M4 7h16M4 12h16M4 17h16"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="wrap">
+        <div class="wiki">
+            <aside class="wiki-side">
+                <div class="side-search">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                         stroke-linecap="round">
+                        <circle cx="11" cy="11" r="7"/>
+                        <path d="M20 20l-3.5-3.5"/>
+                    </svg>
+                    <input type="search" placeholder="搜索教程…" data-wiki-search aria-label="搜索教程">
+                </div>
+                <h4>开始</h4>
+                <a href="index.html" data-wiki-link data-keywords="目录 首页 索引">Wiki 首页</a>
+                <a href="install.html" data-wiki-link data-keywords="安装 前置 版本 下载 首次">安装与前置</a>
+                <h4>基础</h4>
+                <a href="roads.html" data-wiki-link data-keywords="画路 等级 吸附 命名 地点 撤销 删除 单行道 方向 箭头">画路、命名与地点</a>
+                <a href="navigate.html" data-wiki-link data-keywords="导航 目的地 交通方式 偏好 语音 HUD 偏航">导航与 HUD</a>
+                <h4>进阶</h4>
+                <a href="transit.html" data-wiki-link data-keywords="公共交通 线路 站点 换乘 等车 线路配置">公共交通线路</a>
+                <a href="create.html" data-wiki-link data-keywords="机械动力 create 铁路 铁轨 车站 命名">机械动力铁路</a>
+                <a href="roadweaver.html" data-wiki-link data-keywords="阡陌交通 RoadWeaver 自动生成 道路 结构 村落 只读" aria-current="page">阡陌交通</a>
+                <a href="mtr.html" data-wiki-link data-keywords="MTR 铁路 线路 只读 轨道标记 复制">MTR 集成</a>
+                <a href="display.html" data-wiki-link data-keywords="显示 面板 缩放 隐藏 图层 名字 字号">地图显示与缩放</a>
+                <a href="webmap.html" data-wiki-link data-keywords="浏览器地图 webmap 网页 端口 导出 PNG 离线">浏览器地图</a>
+                <h4>参考</h4>
+                <a href="config.html" data-wiki-link data-keywords="配置 文件 toml 数据 存档 备份">配置与数据文件</a>
+                <a href="migrate.html" data-wiki-link data-keywords="迁移 搬家 改名 换电脑 存档 服务器地址 数据 文件夹 sp_ mp_ 世界名 目录 备份 丢失">迁移地图数据</a>
+                <a href="faq.html" data-wiki-link data-keywords="常见问题 限制 报错 没有路线 语音">常见问题与限制</a>
+                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.2 0.2.1 0.2.0 0.1.0">更新日志</a>
+            </aside>
+
+            <main class="wiki-body">
+                <nav class="breadcrumb">
+                    <a href="../index.html">首页</a><span>/</span>
+                    <a href="index.html">Wiki 教程</a><span>/</span><span>阡陌交通</span>
+                </nav>
+
+                <h1>阡陌交通</h1>
+                <p class="lead">
+                    阡陌交通（RoadWeaver）会在结构之间<strong>自动生成道路</strong>。装了它，问道会把这些路读进来、
+                    画在世界地图上、参与寻路，它连接的村落与小屋则成为可导航的目的地——
+                    等于你什么都不用画，地图上就先有了一张能用的路网。
+                    读进来的路是<strong>只读</strong>的：几何属于阡陌交通，问道不写回、不进编辑器、也不随地图导出。
+                </p>
+
+                <h2 id="what">装了它之后，地图上多出什么</h2>
+                <ul>
+                    <li><strong>道路</strong>：它生成的道路被画在世界地图上，按道路等级取色、按层叠放，
+                        和手画的路一起参与寻路。没装它时整层为空，其它功能照旧。</li>
+                    <li><strong>结构</strong>：目的地面板里多一栏「阡陌交通的结构」，地图上也有地点标记与名字。
+                        名字取结构的<strong>别名</strong>（它在自己的地图里给结构起过名字时），其次是翻译名、
+                        可读的 id；其它模组的结构显示原始 id，认不出的结构显示「结构 x, z」。别名一秒内跟上。</li>
+                    <li><strong>缺口补线</strong>：它故意把路修到结构外（默认村庄 60 格、其它 15 格，可配置得更大），
+                        在它自己的地图上「路通到村口」，对寻路却是两段互不相连的路。问道会为每条<strong>已完成连接</strong>
+                        补一条同等级的直线连接段，把道路端点与结构点接起来；连接段画在地图上、参与寻路、
+                        随整层替换，不写回。超过 256 格（它可配置的最大退让距离）就对不上，宁可不连也不乱接。</li>
+                </ul>
+
+                <h2 id="roads">路一律按「小路」读</h2>
+                <p>
+                    阡陌交通铺的是土、砂砾、木板、按生物群系选材的路；它的路宽是<strong>「铺了几格」</strong>，
+                    不是「能不能开车」。以前按路宽把 3 格当公路、5 格以上当高速，于是地图上多出两种并不存在的等级，
+                    小路还会被判成能开车的路。现在读进来的一律是<strong>小路</strong>。
+                    如果你确实想在上面开车，可以在配置里用 <code>roadweaver_road_class</code> 强制一个等级。
+                </p>
+
+                <h2 id="junctions">路口就是它自己说过的路口</h2>
+                <p>
+                    两条路只有<strong>在同一个点上</strong>才算连通——阡陌交通的道路吸附正是把端点移到对方的点上。
+                    交叉而过、没有共享点位的不算路口：那可能是立交桥，平面地图分不出来，所以问道不猜。
+                    问道自己的近距节点合并（3 格内、高差像坡而不像桥）同样对它生效。
+                </p>
+
+                <h2 id="snap">编辑时可以吸附到它的路与结构</h2>
+                <p>
+                    在自己的路上、或它的道路与结构点上点击，会精确落在那里。<strong>只吸位置</strong>：
+                    不拆分、不连接、不移动它的几何——这是把自己的路接到它路网上的入口。
+                    画完之后那条连接仍然是你自己的路，它照样属于你的路网文件、可以改名改等级。
+                </p>
+
+                <h2 id="full-map">整张路网，与「自己开图」</h2>
+                <p>
+                    单人 / 局域网时，问道直接读阡陌交通在进程内保存的<strong>整个路网</strong>
+                    （<code>roadweaver_full_map</code>，默认开），全部道路与结构一次拿到，
+                    不用先打开它自己的路网地图（<code>H</code>）。读取在游戏自己的服务端线程上发起、
+                    转换在问道自己的线程上完成。
+                </p>
+                <div class="callout">
+                    <span class="ico">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                             stroke-linecap="round">
+                            <circle cx="12" cy="12" r="9"/>
+                            <path d="M12 8h.01M11 12h1v4h1"/>
+                        </svg>
+                    </span>
+                    <div>
+                        <p>联机在<strong>别人的服务器</strong>上时，客户端只能读到阡陌交通发给自己的那一份，
+                            所以<strong>这一局要先按一次它的路网地图（<code>H</code>）</strong>，之后它广播的局部更新
+                            会让图层自己更新。这是阡陌交通自己的同步方式决定的，不是问道的限制。</p>
+                    </div>
+                </div>
+
+                <h2 id="routing">参与寻路，也出现在导航里</h2>
+                <p>
+                    <code>roadweaver_routing</code>（默认开）打开时，步行、驾车（被强制成可开等级时）
+                    与公共交通的步行接驳段都能走这些路；导航面板的小地图也画这一层，走在这上面时
+                    脚下的路按<strong>小路</strong>报（速度、路面播报、逆行判断都看得到它）。
+                    关掉后道路照旧画在地图上，只是不参与规划。
+                </p>
+                <p>
+                    这些道路、连接段与结构<strong>从不写进你的路网文件</strong>、不进编辑器、不随地图导出——
+                    几何属于阡陌交通，下一次读取整层替换。它们也不出现在浏览器地图的「玩家画的路」里，
+                    而是作为只读图层单独标出来源（页面上写「自动识别」）。
+                </p>
+
+                <h2 id="config">配置项一览</h2>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>配置项</th>
+                            <th>默认值</th>
+                            <th>作用</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td><code>roadweaver_roads</code></td>
+                            <td><code>true</code></td>
+                            <td>读取它自动生成的道路，作为只读图层画在地图上。关掉整层为空。</td>
+                        </tr>
+                        <tr>
+                            <td><code>roadweaver_road_class</code></td>
+                            <td><code>auto</code></td>
+                            <td>读进来的路按什么等级。默认 <code>auto</code> 一律按小路；
+                                填高速 / 公路 / 小路 / 铁路 / 水路 / 冰道可以强制一个等级（想在上面开车时用）。</td>
+                        </tr>
+                        <tr>
+                            <td><code>roadweaver_full_map</code></td>
+                            <td><code>true</code></td>
+                            <td>单人 / 局域网时直接读它进程内的整个路网；关掉则只读它发给客户端的那一份。</td>
+                        </tr>
+                        <tr>
+                            <td><code>roadweaver_structures</code></td>
+                            <td><code>true</code></td>
+                            <td>把结构作为目的地与地图地点标记。关掉后道路照旧，只是不再有那一栏目的地。</td>
+                        </tr>
+                        <tr>
+                            <td><code>roadweaver_routing</code></td>
+                            <td><code>true</code></td>
+                            <td>让这些道路参与寻路。关掉后照旧画在地图上，只是不参与规划。</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2 id="limits">限制与排错</h2>
+                <ul>
+                    <li><strong>只读</strong>：它的道路不能改名、改等级、改层、标单行，也不能删除。
+                        你画的路与它共用空间，但它们始终是两份数据。</li>
+                    <li><strong>没装也不崩</strong>：读取全靠反射，构建脚本里没有它的依赖；
+                        没装、改名、换版本，对应图层为空，其它功能照旧。</li>
+                    <li><strong>联机看不到全部</strong>：在别人的服务器上，只有按过一次它自己的路网地图（<code>H</code>）
+                        之后，客户端才拿到那一份数据；之后靠它广播的局部更新补齐。</li>
+                    <li><strong>结构别名</strong>：它自己的地图里没给结构起过名字时，目的地显示翻译名或可读 id，
+                        两者都没有就显示「结构 x, z」——这不是读失败，是那一份数据里确实没有名字。</li>
+                </ul>
+
+                <div class="wiki-nav">
+                    <a class="prev" href="create.html">
+                        <small>上一页</small>
+                        <strong>机械动力铁路</strong>
+                    </a>
+                    <a class="next" href="mtr.html">
+                        <small>下一页</small>
+                        <strong>MTR 集成</strong>
+                    </a>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <footer class="site-footer">
+        <div class="wrap">
+            <div class="footer-grid">
+                <div>
+                    <a class="brand" href="../index.html" style="margin-bottom:12px">
+                        <img class="brand-mark" src="../assets/img/mod-icon.png" alt="">
+                        <span>问道<small>HowToGo</small></span>
+                    </a>
+                    <p style="margin:0;color:var(--muted);max-width:32em">
+                        我的世界道路标记与实时导航。纯客户端，开源（MIT）。
+                    </p>
+                </div>
+                <div>
+                    <h5>文档</h5>
+                    <a href="index.html">Wiki 首页</a>
+                    <a href="install.html">安装与前置</a>
+                    <a href="navigate.html">导航与 HUD</a>
+                    <a href="changelog.html">更新日志</a>
+                </div>
+                <div>
+                    <h5>项目</h5>
+                    <a href="../features.html">功能介绍</a>
+                    <a href="config.html">配置与数据文件</a>
+                    <a href="display.html">地图显示与缩放</a>
+                    <a href="mtr.html">MTR 集成</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>© <span data-year>2025</span> DongSZ · HowToGo | 问道</span>
+                <span>Minecraft 与 Xaero's World Map 为各自权利人所有，本模组不随附分发它们的文件。</span>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../assets/js/site.js"></script>
+</body>
+
+</html>

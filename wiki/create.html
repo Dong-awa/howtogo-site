@@ -66,6 +66,7 @@
                 <h4>进阶</h4>
                 <a href="transit.html" data-wiki-link data-keywords="公共交通 线路 站点 换乘 等车 线路配置">公共交通线路</a>
                 <a href="create.html" data-wiki-link data-keywords="机械动力 create 铁路 铁轨 车站 命名" aria-current="page">机械动力铁路</a>
+                <a href="roadweaver.html" data-wiki-link data-keywords="阡陌交通 RoadWeaver 自动生成 道路 结构 村落 只读">阡陌交通</a>
                 <a href="mtr.html" data-wiki-link data-keywords="MTR 铁路 线路 只读 轨道标记 复制">MTR 集成</a>
                 <a href="display.html" data-wiki-link data-keywords="显示 面板 缩放 隐藏 图层 名字 字号">地图显示与缩放</a>
                 <a href="webmap.html" data-wiki-link data-keywords="浏览器地图 webmap 网页 端口 导出 PNG 离线">浏览器地图</a>
@@ -73,7 +74,7 @@
                 <a href="config.html" data-wiki-link data-keywords="配置 文件 toml 数据 存档 备份">配置与数据文件</a>
                 <a href="migrate.html" data-wiki-link data-keywords="迁移 搬家 改名 换电脑 存档 服务器地址 数据 文件夹 sp_ mp_ 世界名 目录 备份 丢失">迁移地图数据</a>
                 <a href="faq.html" data-wiki-link data-keywords="常见问题 限制 报错 没有路线 语音">常见问题与限制</a>
-                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.1 0.2.0 0.1.0">更新日志</a>
+                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.2 0.2.1 0.2.0 0.1.0">更新日志</a>
             </aside>
 
             <main class="wiki-body">
@@ -124,7 +125,7 @@
                         <tr>
                             <td><strong>① Create 的轨道图</strong><br>（优先）</td>
                             <td>Create 客户端自己的轨道网络（<code>CreateClient.RAILWAYS</code>）：它的节点坐标、它自己的贝塞尔曲线，还有带名字的车站。</td>
-                            <td>弯道是<strong>平滑曲线</strong>，而且位置就是 Create 认为的位置，不是方块中心。</td>
+                            <td>弯道是<strong>平滑曲线</strong>，而且位置就是 Create 认为的位置，不是方块中心：0.2.2 起保留它的贝塞尔原采样再平滑，不再先四舍五入到方块。</td>
                         </tr>
                         <tr>
                             <td><strong>② 方块扫描</strong><br>（回退）</td>
@@ -139,6 +140,32 @@
                     当前用的是哪一种，日志里说得明明白白，前缀是 <code>[HowToGo] Create track layer</code>：
                     <code>from Create's graph</code> 是轨道图，<code>from the block scan</code> 是方块扫描，后面还跟着节点数、边数、
                     其中曲线多少条、路段数与车站数。读不出任何东西时，图层只是空的——没有报错，也没有半张地图。
+                </p>
+
+                <h2 id="curve">画出来的是平滑曲线，但只影响显示</h2>
+                <p>
+                    0.2.2 起，地图上的路不再是一格一格的台阶：每条路段额外带一份<strong>显示用的平滑折线</strong>——
+                    先按 <strong>0.9 格</strong>容差抽稀（把一格一格的楼梯收成斜线），
+                    再对折角按<strong>固定 1.25 格</strong>半径做圆弧倒角，首尾钉在道路两端。
+                    Create 的贝塞尔曲线与 MTR 的小数坐标轨道保留原采样再平滑，不会先被四舍五入到方块中心，
+                    所以弯道看起来就是 Create 自己认为的那条弧。
+                </p>
+                <p>
+                    关键在于「只影响显示」：<strong>寻路、测距、选中、存档里的整数顶点一行没动</strong>。
+                    画面上的线是顺的，但 <kbd>Shift</kbd> 选中后端点仍落在原来的格子坐标上，
+                    铁轨的只读图层也还是在它原来那条线上——平滑的是画法，不是数据。
+                    道路 JSON 里多出来的可选字段 <code>curve</code> 写了才出现，旧存档照常读，旧版本忽略它。
+                </p>
+
+                <h2 id="runs">短轨道先拼成长段</h2>
+                <p>
+                    机器读进来的轨道原先是碎的一小段一小段：Create 每条贝塞尔、MTR 每段轨道都是独立片段。
+                    问道现在先把<strong>端点相接、类型相同</strong>的片段拼成一条「路口到路口」的长折线，
+                    只有岔口（三条以上轨道交汇）和没接上的地方才断开。
+                </p>
+                <p>
+                    拼完之后，<kbd>Shift</kbd> 选中与 <kbd>N</kbd> 命名都是<strong>整条线</strong>，不再是一小段一小段；
+                    描边的接缝与寻路的边数也跟着变干净——同样的轨道，省掉的是那些没有意义的中间节点。
                 </p>
 
                 <h2 id="reflect">靠注册名识别，不引用任何 Create 类</h2>
@@ -256,6 +283,19 @@
                             只有调色板里真的出现铁轨的 section 才会逐格走一遍。这也是为什么远处的铁路会「慢慢长出来」而不是一次性出现。</p>
                     </div>
                 </div>
+                <p>
+                    铁轨的颜色不在这张表里：它和手画的道路一样<strong>按等级取色</strong>，
+                    <code>config/howtogo-client.toml</code> 的 <code>road_colors</code> 一节里「铁路」那一项就是它。
+                    世界地图、导航小地图、目的地选择界面、图例与网页地图读的是同一份设置；
+                    写错的值会被忽略（日志说一次）并保留原色，改完不用重启。
+                    公共交通线路本身的线与它的站点标记由 <code>transit_line_colors</code> 管，
+                    线路下面那段轨道仍按 <code>road_colors</code> 画。
+                </p>
+                <p>
+                    这些项——包括上面那几个 <code>create_*</code>——也能在模组列表里的「配置」按钮打开的界面里改：
+                    那个界面读的是生成 <code>howtogo-client.toml</code> 的同一份声明，列出的项、默认值、范围与注释都和文件一致，
+                    改完保存即时生效，中英文都有每项标题。
+                </p>
 
                 <div class="wiki-nav">
                     <a class="prev" href="transit.html">

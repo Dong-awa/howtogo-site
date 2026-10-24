@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>常见问题与限制 — HowToGo | 问道 Wiki</title>
-    <meta name="description" content="问道（HowToGo）常见问题与已知限制：为什么报「没有路线」、为什么以前老报「偏离路线」、怎么画高架与隧道、为什么日志里没有诊断输出（debug_log）、MTR 为什么缺站、换乘站为什么不融合、语音为什么读成中文、能否装在服务器上。">
+    <meta name="description" content="问道（HowToGo）常见问题与已知限制：支持哪些 Minecraft 版本与加载器、主界面 K 是干什么的、为什么报「没有路线」、步行为什么不再能直线穿过很远的野外、路为什么看起来是平滑曲线、地图存档能不能导出给别人、升级到 0.2.2 后数据目录为什么改名、怎么画高架与隧道、为什么日志里没有诊断输出（debug_log）、MTR 为什么缺站、换乘站为什么不融合、语音为什么读成中文、能否装在服务器上。">
     <meta name="theme-color" content="#f4f8ff">
     <link rel="icon" href="../assets/img/mod-icon.png" type="image/png">
     <link rel="stylesheet" href="../assets/css/site.css">
@@ -66,6 +66,7 @@
                 <h4>进阶</h4>
                 <a href="transit.html" data-wiki-link data-keywords="公共交通 线路 站点 换乘 等车 线路配置">公共交通线路</a>
                 <a href="create.html" data-wiki-link data-keywords="机械动力 create 铁路 铁轨 车站 命名">机械动力铁路</a>
+                <a href="roadweaver.html" data-wiki-link data-keywords="阡陌交通 RoadWeaver 自动生成 道路 结构 村落 只读">阡陌交通</a>
                 <a href="mtr.html" data-wiki-link data-keywords="MTR 铁路 线路 只读 轨道标记 复制">MTR 集成</a>
                 <a href="display.html" data-wiki-link data-keywords="显示 面板 缩放 隐藏 图层 名字 字号">地图显示与缩放</a>
                 <a href="webmap.html" data-wiki-link data-keywords="浏览器地图 webmap 网页 端口 导出 PNG 离线">浏览器地图</a>
@@ -73,7 +74,7 @@
                 <a href="config.html" data-wiki-link data-keywords="配置 文件 toml 数据 存档 备份">配置与数据文件</a>
                 <a href="migrate.html" data-wiki-link data-keywords="迁移 搬家 改名 换电脑 存档 服务器地址 数据 文件夹 sp_ mp_ 世界名 目录 备份 丢失">迁移地图数据</a>
                 <a href="faq.html" data-wiki-link data-keywords="常见问题 限制 报错 没有路线 语音" aria-current="page">常见问题与限制</a>
-                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.1 0.2.0 0.1.0">更新日志</a>
+                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.2 0.2.1 0.2.0 0.1.0">更新日志</a>
             </aside>
 
             <main class="wiki-body">
@@ -86,7 +87,43 @@
                 <p class="lead">
                     这里的每一条都按「现象 → 原因 → 怎么办」写。大多数看起来像 bug 的事，
                     其实是问道在设计上选了「如实说做不到」，而不是画一条看起来能走、实际走不通的线；
-                    明白它在坚持什么，剩下的就好办了。
+                    明白它在坚持什么，剩下的就好办了。本页与站点其他页面一致，描述的是已发布的
+                    <strong>0.2.2</strong>——它是预发布测试版。
+                </p>
+
+                <h2 id="version">版本与入口</h2>
+
+                <h3>支持哪些 Minecraft 版本？该装 Fabric 还是 NeoForge？</h3>
+                <p>
+                    0.2.2 一共 <strong>21 个构建</strong>：<strong>11 个 Fabric + 10 个 NeoForge</strong>。
+                    Fabric 覆盖 Minecraft <strong>1.20.1、1.20.4、1.20.6、1.21.1、1.21.4、1.21.6、1.21.8、1.21.11、26.1、26.2、26.3</strong>；
+                    NeoForge 覆盖除 1.20.1 以外的其余十个版本——1.20.1 只有 Fabric，没有 NeoForge。
+                    <strong>不支持 Forge</strong>：它的构建工具链与现有的冲突，已从仓库移除。
+                </p>
+                <p>
+                    下载时选与你的加载器和 Minecraft 版本对应的那一个，文件名形如
+                    <code>howtogo-0.2.2pre1+mc1.21.1-neoforge.jar</code>，放进 <code>mods/</code>。
+                    另外 <strong>Xaero's World Map 是必需的</strong>（0.2.2 面向 1.40.0 及以上），所有道路、线路与路线都画在它上面；
+                    XaeroLib 从 26.x 起随 World Map 以嵌套 jar 分发，<strong>不需要单独下载</strong>。
+                </p>
+                <p>
+                    也要知道 <strong>0.2.2 是预发布测试版</strong>：21 个构建只做过编译验证与回归测试（873 项检查），
+                    没有在真实游戏里逐个版本走查。完整的版本矩阵、前置与安装步骤见 <a href="install.html">安装与前置</a>，
+                    每个版本改了什么见 <a href="changelog.html">更新日志</a>。
+                </p>
+
+                <h3>按 <kbd>K</kbd> 打开的那个主界面是干什么的？</h3>
+                <p>
+                    那是 0.2.2 新增的入口：世界里按 <kbd>K</kbd> 直接打开问道的主界面，指令一个都不用记。
+                    标题下是一张<strong>只能看的地图</strong>——拖动平移、滚轮以光标为中心缩放，点它不会选点、也不会开始导航；
+                    它画着你的路、铁路、阡陌交通的路、地点标记、当前路线与玩家朝向。再往下是状态
+                    （出行方式、导航目的地与剩余距离 / 时间、路网规模）和按钮：
+                    <strong>选择目的地、结束导航、切换出行方式、地图存档、自检、浏览器地图、关闭</strong>。
+                    按键在「控制」里可以改。
+                </p>
+                <p>
+                    两个细节：在世界地图里按 <kbd>K</kbd> 不会触发（那张地图有自己的按键）；
+                    0.2.2 里导航仪物品仍然存在，<kbd>K</kbd> 是新增的另一个入口，不是替换。
                 </p>
 
                 <h2 id="noroute">为什么报「没有路线」</h2>
@@ -103,8 +140,9 @@
                         <tbody>
                         <tr>
                             <td>首末接驳太远</td>
-                            <td>起终点离最近的路超过接驳上限：<strong>驾车与公共交通 64 格</strong>；
-                                步行几乎没有上限（4096 格，实际上等于没有——没路的时候人本来就是直线走过去，只是按离开路面的速度计时）。</td>
+                            <td>起终点离最近的路超过接驳上限：<strong>步行越野 32 格</strong>（<code>walk_offroad_blocks</code>，范围 0~4096）；
+                                <strong>驾车不再越野</strong>，只允许「车还在路面上」的那点距离（最宽路面的半宽）——停在路边可以，停在田里不行。
+                                公共交通的乘车段也只保留<strong>站台到轨道的接驳 32 格</strong>（<code>station_snap_blocks</code>）。</td>
                             <td>把路修到你要去的地方，或者先用 <kbd>Ctrl</kbd> + 左键点一个更靠路的目的地。
                                 问道宁可不画，也不会给你一条横穿地图的直线——那条线看着像答案，走过去是悬崖。</td>
                         </tr>
@@ -136,6 +174,20 @@
                     因为那才是车能走的路。三种方式可走的等级本来就是分开的，这也是同一组起终点会给出不同路线的原因：
                     步行走高速 / 公路 / 小路 / 冰道，驾车只走高速 / 公路，公共交通走铁路 / 水路 / 冰道。
                     想沿小路开车，请把那段路改成公路等级，或者改用步行——问道不会假装小路能过车。
+                </p>
+
+                <h3>为什么步行不能直线穿过很远的野外了？</h3>
+                <p>
+                    0.2.2 给步行越野加了上限：<code>walk_offroad_blocks</code>，默认 <strong>32 格</strong>，范围 0~4096。
+                    超出这个距离的目的地或路尽头直接判「没有路线」，不再画一条横穿地图的直线——那条线看着像答案，
+                    走过去可能是悬崖。近距端点的合并对步行也<strong>只在地表层 0 生效</strong>：
+                    高架与地下的两截路想接上，请自己补一个节点；车仍按同层规则。
+                </p>
+                <p>
+                    同一批改动里还有两条：<strong>驾车不再越野</strong>，只允许「车还在路面上」的那点距离（最宽路面的半宽），
+                    以前允许的 64 格直线接驳没有了；<strong>公共交通的乘车段也不再越野</strong>，
+                    只保留站台到轨道的接驳（<code>station_snap_blocks</code>，默认 32 格），
+                    步行段仍按 <code>walk_offroad_blocks</code>，「全是接驳、没有一节在轨道上」的假乘车会被拒绝。
                 </p>
 
                 <h3>为什么站点必须建在路上？</h3>
@@ -255,19 +307,37 @@
                     按一下就能看见它变；右下角的快捷键列表里也多了一行 <code>- / + 道路层</code>。
                 </p>
 
+                <h3>为什么路看起来是平滑曲线，选中的点却还是一格一格？</h3>
+                <p>
+                    因为 0.2.2 加的那条平滑折线<strong>只用来显示</strong>：每条路段额外带一份
+                    <code>RoadCurve</code>，先按 <strong>0.9 格</strong>容差抽稀（把一格一格的楼梯收成斜线），
+                    再对折角按<strong>固定 1.25 格</strong>半径做圆弧倒角，首尾钉在道路两端。
+                    寻路、测距、选中、存档里的<strong>整数顶点一行没动</strong>——所以画面上是顺的，
+                    <kbd>Shift</kbd> 选中后端点仍落在原来的格子坐标上，测距也还是按那些顶点算。
+                </p>
+                <p>
+                    道路 JSON 里多了一个可选的 <code>curve: [[x,z], ...]</code> 字段，写了才出现；
+                    旧存档照常读，旧版本忽略它。Create 的贝塞尔曲线与 MTR 的小数坐标轨道保留原采样再平滑，
+                    不会先被四舍五入到方块。
+                </p>
+
                 <h2 id="invisible">地图上看不到东西</h2>
 
                 <h3>为什么我画的路别人看不到？</h3>
                 <p>
                     因为问道是<strong>纯客户端</strong>模组：路网存在你自己的 <code>config/howtogo/</code> 里，
                     服务器上没有它，别的玩家也没有。这是设计选择——不用求服主装模组、不用争权限、也不用担心别人改你的路。
-                    想让朋友看到，只能把文件给他（见<a href="config.html#backup">备份与搬家</a>）。
+                    想让朋友看到，把数据文件给他（见<a href="config.html#backup">备份与搬家</a>），或者用 0.2.2 的地图存档导出压缩包
+                    （见本页<a href="#mapsave">地图存档能导出给别人吗</a>）。
                 </p>
 
                 <h3>为什么路有名字，地图上却不显示？</h3>
                 <ul>
-                    <li>名字比它标注的<strong>整条路</strong>还宽时，整条名字都不画。带弯的路是多个路段共用一个名字，
-                        所以量的是整条路的长度，而不是某一段——否则名字会挂在路的两端外面，读起来像在标注旁边的东西。</li>
+                    <li>0.2.2 起名字的字号<strong>不超过这条路画出来的宽度</strong>：路太细（缩小的远景、小路、铁路）时先不写名字，
+                        放大到够宽才出现。长路会沿路写好几个名字——大约每 <strong>190 像素</strong>写一个、每段最多 8 个，
+                        而且只放在屏幕上的可见段里；可见段比名字还短时，这一段就不写。</li>
+                    <li>名字互不重叠：地点名、铁路名、道路名在同一张「已占位置」表上按这个顺序排，排不下就不画；
+                        两个地点靠得近时只显示一个，放大到名字框分开才都显示。</li>
                     <li>地图缩得太远时文字会被抑制，这是为了不让一屏字糊成一片。
                         注意被抑制的只有<strong>文字</strong>：<strong>地点标记</strong>在任何缩放下都还画着，
                         缩小时正是最需要它指出「那儿有个东西」的时候。</li>
@@ -382,6 +452,46 @@
                     完整的开关说明见 <a href="config.html#log">配置与数据文件</a>。
                 </p>
 
+                <h2 id="mapsave">地图存档与数据目录</h2>
+
+                <h3>地图存档能导出给别人吗？</h3>
+                <p>
+                    能。0.2.2 起 <code>/howtogo data</code> 会打开「地图存档」界面：一个按钮把<strong>当前世界</strong>的道路、地点、
+                    铁路名称、公共交通线路与附属数据打成一个 <code>.zip</code> 放进 <code>config/howtogo/exports/</code>，
+                    另一个按钮把别人的 <code>.zip</code> 导入回来。指令也行：<code>/howtogo export</code> 直接导出，
+                    <code>/howtogo import [压缩包]</code> 读指定文件，压缩包还能直接拖进界面。
+                </p>
+                <p>
+                    导入时<strong>不用改目录名</strong>：压缩包的名字和内部目录层级都会被忽略，<code>.world</code> 记录改写成当前世界，
+                    数据直接写进当前世界的目录——所以收到的包，打开自己那个世界导入就行。
+                    覆盖前会警告：写进哪个世界、来源与时间、文件数、旧数据会先备份；确认后先备份到
+                    <code>config/howtogo/backups/</code>，再<strong>整目录替换</strong>。注意是替换、<strong>不合并</strong>：
+                    包里没有的维度文件会被删掉。备份文件名带 <code>-backup</code>，在「可导入的压缩包」列表里单独标黄，
+                    再导入它一次就回到导入之前。
+                </p>
+                <p>
+                    只接受认识的文件：只读 <code>.json</code>；<code>__MACOSX/</code>、<code>.DS_Store</code>、<code>.world</code>、
+                    <code>*.part</code>、<code>*.corrupt</code> 跳过；带 <code>..</code> 或绝对路径的条目不跟随；
+                    文件数与解压总大小有上限；没有任何可读数据的包会被拒绝，当前地图不动。
+                    列表里的来源分三种：导入文件夹、我的导出、备份。自检里也多了一项「地图存档压缩包」（真的导出、导入、逐字节核对）。
+                    完整说明见 <a href="migrate.html#archive">迁移地图数据</a>。
+                </p>
+
+                <h3>升级到 0.2.2 后，存档目录自己改名了？</h3>
+                <p>
+                    是的，这是 0.2.2 的破坏性变更：中文存档的数据目录改用<strong>拼音</strong>命名，
+                    <code>sp_新世界</code> 从 <code>sp____</code> 变成 <code>sp_xin_shi_jie</code>。
+                    第一次打开某个世界时，问道会把旧目录<strong>整目录改名</strong>过去，文件跟着走，
+                    <strong>升级不用做任何事</strong>；如果目标名字已经被别的世界占用、或改名失败，就继续用旧目录，
+                    一条路都不会丢。
+                </p>
+                <p>
+                    风险在<strong>降级</strong>：用 0.2.2 存过档再退回 0.2.1，旧版本按老规则（中文全是下划线）去找目录，
+                    找不到拼音名，那个世界的路网看起来就是空的——文件还在，只是没人读。
+                    所以别随便降级；确实要退，先在 0.2.2 里导出压缩包备份，再按
+                    <a href="migrate.html">迁移地图数据</a> 把 JSON 放到旧规则会读的目录里。
+                </p>
+
                 <h2 id="server">服务器与联机</h2>
 
                 <h3>能装在服务器上吗？</h3>
@@ -428,7 +538,9 @@
                         </tr>
                         <tr>
                             <td>离路太远会报无解</td>
-                            <td>接驳段超过上限（驾车与公共交通 64 格；步行 4096 格，实际等于没有上限）时不画直线，直接报「没有路线」。</td>
+                            <td>步行越野上限 <code>walk_offroad_blocks</code>（默认 32 格，范围 0~4096）；
+                                公共交通只保留站台到轨道的接驳（<code>station_snap_blocks</code>，默认 32 格）；
+                                驾车不再越野，只允许停在路面上。超过就报「没有路线」，不画直线。</td>
                         </tr>
                         <tr>
                             <td>MTR 的数据范围取决于玩法</td>

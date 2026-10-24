@@ -66,6 +66,7 @@
                 <h4>进阶</h4>
                 <a href="transit.html" data-wiki-link data-keywords="公共交通 线路 站点 换乘 等车 线路配置">公共交通线路</a>
                 <a href="create.html" data-wiki-link data-keywords="机械动力 create 铁路 铁轨 车站 命名">机械动力铁路</a>
+                <a href="roadweaver.html" data-wiki-link data-keywords="阡陌交通 RoadWeaver 自动生成 道路 结构 村落 只读">阡陌交通</a>
                 <a href="mtr.html" data-wiki-link data-keywords="MTR 铁路 线路 只读 轨道标记 复制" aria-current="page">MTR 集成</a>
                 <a href="display.html" data-wiki-link data-keywords="显示 面板 缩放 隐藏 图层 名字 字号">地图显示与缩放</a>
                 <a href="webmap.html" data-wiki-link data-keywords="浏览器地图 webmap 网页 端口 导出 PNG 离线">浏览器地图</a>
@@ -73,7 +74,7 @@
                 <a href="config.html" data-wiki-link data-keywords="配置 文件 toml 数据 存档 备份">配置与数据文件</a>
                 <a href="migrate.html" data-wiki-link data-keywords="迁移 搬家 改名 换电脑 存档 服务器地址 数据 文件夹 sp_ mp_ 世界名 目录 备份 丢失">迁移地图数据</a>
                 <a href="faq.html" data-wiki-link data-keywords="常见问题 限制 报错 没有路线 语音">常见问题与限制</a>
-                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.1 0.2.0 0.1.0">更新日志</a>
+                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.2 0.2.1 0.2.0 0.1.0">更新日志</a>
             </aside>
 
             <main class="wiki-body">
@@ -183,6 +184,11 @@
                     <li>记忆有上限，但都开得很大：线路 512 条、车站 5000 个、轨道 2 万段。上限存在的意义是
                         「不要无界增长」，不是「定期清理」——一个普通大小的铁路网络碰不到它。</li>
                 </ul>
+                <p>
+                    整图读取发生在 MTR 自己的线程上，只把<strong>不可变的结果</strong>带回来，也从不写回 MTR 的数据。
+                    所以它的开销不在客户端线程上：一次读取拿到的是当时那张网络，之后所有查询都用合并后的全量，
+                    不会每一帧去翻 MTR 的模拟器。MTR 那边后来新增的线路，靠窗口读取与下一次读取补进来。
+                </p>
                 <div class="callout">
                     <span class="ico">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -197,6 +203,15 @@
                             但从没靠近过的线路确实读不到——想让它出现，坐车或走路靠近一次即可。</p>
                     </div>
                 </div>
+
+                <h3>MTR Map Overlay 的两个开关会被记住</h3>
+                <p>
+                    MTR Map Overlay 自己的地图上还有「线路」与「轨道」两个开关。它以前每次开游戏都回到「都画」，
+                    于是上一局特意关掉的图层，下一局又出现了。0.2.2 起问道把这两个开关记在
+                    <code>config/howtogo/mtr_overlay_toggles.json</code>：改了立刻保存，下一局恢复成上次的样子。
+                    它自己的配置文件<strong>不动</strong>；删掉这个文件就不再记，回到「都画」。
+                    没装那个模组时整段功能不存在。
+                </p>
 
                 <h2 id="lines">线路类型与站点</h2>
                 <p>MTR 的线路有很多种类型，问道只认识能对应到自己道路等级的那些，其余的<strong>不猜</strong>：</p>
@@ -326,6 +341,15 @@
                     </div>
                 </div>
 
+                <h2 id="segments">短轨道先拼成长段</h2>
+                <p>
+                    MTR 交给客户端的轨道常常是<strong>一小段一小段</strong>的。直接拿这些碎片来画与规划，同一条会变成
+                    几十条互不相干的边：选中只选中其中一截，命名、描边与寻路的边数都被碎片放大。所以读进来之后先做一次拼接：
+                    <strong>端点相接、类型相同</strong>的片段接成一条「路口到路口」的长折线，只有<strong>岔口</strong>
+                    （三条及以上轨道交汇）和<strong>没接上的地方</strong>才断开。机械动力的轨道走的是同一套。
+                    拼接只发生在机器读到的只读图层里：轨道标记、线路与站点的说法都不受影响。
+                </p>
+
                 <h2 id="interchange">换乘站</h2>
                 <p>
                     MTR 的线路和你自己建的线路是同一批线路：某条 MTR 线路与另一条线路（不管是 MTR 的还是你的）
@@ -390,6 +414,12 @@
                     （4.0.x 到 1.20.4 为止，1.21.1 只有 4.1.0-beta.1/2），所以 4.0.4 属于 <code>1.20.1-*</code> /
                     <code>1.20.4-neoforge</code> 那几条分支。上表证明的是<strong>读取器的名字表覆盖 4.0.4</strong>
                     （反射按描述符解析，与 Minecraft 版本无关）；真正的一局里能不能用，仍然要在对应分支上用那个版本跑一次。
+                </p>
+                <p>
+                    还要分清两件事：版本支持说的是「读取器认得哪个 MTR」，而模组自己的构建是另一回事。
+                    0.2.2 的 21 个构建（11 Fabric + 10 NeoForge）都能在对应的 Minecraft 版本上装，
+                    但 <strong>MTR 读取只会在那个版本真的装了 MTR 时发生</strong>——没装，或者装的是 4.0.4 以下的版本，
+                    问道就是读不到，其余功能一件不少。
                 </p>
                 <p>
                     这些结论不是读更新日志读出来的，而是<strong>量出来的</strong>：把那个版本的真 jar 放进回归测试的 classpath，

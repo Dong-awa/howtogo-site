@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Wiki 教程 — HowToGo | 问道</title>
-    <meta name="description" content="问道（HowToGo）使用教程：安装、画路、导航、公共交通线路、机械动力铁路、MTR 集成、地图显示、浏览器地图、配置与常见问题。">
+    <meta name="description" content="问道（HowToGo）v0.2.2 使用教程：安装与版本矩阵、画路、导航、公共交通线路、机械动力铁路、MTR 集成、阡陌交通只读图层、地图显示与配色、浏览器地图、地图存档导出导入、配置与常见问题。">
     <meta name="theme-color" content="#f4f8ff">
     <link rel="icon" href="../assets/img/mod-icon.png" type="image/png">
     <link rel="stylesheet" href="../assets/css/site.css">
@@ -66,6 +66,7 @@
                 <h4>进阶</h4>
                 <a href="transit.html" data-wiki-link data-keywords="公共交通 线路 站点 换乘 等车 线路配置">公共交通线路</a>
                 <a href="create.html" data-wiki-link data-keywords="机械动力 create 铁路 铁轨 车站 命名">机械动力铁路</a>
+                <a href="roadweaver.html" data-wiki-link data-keywords="阡陌交通 RoadWeaver 自动生成 道路 结构 村落 只读">阡陌交通</a>
                 <a href="mtr.html" data-wiki-link data-keywords="MTR 铁路 线路 只读 轨道标记 复制">MTR 集成</a>
                 <a href="display.html" data-wiki-link data-keywords="显示 面板 缩放 隐藏 图层 名字 字号">地图显示与缩放</a>
                 <a href="webmap.html" data-wiki-link data-keywords="浏览器地图 webmap 网页 端口 导出 PNG 离线">浏览器地图</a>
@@ -73,7 +74,7 @@
                 <a href="config.html" data-wiki-link data-keywords="配置 文件 toml 数据 存档 备份">配置与数据文件</a>
                 <a href="migrate.html" data-wiki-link data-keywords="迁移 搬家 改名 换电脑 存档 服务器地址 数据 文件夹 sp_ mp_ 世界名 目录 备份 丢失">迁移地图数据</a>
                 <a href="faq.html" data-wiki-link data-keywords="常见问题 限制 报错 没有路线 语音">常见问题与限制</a>
-                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.1 0.2.0 0.1.0">更新日志</a>
+                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.2 0.2.1 0.2.0 0.1.0">更新日志</a>
             </aside>
 
             <main class="wiki-body">
@@ -86,7 +87,10 @@
                     问道把「画路」和「导航」接在了一起，所以教程也按你上手时会遇到的顺序排：
                     先装好，再画第一条路，然后学会导航；公共交通、机械动力与 MTR 是之后的进阶内容，
                     最后是配置表、迁移数据与常见问题。还没决定要不要看文档，可以先翻
-                    <a href="../features.html">功能介绍</a>。
+                    <a href="../features.html">功能介绍</a>。这里描述的是已发布的 <strong>v0.2.2</strong>——
+                    <strong>21 个构建</strong>（11 个 Fabric + 10 个 NeoForge），它是<strong>预发布测试版</strong>：
+                    只做过编译验证与回归测试（873 项检查），没有在真实游戏里逐个版本走查；
+                    完整矩阵见 <a href="install.html">安装与前置</a>。
                 </p>
 
                 <h2 id="start">先看这三篇</h2>
@@ -109,11 +113,15 @@
                     </a>
                     <a class="card" href="migrate.html" data-keywords="迁移 搬家 改名 换电脑 存档 服务器地址 数据 文件夹">
                         <h3>迁移地图数据</h3>
-                        <p>改了世界名、换了服务器地址或搬了游戏实例？数据没有丢，只是目录名跟着名字变了——怎么找回来。</p>
+                        <p>改了世界名、换了服务器地址或搬了游戏实例？数据没有丢，只是目录名跟着名字变了（0.2.2 起中文名是拼音）——怎么找回来，或者直接用压缩包整份搬走。</p>
                     </a>
                     <a class="card" href="webmap.html" data-keywords="浏览器地图 webmap 网页 导出 PNG 端口">
                         <h3>浏览器地图</h3>
                         <p>用 <code>/howtogo webmap</code> 把当前维度的路网画成一张网页地图：拖动缩放、按等级与层过滤，并导出 PNG。</p>
+                    </a>
+                    <a class="card" href="roadweaver.html" data-keywords="阡陌交通 roadweaver 只读 自动生成 道路 村落 结构 小路">
+                        <h3>阡陌交通（RoadWeaver）</h3>
+                        <p>它自动生成的道路与结构怎么被读进来：一律按小路读、路口怎么算连通、联机时为什么要先按一次它的路网地图（<kbd>H</kbd>），以及哪些开关能关掉。</p>
                     </a>
                 </div>
 
@@ -145,19 +153,23 @@
                         </tr>
                         <tr>
                             <td><a href="create.html">机械动力铁路</a></td>
-                            <td>自动识别的两个来源、曲线与方块扫描的区别、铁路命名、车站与吸附。</td>
+                            <td>自动识别的两个来源、平滑曲线与方块扫描的区别、短轨道拼成长段、铁路命名、车站与吸附。</td>
                         </tr>
                         <tr>
                             <td><a href="mtr.html">MTR 集成</a></td>
-                            <td>MTR 给客户端的是什么、问道怎么补齐、只读线路、轨道标记开关、复制为自己的线路。</td>
+                            <td>MTR 给客户端的是什么、问道怎么补齐、只读线路、同名车站合并、轨道标记开关、复制为自己的线路。</td>
+                        </tr>
+                        <tr>
+                            <td><a href="roadweaver.html" data-keywords="阡陌交通 roadweaver 只读 自动生成 道路 村落 结构 小路">阡陌交通（RoadWeaver）</a></td>
+                            <td>它自动生成的道路怎么被读进来、按什么等级读、路口与连接段怎么算、整图读取与联机时的限制、哪些配置能关掉。</td>
                         </tr>
                         <tr>
                             <td><a href="display.html">地图显示与缩放</a></td>
-                            <td>地图显示面板、每类开关、缩放时的取舍顺序、绘制顺序、名字与标记的显示规则。</td>
+                            <td>地图显示面板、每类开关、缩放时的取舍顺序、从低层往高层的绘制顺序、名字排版与道路配色、地点标记的显示规则。</td>
                         </tr>
                         <tr>
                             <td><a href="webmap.html" data-keywords="浏览器地图 webmap 网页 导出 PNG 端口">浏览器地图</a></td>
-                            <td>用 <code>/howtogo webmap</code> 在浏览器里看当前维度的路网、按等级与层过滤、导出 PNG；只监听本机回环地址。</td>
+                            <td>用 <code>/howtogo webmap</code> 在浏览器里看整张游戏地图（含只读图层与平滑曲线）、按等级与层过滤、导出 PNG；只监听本机回环地址。</td>
                         </tr>
                         <tr>
                             <td><a href="config.html">配置与数据文件</a></td>
@@ -165,7 +177,7 @@
                         </tr>
                         <tr>
                             <td><a href="migrate.html" data-keywords="迁移 搬家 改名 换电脑 存档 服务器地址 数据 文件夹">迁移地图数据</a></td>
-                            <td>数据目录名怎么来的，改世界名 / 换服务器地址 / 换电脑 / 复制存档时怎么搬，以及 <code>.world</code> 标记与撞名目录。</td>
+                            <td>0.2.2 起的拼音目录名怎么算、改世界名 / 换服务器地址 / 换电脑 / 复制存档时怎么搬、<code>.world</code> 记录与撞名目录，以及用压缩包整份导出导入。</td>
                         </tr>
                         <tr>
                             <td><a href="faq.html">常见问题与限制</a></td>

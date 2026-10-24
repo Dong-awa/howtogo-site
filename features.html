@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>功能介绍 — HowToGo | 问道</title>
-    <meta name="description" content="问道（HowToGo）完整功能列表：道路绘制与维护、实时导航、公共交通线路、机械动力铁路自动识别、MTR 集成、地图显示与按层叠放、浏览器地图（webmap）、目的地来源与数据存放。">
+    <meta name="description" content="问道（HowToGo）0.2.2 完整功能列表：道路绘制与维护（平滑曲线、按层叠放、道路层加减）、实时导航（含主界面 K）、公共交通线路、机械动力铁路与 MTR 自动识别、阡陌交通 RoadWeaver 只读图层、地图显示与颜色自定义、浏览器地图（webmap）、地图存档导出导入、目的地来源与数据存放。">
     <meta name="theme-color" content="#f4f8ff">
     <link rel="icon" href="assets/img/mod-icon.png" type="image/png">
     <link rel="stylesheet" href="assets/css/site.css">
@@ -53,8 +53,8 @@
                     <span class="eyebrow">功能介绍</span>
                     <h1 style="margin-bottom:.4em">它到底做了什么</h1>
                     <p style="font-size:1.06rem;color:var(--muted)">
-                        当前版本 <strong>v0.2.1</strong>，面向 Minecraft <strong>1.21.1</strong> /
-                        NeoForge <strong>21.1.x</strong>，纯客户端。
+                        当前版本 <strong>v0.2.2</strong>（预发布测试版），面向 Minecraft <strong>1.20.1 – 26.3</strong>，
+                        <strong>Fabric</strong> 与 <strong>NeoForge</strong> 双平台，纯客户端。
                         一句话：把 Xaero 世界地图变成一张<strong>能规划、能导航</strong>的路网。
                         下面是全部功能，以及每一条背后的取舍——因为「为什么不那样做」往往比功能本身更重要。
                     </p>
@@ -65,7 +65,8 @@
                 <div class="reveal">
                     <p>
                         在世界地图上直接画折线，六个等级：<strong>高速 / 公路 / 小路 / 铁路 / 水路 / 冰道</strong>。
-                        颜色与线宽各不相同，一眼就能读出「这是快路还是小路」。
+                        颜色与线宽各不相同，一眼就能读出「这是快路还是小路」。下表是默认配色，
+                        想让路网长成别的样子，可以在<a href="#colors">颜色可以自己定</a>里改。
                     </p>
                     <div class="table-wrap">
                         <table>
@@ -121,17 +122,35 @@
                         <li><strong>吸附</strong>：靠近已有节点或路段时自动吸附；按 <kbd>Alt</kbd> 自由放置。附近没有手画道路时，
                             会吸附到自动识别的铁轨上，让你把路正好接在铁轨上。</li>
                         <li><strong>在路段中间落点会真正拆分路段</strong>，并在交点建立节点——拓扑是真的，不是看起来像。</li>
-                        <li><strong>命名</strong>：一条路（含所有转折段）共用一个名字，地图上每条路只显示一次标签。
-                            名字宽度超过整条路时整条不画，避免它读起来像在标注旁边的东西。</li>
+                        <li><strong>画出来的是平滑曲线</strong>：路段额外带一份只用于显示的平滑折线，先按 <strong>0.9 格</strong>
+                            容差抽稀（把一格一格的楼梯收成斜线），再对折角按<strong>固定 1.25 格半径</strong>做圆弧倒角，
+                            首尾仍钉在道路两端。它<strong>只影响显示</strong>——寻路、测距、选中与存档里的整数顶点一行没动；
+                            道路 JSON 里多一个可选的 <code>curve</code> 字段，写了才出现，旧存档照常读，旧版本会忽略它。</li>
+                        <li><strong>命名</strong>：一条路（含所有转折段）共用一个名字。名字的<strong>字号不超过这条路画出来的宽度</strong>：
+                            路太细（缩小的远景、小路、铁路）先不写名字，放大到够宽才出现——宽路字大、窄路字小，名字永远落在路面里。
+                            很长的路会沿路每隔约 <strong>190 像素</strong>写一个（每段最多 8 个），只放在屏幕上的可见段里；
+                            可见段比名字还短时这一段不写。</li>
                         <li><strong>地点标记</strong>：四种类别（地点 / 资源点 / 商店 / 站点）。类别只影响显示与缩放取舍，不影响导航；
                             只有「站点」必须建在道路上。</li>
                         <li><strong>撤销 / 重做</strong> 64 步；节点可以拖动，路段可以整体改等级或删除。</li>
                         <li><strong>单行道</strong>：<kbd>O</kbd> 让选中（或光标所在）的那条路在
                             <strong>双向 / 顺向单行 / 逆向单行</strong>之间循环，地图上沿路画出箭头指明方向。
                             按整条街生效，弯道两侧方向一致，而且步行、驾车、公共交通都遵守它。</li>
+                        <li><strong>道路层直接加减</strong>：<kbd>-</kbd> / <kbd>+</kbd> 改的是<strong>接下来画在哪一层</strong>，
+                            范围 −32 ~ +32，画隧道时按一下就下到地下 1 层，接着画的路都在那一层；当前层一直写在左下角的读数里。
+                            它不动已经画好的路（改已有的路仍用 <kbd>N</kbd> 面板），也没有撤销记录——绘制层是一个模式，不写进存档。</li>
+                        <li><strong>右键拖地图</strong>：编辑模式里、地图上没有正在画的线时，按住右键拖动就是平移地图；
+                            一旦开始画，右键还是「结束这条线」；右键单击不拖照旧清除选中。</li>
+                        <li><strong>选中的路会报出层与全长</strong>：<kbd>Shift</kbd> 选中后左下角读数是
+                            「等级 · 方向 · 道路层 · 全长 N 格」。全长是整条路的——带弯的路在数据里是好几段，报的是它们加起来的总长。</li>
                         <li><strong>把「看着连上」变成真的连上</strong>：两条路交叉而过、或差一格没接上，本来是不通的；
                             开启 <code>repair_road_joins</code>（默认开）会先把这种地方修好再规划。</li>
                     </ul>
+                    <p>
+                        画好的路在地图上<strong>按层叠放</strong>：从低层往高层画，高架压在自己跨过去的地面路之上、隧道在地面路之下，
+                        同一层里先画完所有描边再画所有填充，所以路口看起来是一条路从另一条上跨过去。叠放与缩放的规则见
+                        <a href="#display">地图显示与缩放</a>。
+                    </p>
                     <p><a href="wiki/roads.html">详细教程：画路、命名与地点 →</a></p>
                 </div>
 
@@ -172,12 +191,21 @@
                     </div>
                     <ul>
                         <li><strong>路线偏好</strong>：最快时间 ↔ 最短距离；可以避开某些等级（例如不想走水路）；
-                            可以「优先大路」，让小路代价 ×1.6，只在必要时才走。</li>
+                            可以「优先大路」——每类道路各有一个权重，只乘在搜索代价上（<strong>高速 1.0 / 公路 1.25 / 小路 1.8</strong>），
+                            不影响报出来的时间与距离，两种度量走同一条计算。</li>
                         <li><strong>先预览再出发</strong>：预览会显示目的地与预计时间；没有可走的连接时直说「没有可用的道路连接」。</li>
-                        <li><strong>不绕远、不拉直线</strong>：所选方式比走路更慢、或该方式无解时，会说明原因并改为按步行规划；
-                            接驳段（首末离开路网的那一段）有距离上限——驾车与公共交通 64 格、步行 4096 格
-                            （实际上等于没有上限：没路时人本来就直线走，只是按离开路面的速度计时）——
-                            超过上限时宁可报「没有路线」，也不画一条横穿地图的直线。</li>
+                        <li><strong>不绕远、不拉直线</strong>：所选方式比走路更慢、或该方式无解时，会说明原因并改为按步行规划。</li>
+                        <li><strong>接驳段有上限</strong>：步行离开路面最多 <code>walk_offroad_blocks</code>（默认 <strong>32</strong> 格，
+                            范围 0 ~ 4096），超出的目的地与路尽头直接判「没有路线」；<strong>驾车不再越野</strong>，
+                            只允许「车还在路面上」的那点距离（最宽路面的半宽）——停在路边可以，停在田里不行；
+                            公共交通只保留站台到轨道的接驳（<code>station_snap_blocks</code>，默认 32 格），
+                            超过就没有这段车程，「全是接驳、没有一节在轨道上」的假乘车会被拒绝。
+                            宁可报「没有路线」，也不画一条横穿地图的直线。</li>
+                        <li><strong>主界面（<kbd>K</kbd>）</strong>：世界里按 <kbd>K</kbd> 打开，指令一个都不用记——
+                            标题下是一张只能看的地图（拖动平移、滚轮以光标为中心缩放，点它不会选点也不会开始导航）。
+                            世界地图里按 <kbd>K</kbd> 不会触发（地图有自己的按键）。</li>
+                        <li><strong>走完最后一段，路线颜色不再倒回去</strong>：到达后整条按「已走」处理，不会整条重画成未走的颜色。</li>
+                        <li><strong>退出世界不会把上一局的导航带进下一局</strong>：世界卸载时就结束导航并写一行日志。</li>
                         <li><strong>转向提示</strong>：HUD 显示转向箭头、剩余距离与时间、进度条；播报距离按路况缩放
                             （步行 50m、公路驾车 100m、高速驾车 300m、铁路 300m、冰道 500m）。</li>
                         <li><strong>转弯判定要求朝向</strong>：与路口齐平时，只有大致转向该方向（≤45°）才算转过，
@@ -198,8 +226,12 @@
                     <ul>
                         <li><strong>线路有自己的类型</strong>（铁路 / 水路 / 公路 / 冰道），决定它能在哪些道路上跑。
                             中列里接不上一站的站点会<strong>显示为红色</strong>，所以在保存之前你就能看见「这条线跑不通」。</li>
+                        <li><strong>线路按类型配色</strong>：四个类型各有一个颜色，改的是线路本身的线与它名下的每一个站点标记；
+                            它下面的轨道仍按道路等级取色。默认值就是一直使用的配色，不配置时和以前一样，MTR 读进来的线路同样按类型取色。</li>
                         <li><strong>站点有三个来源</strong>：自己标记的站点（可改）、机械动力车站（只读）、MTR 车站（只读）。
                             只读的理由很简单：它们的名字与类型属于那个模组，在这里改会得到一条描述着「不存在的车站」的线路。</li>
+                        <li><strong>MTR 同名车站合并后</strong>，线路里同名的车站只停一次，换乘也按合并后的那个地点算；
+                            合并规则见下面的 <a href="#mtr">MTR 集成</a>。</li>
                         <li><strong>规划</strong>：站点是有向图的节点，相邻两站之间是边，用 Dijkstra 求最省时间或最短的走法。</li>
                         <li><strong>没有可用线路就如实回答</strong>「没有公共交通路线」，不会假装成公交把你送到最近的一段轨道上。</li>
                         <li><strong>等车时间</strong>：每次登乘计一次（首次乘车也算，换乘再计一次），同时参与搜索与预计时间。</li>
@@ -219,6 +251,10 @@
                     <ul>
                         <li><strong>不引用任何 Create 类</strong>：靠方块注册名识别，所以 Create 改名或换版本不会让问道编译不过。
                             日志里的 <code>[HowToGo] Create track layer:</code> 会告诉你当前用的是哪种来源。</li>
+                        <li><strong>曲线保留原采样</strong>：Create 的贝塞尔曲线与 MTR 的小数坐标轨道保留原采样再平滑，
+                            不再先四舍五入到方块；平滑只影响显示，寻路用的顶点没有变。</li>
+                        <li><strong>短轨道先拼成长段</strong>：端点相接、类型相同的片段拼成「路口到路口」的长折线，
+                            只有岔口（三条以上轨道交汇）和没接上的地方才断开——选中、命名、描边与寻路的边数都跟着变干净。</li>
                         <li><strong>铁路只读，但可以命名</strong>：几何属于 Create，动了下一秒就被覆盖；名字是唯一可以改的东西，
                             存在单独的文件里，并且绑在路段两端坐标上，所以重建与重载都不会丢。</li>
                         <li><strong>整条线一起操作</strong>：<kbd>Shift</kbd> 点击选中整条铁路线，<kbd>N</kbd> 命名时整条线共用一个名字。</li>
@@ -233,20 +269,53 @@
                 <h2 id="mtr" class="reveal">MTR 集成（自动识别）</h2>
                 <div class="reveal">
                     <p>
-                        装了 MTR，它的车站与线路会被读成问道自己的站点与公共交通线路：列车与缆车算铁路，船算水路，
-                        其它类型（例如飞机）不猜、直接不处理。
+                        装了 MTR（<strong>4.0.4 及以上</strong>），它的车站与线路会被读成问道自己的站点与公共交通线路：
+                        列车与缆车算铁路，船算水路，其它类型（例如飞机）不猜、直接不处理。
                     </p>
                     <ul>
-                        <li><strong>MTR 只把玩家附近的数据发给客户端</strong>，所以任何一次读取都只是一个窗口。
-                            问道把每次读到的<strong>合并记住</strong>：走出同步范围后线路不会凭空消失。</li>
+                        <li><strong>读到过的都会被记住</strong>：MTR 发给客户端的数据可能只是一个窗口（联机时尤其如此），
+                            问道把每次读到的<strong>合并记住</strong>，走出同步范围后线路不会凭空消失；
+                            整图读取由 <code>mtr_full_map</code>（默认开）控制。</li>
+                        <li><strong>同名车站会合并</strong>：同名（忽略大小写与首尾空格）且候车点相距不超过
+                            <code>mtr_station_merge_blocks</code>（默认 <strong>256</strong> 格）的车站合成一个地点——
+                            列表里一条、地图上一个标记、线路只停一次，位置取所有站台的中点。无名车站从不合并，
+                            设成 <code>0</code> 就完全按 MTR 原样；站台认不出所属车站时按「不知道」处理，不再把孤儿站台凑到一起。</li>
                         <li><strong>站点取站台的中点</strong>而不是车站区域中心——大站的中心离轨道很远，而车停的是站台。</li>
                         <li><strong>每条线路可以自己决定要不要标记轨道</strong>。MTR 的协议里没有「这条线走哪段轨道」这个信息，
                             问道是反推的：对相邻站点对在 MTR 的轨道上规划一次，走过的轨道就是这条线实际走的轨道，
                             再以只读的铁路 / 水路道路标上去，让车程沿着 MTR 真正铺的轨道计算。</li>
+                        <li><strong>MTR Map Overlay 的两个地图开关会被记住</strong>：它自己的「线路 / 轨道」开关以前每次开游戏都回到「都画」，
+                            现在问道把它们记在 <code>config/howtogo/mtr_overlay_toggles.json</code>，改了立刻保存、下一局恢复；
+                            它自己的配置文件不动，删掉这个文件就不再记。没装那个模组时整段功能不存在。</li>
                         <li><strong>只读，但能拿走</strong>：MTR 的线路在列表里带 <code>[MTR]</code> 标记，
                             按「复制为我的」就得到一份可以随意改的副本。</li>
                     </ul>
                     <p><a href="wiki/mtr.html">详细教程：MTR 集成 →</a></p>
+                </div>
+
+                <!-- ================================================= 阡陌交通 -->
+                <h2 id="roadweaver" class="reveal">阡陌交通（RoadWeaver，自动识别）</h2>
+                <div class="reveal">
+                    <p>
+                        装了阡陌交通，它自动生成的道路会被读进来、画在世界地图上、参与寻路，
+                        它连接的村落与小屋成为目的地。整个读取是<strong>全反射</strong>的：没装、版本不合都不会崩。
+                    </p>
+                    <ul>
+                        <li><strong>路一律按「小路」读</strong>：它铺的是土 / 砂砾 / 木板，路宽表示的是「铺了几格」，不是「能不能开车」。
+                            <code>roadweaver_road_class</code> 仍可强制一个等级。</li>
+                        <li><strong>路口就是它自己说过的路口</strong>：两条路在同一个点才算连通；交叉而过、没有共享点位的不算（可能是立交，不猜）。
+                            路尽头的缺口会补一条同等级的直线连接段（连到结构），画在地图上、参与寻路、随整层替换、不写回。</li>
+                        <li><strong>整张路网</strong>：单人 / 局域网时直接读它进程内的整个路网（<code>roadweaver_full_map</code>，默认开），
+                            不用先打开它自己的路网地图；<strong>联机在别人的服务器上时只读它发给客户端的那一份，
+                            所以这一局要先按一次它的路网地图（<kbd>H</kbd>）</strong>，之后广播的局部更新会让图层自己更新。</li>
+                        <li><strong>参与寻路</strong>：步行、驾车（强制成可开等级时）与公交的步行接驳段都会用到它
+                            （<code>roadweaver_routing</code>，默认开）；关掉后照旧画在地图上，只是不参与规划。
+                            <code>roadweaver_roads</code> 关掉整层，<code>roadweaver_structures</code> 关掉结构目的地。</li>
+                        <li><strong>结构有别名</strong>：目的地列表、地图标签、导航提示都用它的别名，其次翻译名、可读 id。
+                            编辑时可以吸附到它的路与结构上，但只吸位置——不拆分、不连接、不移动它的几何。</li>
+                        <li><strong>它从不被写回</strong>：这些道路、连接段与结构不写进自己的路网文件、不进编辑器、不随地图导出。</li>
+                    </ul>
+                    <p><a href="wiki/roadweaver.html">详细教程：阡陌交通只读图层 →</a></p>
                 </div>
 
                 <!-- ================================================= 显示 -->
@@ -268,20 +337,49 @@
                             单向箭头跟着本层的填充画，桥也盖得住桥下的箭头。</li>
                         <li>地点这边先舍商店，再舍站点，再舍普通地点，<strong>资源点最后才舍</strong>——它本来就是值得专程去的东西。</li>
                         <li><strong>公共交通线路从不因为缩小而消失</strong>：它是地图上唯一不能由道路推出来的东西。</li>
-                        <li><strong>名字的大小跟着缩放走</strong>：缩小时按比例变小；放大时增长得很慢，因为名字是标签不是测量结果。
-                            名字与它标注的目标一起缩放，所以缩小的时候名字会自动贴近标记。</li>
+                        <li><strong>名字的字号不超过路的宽度</strong>，而不是跟着缩放走：路太细（缩小的远景、小路、铁路）先不写名字，
+                            放大到够宽才出现，所以名字永远落在路面里；宽路字大、窄路字小。
+                            很长的路沿路每隔约 190 像素写一个（每段最多 8 个），只放在屏幕上的可见段里，可见段比名字还短时就不写。</li>
+                        <li><strong>名字互不重叠</strong>：地点名、铁路名、道路名在同一张「已占位置」表上按这个顺序排，排不下就不画；
+                            两个地点靠近时只显示一个，放大到名字框分开才都显示。地点名与地点标记来自同一份目的地列表
+                            （自己标记的地点、Create 车站、MTR 车站），所以 MTR 站名也会画出来。</li>
+                        <li><strong>地点名按类型分缩放出</strong>：资源点 <code>0.4</code>、普通地点 <code>0.55</code>、
+                            站点 <code>0.7</code>、商店 <code>1.0</code>（px / 格）。默认写在标记下方，
+                            被占就依次试上方、右方、左方与四个斜角，都不行才退一步。</li>
                         <li><strong>线上名字顺着线的方向写</strong>，地点名保持水平——点标签和线的标签不是一回事。</li>
                         <li>开关与缩放规则走同一个入口，所以面板上的开关和缩放规则不可能互相矛盾。</li>
                     </ul>
                     <p><a href="wiki/display.html">详细教程：地图显示与缩放 →</a></p>
                 </div>
 
+                <!-- ================================================= 配色 -->
+                <h2 id="colors" class="reveal">颜色可以自己定</h2>
+                <div class="reveal">
+                    <p>
+                        每个道路等级、每种公共交通线路的颜色都能改，不用重新打包，也不用重启游戏。
+                    </p>
+                    <ul>
+                        <li><strong>道路等级颜色</strong>：<code>config/howtogo-client.toml</code> 新增 <code>road_colors</code> 一节，
+                            六项各一个颜色，写 <code>#RRGGBB</code> 或带透明度的 <code>#AARRGGBB</code>。
+                            世界地图、导航小地图、目的地选择界面、图例与网页地图读的是同一份设置。</li>
+                        <li><strong>公共交通线路颜色</strong>：<code>transit_line_colors</code>，四个类型（铁路 / 水路 / 公路 / 冰道）各一项，
+                            改的是线路本身的线与它名下的每一个站点标记；它下面的轨道仍按道路等级取色。
+                            默认值就是一直使用的配色，不配置时和以前一样，MTR 读进来的线路同样按类型取色。</li>
+                        <li><strong>写错的值会被忽略</strong>（日志里说一次）并保留原色；改完不用重启。
+                            NeoForge 上在模组列表的「配置」按钮里改最方便——它注册了 NeoForge 自带的配置屏幕，读的是生成
+                            <code>howtogo-client.toml</code> 的同一份声明，所以列出的项、默认值、范围与注释都与文件一致，保存后即时生效；
+                            Fabric 侧没有这个按钮，配置直接改 TOML 即可，值同样即时生效。</li>
+                    </ul>
+                    <p><a href="wiki/config.html">配置项一览 →</a></p>
+                </div>
+
                 <!-- ================================================= 浏览器地图 -->
                 <h2 id="webmap" class="reveal">浏览器地图（webmap）</h2>
                 <div class="reveal">
                     <p>
-                        <code>/howtogo webmap</code> 在本机开一个小型 HTTP 服务，把<strong>当前维度的路网</strong>
-                        送到浏览器里，画成一张可平移缩放的俯视 2D 地图，并带一个<strong>导出 PNG</strong> 的按钮。
+                        <code>/howtogo webmap</code> 在本机开一个小型 HTTP 服务，把<strong>游戏里那张地图</strong>
+                        （不只是手画的路：阡陌交通、机械动力、MTR 的只读图层也在里面）送到浏览器里，
+                        画成一张可平移缩放的俯视 2D 地图，并带一个<strong>导出 PNG</strong> 的按钮。
                         地址以可点击的链接发在聊天栏，点一下就用浏览器打开——它读的始终是你自己的那份路网。
                     </p>
                     <div class="table-wrap">
@@ -318,19 +416,52 @@
                         <li><strong>端口不是死的</strong>：默认 <code>7573</code>，被占用时依次试后面 9 个，
                             <strong>实际绑定的端口写在聊天消息里</strong>，书签不会悄悄失效；
                             <code>webmap_port</code> 可改，<code>webmap_auto_start</code>（默认关）可在世界加载后自动启动。</li>
+                        <li><strong>手动启动不再弹确认框</strong>：服务启动成功后直接用系统默认浏览器打开，聊天栏保留纯文本地址。</li>
                         <li><strong>数据只在客户端主线程读</strong>：HTTP 线程从不碰路网对象，
                             请求排进客户端刻的队列，由游戏线程摊平成一份<strong>不可变快照</strong>。
                             等待 5 秒超时返回 503，所以「这个世界还没画路」和「游戏还在加载世界」是两个能分辨的答案。</li>
+                        <li><strong>平滑曲线来自同一份数据</strong>：页面用 <code>curve</code> 描边、沿路排路名，并让地点名避开真正画出来的线；
+                            没有 <code>curve</code> 的手画道路照旧用顶点。载荷里每条路段还多一个可选的 <code>source</code>
+                            （阡陌交通 / 机械动力 / MTR / 扩展，玩家手画的没有这一项），
+                            页面用它把「只读」和来源写进鼠标读数与统计，侧栏多一行「自动识别」。</li>
                         <li><strong>遮挡按层与描边排</strong>：路段按 <code>layer</code> 从小到大画，
                             高架压地面、隧道在最下；同一层先描边后填充，所以十字路口看得出谁跨过谁。</li>
                         <li><strong>文字会挪位置，而不是压住别人</strong>：路名沿路旋转且永远不写成倒的，
-                            地点名默认在标记下方，被占了就依次试其它方向与更远一档，都放不下就不画。</li>
+                            地点名默认在标记下方，被占了就依次试上方、右方、左方与斜角，都放不下就不画。
+                            排版规则与游戏里的地图是同一套。</li>
                         <li><strong>导出的就是屏幕上那张图</strong>：用同一个绘制函数按 2 倍分辨率重画，
                             带标题栏（世界、维度、时间、统计、图例）；html2canvas 不可用时退回直接导出画布。</li>
                         <li><strong>自检覆盖它</strong>：<code>/howtogo selftest</code> 会在系统分配的端口上真的把服务开起来，
                             取回页面、脚本、html2canvas 与 <code>/api/roads</code> 并核对份数。</li>
                     </ul>
                     <p><a href="wiki/webmap.html">详细教程：浏览器地图 →</a></p>
+                </div>
+
+                <!-- ================================================= 主界面与地图存档 -->
+                <h2 id="main-menu" class="reveal">主界面与地图存档</h2>
+                <div class="reveal">
+                    <p>
+                        世界里按 <kbd>K</kbd> 打开主界面：标题下是一张<strong>只能看的地图</strong>（拖动平移、滚轮以光标为中心缩放，
+                        点它不会选点也不会开始导航），再下面是状态（出行方式、导航目的地与剩余距离 / 时间、路网规模）和按钮——
+                        选择目的地、结束导航、切换出行方式、地图存档、自检、浏览器地图、关闭。按键可以在「控制」里改。
+                    </p>
+                    <ul>
+                        <li><strong>导出</strong>：<code>/howtogo data</code> 打开「地图存档」界面，一个按钮把<strong>当前世界</strong>的道路、
+                            地点、铁路名称、公共交通线路与附属数据打成一个 <code>.zip</code> 放到
+                            <code>config/howtogo/exports/</code>；<code>/howtogo export</code> 直接导出。</li>
+                        <li><strong>导入</strong>：另一个按钮把别人的 <code>.zip</code> 导回来，<code>/howtogo import [压缩包]</code>
+                            读指定文件，压缩包也可以直接拖进界面。导入<strong>无视压缩包名与内部目录名</strong>：
+                            目录层级被剥掉，<code>.world</code> 记录改写为当前世界，数据写进当前世界目录。</li>
+                        <li><strong>覆盖前先说清楚</strong>：界面上写明写进哪个世界、来源与时间、文件数，旧数据会先备份；
+                            确认后先备份到 <code>config/howtogo/backups/</code>，再整目录替换——<strong>不合并</strong>，
+                            包里没有的维度文件会被删掉。备份文件名带 <code>-backup</code>，在「可导入的压缩包」列表里单独标黄，
+                            再导入它一次就回到导入之前。</li>
+                        <li><strong>只接受认识的文件</strong>：只读 <code>.json</code>；<code>__MACOSX/</code>、<code>.DS_Store</code>、
+                            <code>.world</code>、<code>*.part</code>、<code>*.corrupt</code> 跳过；带 <code>..</code> 或绝对路径的条目不跟随；
+                            文件数与解压总大小有上限；没有任何可读数据的包被拒绝，当前地图不动。</li>
+                        <li><strong>自检也覆盖它</strong>：自检里多一项「地图存档压缩包」，真的导出、导入、逐字节核对。</li>
+                    </ul>
+                    <p><a href="wiki/migrate.html">详细教程：数据目录与迁移 →</a></p>
                 </div>
 
                 <!-- ================================================= 目的地 -->
@@ -367,6 +498,11 @@
                                 <td>小地图上插的路标点（需要装 Xaero's Minimap）</td>
                                 <td>只读</td>
                             </tr>
+                            <tr>
+                                <td>阡陌交通结构</td>
+                                <td>它连接的村落与小屋</td>
+                                <td>只读（名字用它的别名或翻译名）</td>
+                            </tr>
                             </tbody>
                         </table>
                     </div>
@@ -380,11 +516,20 @@
                 <h2 id="compat" class="reveal">兼容性与数据</h2>
                 <div class="reveal">
                     <ul>
-                        <li><strong>纯客户端</strong>：服务器上不需要安装，也不会要求服务器装任何东西。代价是别的玩家看不到你画的路。</li>
+                        <li><strong>纯客户端</strong>：服务器上不需要安装，也不会要求服务器装任何东西——唯一一个服务端入口只做一件事，
+                            注册导航仪物品，让配方在服务端也能解析。代价是别的玩家看不到你画的路。</li>
                         <li><strong>可选模组全部是「软」依赖</strong>：通过方块注册名或反射读取，没装就是对应图层为空，其它功能照常。</li>
                         <li><strong>数据按存档分开</strong>：单人按存档名（<code>sp_</code>）、多人按服务器地址（<code>mp_</code>），
-                            文件名里带维度。备份整个 <code>config/howtogo/</code> 目录即可搬家。</li>
-                        <li><strong>不写别人的数据</strong>：机械动力与 MTR 的图层从不写进你的文件，你的路网也不会被它们改写。</li>
+                            文件名里带维度，目录里还有一个 <code>.world</code> 记录指向它属于哪个世界。</li>
+                        <li><strong>0.2.2 改了目录命名</strong>：中文存档的数据目录改用<strong>拼音</strong>
+                            （<code>sp_新世界</code> 从 <code>sp_____</code> 变成 <code>sp_xin_shi_jie</code>），
+                            第一次打开某个世界时自动整目录改名，升级不用做任何事；<strong>风险在降级</strong>：
+                            用 0.2.2 存过档再退回 0.2.1，那个世界的路网会是空的。
+                            维度文件名不再被拼音化（<code>minecraft_overworld.json</code> 就是它，不会变成「消失」）。
+                            详见 <a href="wiki/migrate.html">数据目录与迁移</a>。</li>
+                        <li><strong>搬家有两种方式</strong>：备份整个 <code>config/howtogo/</code> 目录，
+                            或用「地图存档」把当前世界打成 <code>.zip</code> 导出、再到另一台机器上导入。</li>
+                        <li><strong>不写别人的数据</strong>：机械动力、MTR 与阡陌交通的图层从不写进你的文件，你的路网也不会被它们改写。</li>
                     </ul>
                     <div class="callout">
                         <span class="ico">
@@ -397,6 +542,22 @@
                         <div>
                             <p>还没装？<a href="wiki/install.html">看安装教程</a>；想直接动手，
                                 去 <a href="wiki/index.html">Wiki 首页</a> 按顺序读三篇就能用起来。</p>
+                        </div>
+                    </div>
+                    <div class="callout warn">
+                        <span class="ico">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                 stroke-linecap="round">
+                                <path d="M12 4l9 16H3z"/>
+                                <path d="M12 10v4M12 17h.01"/>
+                            </svg>
+                        </span>
+                        <div>
+                            <p><strong>0.2.2 是预发布测试版。</strong>21 个构建（Fabric 11 个、NeoForge 10 个）
+                                只做过编译验证与回归测试（873 项检查），并没有在真实游戏里逐个走查。
+                                遇到问题请附上日志、MC 版本与加载器版本。</p>
+                            <p>完整变更见 <a href="wiki/changelog.html">更新日志</a>，
+                                安装与版本状态见 <a href="wiki/install.html">安装与前置</a>。</p>
                         </div>
                     </div>
                 </div>

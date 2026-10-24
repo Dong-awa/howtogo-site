@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>导航与 HUD — HowToGo | 问道 Wiki</title>
-    <meta name="description" content="问道导航教程：三种开始导航的方式、三种交通方式各自能走的道路等级与速度表、路线偏好（按等级权重）、高速上的搜索限制、先预览再出发、无解时的回退规则与驾车重计时、HUD 读数与转弯判定、语音播报与偏航容差。">
+    <meta name="description" content="问道导航教程：四种开始导航的方式、三种交通方式各自能走的道路等级与速度表、路线偏好（按等级权重）、高速上的搜索限制、先预览再出发、无解时的回退规则与驾车重计时、HUD 读数与转弯判定、语音播报与偏航容差。">
     <meta name="theme-color" content="#f4f8ff">
     <link rel="icon" href="../assets/img/mod-icon.png" type="image/png">
     <link rel="stylesheet" href="../assets/css/site.css">
@@ -66,6 +66,7 @@
                 <h4>进阶</h4>
                 <a href="transit.html" data-wiki-link data-keywords="公共交通 线路 站点 换乘 等车 线路配置">公共交通线路</a>
                 <a href="create.html" data-wiki-link data-keywords="机械动力 create 铁路 铁轨 车站 命名">机械动力铁路</a>
+                <a href="roadweaver.html" data-wiki-link data-keywords="阡陌交通 RoadWeaver 自动生成 道路 结构 村落 只读">阡陌交通</a>
                 <a href="mtr.html" data-wiki-link data-keywords="MTR 铁路 线路 只读 轨道标记 复制">MTR 集成</a>
                 <a href="display.html" data-wiki-link data-keywords="显示 面板 缩放 隐藏 图层 名字 字号">地图显示与缩放</a>
                 <a href="webmap.html" data-wiki-link data-keywords="浏览器地图 webmap 网页 端口 导出 PNG 离线">浏览器地图</a>
@@ -73,7 +74,7 @@
                 <a href="config.html" data-wiki-link data-keywords="配置 文件 toml 数据 存档 备份">配置与数据文件</a>
                 <a href="migrate.html" data-wiki-link data-keywords="迁移 搬家 改名 换电脑 存档 服务器地址 数据 文件夹 sp_ mp_ 世界名 目录 备份 丢失">迁移地图数据</a>
                 <a href="faq.html" data-wiki-link data-keywords="常见问题 限制 报错 没有路线 语音">常见问题与限制</a>
-                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.1 0.2.0 0.1.0">更新日志</a>
+                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.2 0.2.1 0.2.0 0.1.0">更新日志</a>
             </aside>
 
             <main class="wiki-body">
@@ -89,7 +90,7 @@
                     所以它给的每一条路线都能在地图上指出它为什么这么走。
                 </p>
 
-                <h2 id="start">三种开始导航的方式</h2>
+                <h2 id="start">四种开始导航的方式</h2>
                 <div class="table-wrap">
                     <table>
                         <thead>
@@ -106,6 +107,12 @@
                             <td>不用。<kbd>Ctrl</kbd> + 左键是唯一一个不需要 <kbd>R</kbd> 的地图操作。</td>
                         </tr>
                         <tr>
+                            <td>主界面 <kbd>K</kbd></td>
+                            <td>在世界里按 <kbd>K</kbd> 打开主界面，点「选择目的地」；「结束导航」「切换出行方式」也在这里。
+                                标题下那张地图只能看——拖动平移、滚轮缩放，点它不会选点也不会开始导航。</td>
+                            <td>不用。按键可以在「控制」里改；世界地图里按 <kbd>K</kbd> 不会触发（地图有自己的按键）。</td>
+                        </tr>
+                        <tr>
                             <td>导航仪</td>
                             <td>手持「道路导航仪」右键，打开「选择目的地」界面；鼠标悬停时 tooltip 显示当前行程。</td>
                             <td>不用</td>
@@ -118,7 +125,11 @@
                         </tbody>
                     </table>
                 </div>
-                <p>导航仪由四角铁锭、四边纸、中心指南针合成（有序，九格全满），拿到指南针后配方会自动出现在配方书里。</p>
+                <p>
+                    导航仪由四角铁锭、四边纸、中心指南针合成（有序，九格全满），拿到指南针后配方会自动出现在配方书里。
+                    0.2.2 新增的 <kbd>K</kbd> 主界面是另一个入口：不必把导航仪拿在手上，按一下就能看状态、
+                    换出行方式、选目的地或结束导航，两条路最后都落在「选择目的地」上。
+                </p>
 
                 <h2 id="modes">交通方式：等级决定路线</h2>
                 <p>
@@ -251,11 +262,16 @@
                     <li><strong>公共交通是例外</strong>：一条真实存在的公交行程不会被替换掉。
                         步行只会作为替代方案给出，不会顶替那条行程——
                         否则你选了公共交通，却拿到一条全程步行的路线，跟没做这个功能一样。</li>
-                    <li><strong>首末接驳有上限</strong>：驾车与公共交通 64 格。超过就直接报「没有路线」，
-                        绝不画一条横穿地图的直线。</li>
-                    <li><strong>步行几乎没有上限</strong>：走路网之外的地方本来就是步行会做的事，
-                        那条路会按越野速度计时。上限只留了一个「大到等于没有」的值，
-                        只是防止一个打错的坐标变成一条通往世界尽头的路线。</li>
+                    <li><strong>步行越野有上限了</strong>（0.2.2 起）：<code>walk_offroad_blocks</code> 默认
+                        <strong>32</strong> 格，范围 <code>0 ~ 4096</code>。超出的目的地或路尽头直接判「没有路线」，
+                        不再画一条横穿地图的直线。走路网之外的地方本来就是步行会做的事，
+                        所以这个值给的是「越野多远还算合理」，而不是有没有这个能力。</li>
+                    <li><strong>驾车不再越野</strong>（0.2.2 起）：只允许「车还在路面上」的那一点距离
+                        （最宽路面的半宽）——停在路边可以，停在田里不行。以前它和公共交通一样可以走 64 格直线接驳。</li>
+                    <li><strong>公共交通的乘车段也不再越野</strong>（0.2.2 起）：只保留站台到轨道的接驳
+                        （<code>station_snap_blocks</code>，默认 32 格），超过就没有这段车程；
+                        一段「全是接驳、没有一节在轨道上」的假乘车会被拒绝。步行段仍按
+                        <code>walk_offroad_blocks</code> 越野。</li>
                     <li><strong>单行道只能顺着走</strong>：被标成单行的路，规划只在允许的方向上使用它，步行也一样
                         （见 <a href="roads.html">画路、命名与地点</a>）。所以把一条街设成单行之后，
                         反向的路线会改走别的路——真的没有别的路时，答案就是「没有路线」，
@@ -267,6 +283,11 @@
                     导航开始后，屏幕上的面板给出：<strong>旋转小地图</strong>（带北向指示）、<strong>转向箭头</strong>、
                     <strong>剩余距离与时间</strong>、<strong>进度条</strong>。文字读数是同一套数字的另一种写法，
                     例如「前往 家 | 剩余 840 米 · 约 1分40秒」。到达时显示「✔ 已到达 家」。
+                </p>
+                <p>
+                    导航线分成「已走」与「未走」两种颜色；<strong>走完最后一段时整条按「已走」处理</strong>，
+                    不会因为到达而整条重画回未走的颜色（0.2.2 起）。<strong>退出世界也会结束导航</strong>：
+                    世界被卸下时就结束并写一行日志，上一局的路线不会跟着带进下一局。
                 </p>
                 <p>
                     <strong>转弯判定要求朝向。</strong>与路口齐平时，只有当你大致转向该方向（≤45°）才算「转过」；

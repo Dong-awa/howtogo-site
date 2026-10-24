@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>安装与前置 — HowToGo | 问道 Wiki</title>
-    <meta name="description" content="问道（HowToGo）安装教程：支持的 Minecraft 与 NeoForge 版本、必需与可选前置模组、装到哪个目录、进游戏后先确认什么、数据文件放在哪。">
+    <meta name="description" content="问道（HowToGo）安装教程：0.2.2 支持的 Minecraft 1.20.1 ~ 1.21.11 与 26.x、Fabric 与 NeoForge 两种加载器、必需与可选前置模组、装到哪个目录、进游戏后先确认什么、数据文件放在哪、升级到 0.2.2 时存档目录的改名规则。">
     <meta name="theme-color" content="#f4f8ff">
     <link rel="icon" href="../assets/img/mod-icon.png" type="image/png">
     <link rel="stylesheet" href="../assets/css/site.css">
@@ -66,6 +66,7 @@
                 <h4>进阶</h4>
                 <a href="transit.html" data-wiki-link data-keywords="公共交通 线路 站点 换乘 等车 线路配置">公共交通线路</a>
                 <a href="create.html" data-wiki-link data-keywords="机械动力 create 铁路 铁轨 车站 命名">机械动力铁路</a>
+                <a href="roadweaver.html" data-wiki-link data-keywords="阡陌交通 RoadWeaver 自动生成 道路 结构 村落 只读">阡陌交通</a>
                 <a href="mtr.html" data-wiki-link data-keywords="MTR 铁路 线路 只读 轨道标记 复制">MTR 集成</a>
                 <a href="display.html" data-wiki-link data-keywords="显示 面板 缩放 隐藏 图层 名字 字号">地图显示与缩放</a>
                 <a href="webmap.html" data-wiki-link data-keywords="浏览器地图 webmap 网页 端口 导出 PNG 离线">浏览器地图</a>
@@ -73,7 +74,7 @@
                 <a href="config.html" data-wiki-link data-keywords="配置 文件 toml 数据 存档 备份">配置与数据文件</a>
                 <a href="migrate.html" data-wiki-link data-keywords="迁移 搬家 改名 换电脑 存档 服务器地址 数据 文件夹 sp_ mp_ 世界名 目录 备份 丢失">迁移地图数据</a>
                 <a href="faq.html" data-wiki-link data-keywords="常见问题 限制 报错 没有路线 语音">常见问题与限制</a>
-                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.1 0.2.0 0.1.0">更新日志</a>
+                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.2 0.2.1 0.2.0 0.1.0">更新日志</a>
             </aside>
 
             <main class="wiki-body">
@@ -86,42 +87,90 @@
                 <p class="lead">
                     问道是<strong>纯客户端</strong>模组：装在你自己的客户端就够了，服务器上不需要装它，
                     它也不会向服务器要求任何东西。换句话说，在任何服务器里，你都能独自使用它；
-                    你画的路、标的地点只存在于你的客户端。
+                    你画的路、标的地点只存在于你的客户端。0.2.2 起同时提供
+                    <strong>Fabric</strong> 与 <strong>NeoForge</strong> 两种加载器的构建。
                 </p>
 
                 <h2 id="version">版本要求</h2>
+                <p>
+                    0.2.2 覆盖 Minecraft <strong>1.20.1 到 1.21.11</strong> 以及 <strong>26.1 ~ 26.3</strong>，
+                    共 <strong>21 个构建</strong>（Fabric 11 个、NeoForge 10 个）。
+                    下载时挑与你游戏版本和加载器都对应的那一个：
+                </p>
                 <div class="table-wrap">
                     <table>
                         <thead>
                         <tr>
-                            <th>项目</th>
-                            <th>要求</th>
+                            <th>Minecraft</th>
+                            <th>Fabric</th>
+                            <th>NeoForge</th>
                         </tr>
                         </thead>
                         <tbody>
                         <tr>
-                            <td>Minecraft</td>
-                            <td><strong>1.21.1</strong></td>
+                            <td>1.20.1</td>
+                            <td>✔</td>
+                            <td>—</td>
                         </tr>
                         <tr>
-                            <td>NeoForge</td>
-                            <td><strong>21.1.x</strong>（21.1.0 及以上，21.2 之前）</td>
+                            <td>1.20.4</td>
+                            <td>✔</td>
+                            <td>✔</td>
                         </tr>
                         <tr>
-                            <td>运行侧</td>
-                            <td>客户端（<code>dist = CLIENT</code>）</td>
+                            <td>1.20.6</td>
+                            <td>✔</td>
+                            <td>✔</td>
                         </tr>
                         <tr>
-                            <td>模组 ID</td>
-                            <td><code>howtogo</code></td>
+                            <td>1.21.1</td>
+                            <td>✔</td>
+                            <td>✔</td>
                         </tr>
                         <tr>
-                            <td>当前版本</td>
-                            <td><strong>0.2.1</strong></td>
+                            <td>1.21.4</td>
+                            <td>✔</td>
+                            <td>✔</td>
+                        </tr>
+                        <tr>
+                            <td>1.21.6</td>
+                            <td>✔</td>
+                            <td>✔</td>
+                        </tr>
+                        <tr>
+                            <td>1.21.8</td>
+                            <td>✔</td>
+                            <td>✔</td>
+                        </tr>
+                        <tr>
+                            <td>1.21.11</td>
+                            <td>✔</td>
+                            <td>✔</td>
+                        </tr>
+                        <tr>
+                            <td>26.1</td>
+                            <td>✔</td>
+                            <td>✔</td>
+                        </tr>
+                        <tr>
+                            <td>26.2</td>
+                            <td>✔</td>
+                            <td>✔</td>
+                        </tr>
+                        <tr>
+                            <td>26.3</td>
+                            <td>✔</td>
+                            <td>✔</td>
                         </tr>
                         </tbody>
                     </table>
                 </div>
+                <p>
+                    <code>✔</code> 表示有对应构建，<code>—</code> 表示这一版没有那个加载器的构建。
+                    <strong>不支持 Forge</strong>：ForgeGradle 与当前的构建工具链冲突，Forge 的构建已从仓库移除。
+                    构建文件名形如 <code>howtogo-0.2.2pre1+mc1.21.1-neoforge.jar</code>，
+                    里面带着 Minecraft 版本与加载器，按名字对号入座即可。
+                </p>
 
                 <div class="callout warn">
                     <span class="ico">
@@ -132,9 +181,38 @@
                         </svg>
                     </span>
                     <div>
-                        <p>版本范围是<strong>写死</strong>的，不是「大概能用」：NeoForge 只声明 21.1.x、Minecraft 只声明
-                            1.21.1。一个错误的上限比缺少一个功能更糟——它会让人在从没测试过的版本上加载，然后把崩溃当成 bug 报上来。</p>
+                        <p>0.2.2 仍是<strong>预发布测试版</strong>：21 个构建都只做过<strong>编译验证与回归测试</strong>
+                            （873 项检查），没有在真实游戏里逐个走查过。遇到问题请附上 <code>latest.log</code>。</p>
                     </div>
+                </div>
+
+                <h3 id="status">现在发布的是哪一版</h3>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>版本</th>
+                            <th>状态</th>
+                            <th>说明</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td><strong>0.2.2</strong></td>
+                            <td>已发布（预发布测试版）</td>
+                            <td>GitHub Release <code>v0.2.2</code>（2026-10-18），21 个构建。
+                                本站的教程与功能说明描述的就是这一版。</td>
+                        </tr>
+                        <tr>
+                            <td>0.2.3</td>
+                            <td>开发中，<strong>未发布</strong></td>
+                            <td>作者本地的开发版本：GitHub 上的仓库与 Release 里都还没有。它已经在改一批东西
+                                （例如导航仪物品的去留、Fabric 的按键、MTR 数据的同步方式），
+                                <strong>尚不可下载</strong>，与 0.2.2 的差异记在
+                                <a href="changelog.html">更新日志</a>的「未发布」一节。</td>
+                        </tr>
+                        </tbody>
+                    </table>
                 </div>
 
                 <h2 id="dependencies">需要哪些模组</h2>
@@ -151,12 +229,25 @@
                         <tr>
                             <td><strong>Xaero's World Map</strong></td>
                             <td>必需</td>
-                            <td>所有道路、线路与路线都渲染在它上面。缺少时模组会在日志里报错并停用渲染层。</td>
+                            <td>装与你的 Minecraft 版本对应的版本（0.2.2 面向 Xaero <strong>1.40.0</strong> 及以上，
+                                开发与测试用的是 1.47.x）。所有道路、线路与路线都渲染在它上面；
+                                缺少时模组会在日志里报错并停用渲染层。</td>
                         </tr>
                         <tr>
                             <td>XaeroLib</td>
                             <td>必需</td>
-                            <td>随 World Map 一起提供，不需要单独下载。</td>
+                            <td>随 World Map 一起提供，不需要单独下载；26.x 的世界地图以嵌套 jar 分发它，
+                                运行时由世界地图交给本模组。</td>
+                        </tr>
+                        <tr>
+                            <td>Fabric API</td>
+                            <td>Fabric 必需</td>
+                            <td>用 Fabric 时需要 Fabric Loader 与 Fabric API；NeoForge 不需要它。</td>
+                        </tr>
+                        <tr>
+                            <td>NeoForge</td>
+                            <td>NeoForge 必需</td>
+                            <td>用 NeoForge 时需要与你的 Minecraft 版本对应的 NeoForge。</td>
                         </tr>
                         <tr>
                             <td>Xaero's Minimap</td>
@@ -171,7 +262,13 @@
                         <tr>
                             <td>MTR（我的世界铁路）</td>
                             <td>可选</td>
-                            <td>读取 MTR 的车站与线路，见 <a href="mtr.html">MTR 集成</a>。</td>
+                            <td>读取 MTR 的车站与线路（读取器要求 MTR <strong>4.0.4 及以上</strong>），
+                                见 <a href="mtr.html">MTR 集成</a>。</td>
+                        </tr>
+                        <tr>
+                            <td>阡陌交通（RoadWeaver）</td>
+                            <td>可选</td>
+                            <td>读取它自动生成的道路与结构，见 <a href="roadweaver.html">阡陌交通</a>。</td>
                         </tr>
                         <tr>
                             <td>MCPhone</td>
@@ -190,14 +287,18 @@
 
                 <h2 id="steps">安装步骤</h2>
                 <ol>
-                    <li>给 1.21.1 装好 <strong>NeoForge 21.1.x</strong>，确认能正常进入游戏。</li>
-                    <li>把 <strong>Xaero's World Map</strong>（1.21.1 / NeoForge 版）放进 <code>mods/</code>。</li>
-                    <li>把 <code>howtogo-0.2.1.jar</code> 放进同一个 <code>mods/</code>。</li>
+                    <li>选好 Minecraft 版本与加载器，装好 <strong>Fabric Loader + Fabric API</strong>
+                        或对应版本的 <strong>NeoForge</strong>，确认能正常进入游戏。</li>
+                    <li>把与你 Minecraft 版本对应的 <strong>Xaero's World Map</strong> 放进 <code>mods/</code>；
+                        26.x 不用另外找 XaeroLib，它随世界地图分发。</li>
+                    <li>把对应构建放进同一个 <code>mods/</code>，例如 1.21.1 + NeoForge 就用
+                        <code>howtogo-0.2.2pre1+mc1.21.1-neoforge.jar</code>；Fabric 则用同一版本号里
+                        <code>-fabric</code> 的那一个。</li>
                     <li>启动游戏。日志里出现 <code>[HowToGo] constructed</code> 就说明模组已经加载。</li>
                 </ol>
 
-                <p>想要识别机械动力铁路或 MTR 线路，再把对应模组也放进 <code>mods/</code>；它们是随时可以加减的——
-                    加进来图层立刻有内容，拿掉图层立刻为空，你的路网不会因此受损。</p>
+                <p>想要识别机械动力铁路、MTR 线路或阡陌交通的路，再把对应模组也放进 <code>mods/</code>；
+                    它们是随时可以加减的——加进来图层立刻有内容，拿掉图层立刻为空，你的路网不会因此受损。</p>
 
                 <h2 id="verify">进游戏后先确认这三件事</h2>
                 <ol>
@@ -205,7 +306,8 @@
                         看不到它，多半是 Xaero 的世界地图没装或版本不对。</li>
                     <li>在世界地图上按 <kbd>R</kbd>，屏幕左下角出现绘制状态与路网统计、右下角出现快捷键列表，
                         说明编辑模式已经打开。</li>
-                    <li>拿一个导航仪（或按 <kbd>Ctrl</kbd> + 左键点地图）确认选择目的地界面能打开。</li>
+                    <li>按 <kbd>K</kbd> 打开主界面（0.2.2 新增），或者拿一个导航仪右键、按 <kbd>Ctrl</kbd> +
+                        左键点地图，确认选择目的地界面能打开。</li>
                 </ol>
 
                 <div class="callout">
@@ -226,8 +328,14 @@
                 <p>
                     所有数据都在客户端的 <code>config/howtogo/</code> 下，<strong>按世界分开</strong>：
                     单人存档按世界名（<code>sp_&lt;世界名&gt;</code>），多人服务器按服务器地址（<code>mp_&lt;地址&gt;</code>）。
-                    目录名里的空格、中文、端口冒号都会被换成下划线；改名、换地址或换电脑时怎么搬，见
-                    <a href="migrate.html">迁移地图数据</a>。坐标只在一个维度里有意义，所以文件名里还带着维度。
+                    0.2.2 起目录名里的中文会转成<strong>拼音</strong>（<code>sp_新世界</code> →
+                    <code>sp_xin_shi_jie</code>），ASCII 名字原样保留，其余非法字符换成下划线。
+                    第一次用新版打开旧世界时，整个目录会自动改名，不需要你做任何事；
+                    <strong>风险在降级</strong>——用 0.2.2 存过档再退回 0.2.1，那个世界的路网会是空的。
+                    改名、换地址或换电脑时怎么搬，见 <a href="migrate.html">迁移地图数据</a>。
+                    坐标只在一个维度里有意义，所以文件名里还带着维度；
+                    维度文件名不经过拼音（<code>minecraft_overworld.json</code> 就是它），
+                    所以升级不会让已有的路网「消失」。
                 </p>
                 <div class="table-wrap">
                     <table>
@@ -240,7 +348,7 @@
                         <tbody>
                         <tr>
                             <td><code>&lt;维度&gt;.json</code></td>
-                            <td>道路网络：节点、路段、名称、地点与地点类型。</td>
+                            <td>道路网络：节点、路段（含可选的平滑折线 <code>curve</code>）、名称、地点与地点类型。</td>
                         </tr>
                         <tr>
                             <td><code>&lt;维度&gt;-lines.json</code></td>
@@ -259,6 +367,14 @@
                             <td>地图显示面板的开关、卷起状态与位置（与存档无关）。</td>
                         </tr>
                         <tr>
+                            <td><code>mtr_overlay_toggles.json</code></td>
+                            <td>装了 MTR Map Overlay 时，记住它在世界地图上的「线路 / 轨道」两个开关（0.2.2 起）。</td>
+                        </tr>
+                        <tr>
+                            <td><code>exports/</code>、<code>backups/</code></td>
+                            <td>地图存档压缩包：导出的包与导入前的备份（0.2.2 起，见 <a href="migrate.html">迁移地图数据</a>）。</td>
+                        </tr>
+                        <tr>
                             <td><code>../howtogo-client.toml</code></td>
                             <td>客户端配置，见 <a href="config.html">配置与数据文件</a>。</td>
                         </tr>
@@ -267,7 +383,9 @@
                 </div>
 
                 <p>
-                    想备份路网，复制整个 <code>config/howtogo/</code> 目录即可；想在不同电脑之间搬家，也是同一个目录。
+                    想备份路网，复制整个 <code>config/howtogo/</code> 目录即可，也可以在一个世界里用
+                    <code>/howtogo data</code> 把当前世界打包成 <code>.zip</code>；
+                    想在不同电脑之间搬家，两种方式都行（压缩包同样能导入回来）。
                     反过来，删掉模组的 jar <strong>不会</strong>删掉这些文件——路网是你的数据，不是模组的缓存。
                     单个世界的迁移（改世界名、换服务器地址、复制存档）见 <a href="migrate.html">迁移地图数据</a>。
                 </p>

@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>地图显示与缩放 — HowToGo | 问道 Wiki</title>
-    <meta name="description" content="问道（HowToGo）地图显示教程：左上角「地图显示」面板怎么用、每个开关管什么、缩小地图时道路与地点按什么顺序自动取舍、道路的绘制顺序（按层与描边）、名字的字号与位置规则、地图上的标记分别是什么。">
+    <meta name="description" content="问道（HowToGo）地图显示教程：左上角「地图显示」面板怎么用、每个开关管什么、缩小地图时道路与地点按什么顺序自动取舍、道路的绘制顺序（按层与描边）、名字排版规则（字号不超过路宽、长路多个名字、互不重叠）、道路与线路颜色怎么自己定、地图上的标记分别是什么。">
     <meta name="theme-color" content="#f4f8ff">
     <link rel="icon" href="../assets/img/mod-icon.png" type="image/png">
     <link rel="stylesheet" href="../assets/css/site.css">
@@ -66,6 +66,7 @@
                 <h4>进阶</h4>
                 <a href="transit.html" data-wiki-link data-keywords="公共交通 线路 站点 换乘 等车 线路配置">公共交通线路</a>
                 <a href="create.html" data-wiki-link data-keywords="机械动力 create 铁路 铁轨 车站 命名">机械动力铁路</a>
+                <a href="roadweaver.html" data-wiki-link data-keywords="阡陌交通 RoadWeaver 自动生成 道路 结构 村落 只读">阡陌交通</a>
                 <a href="mtr.html" data-wiki-link data-keywords="MTR 铁路 线路 只读 轨道标记 复制">MTR 集成</a>
                 <a href="display.html" data-wiki-link data-keywords="显示 面板 缩放 隐藏 图层 名字 字号" aria-current="page">地图显示与缩放</a>
                 <a href="webmap.html" data-wiki-link data-keywords="浏览器地图 webmap 网页 端口 导出 PNG 离线">浏览器地图</a>
@@ -73,7 +74,7 @@
                 <a href="config.html" data-wiki-link data-keywords="配置 文件 toml 数据 存档 备份">配置与数据文件</a>
                 <a href="migrate.html" data-wiki-link data-keywords="迁移 搬家 改名 换电脑 存档 服务器地址 数据 文件夹 sp_ mp_ 世界名 目录 备份 丢失">迁移地图数据</a>
                 <a href="faq.html" data-wiki-link data-keywords="常见问题 限制 报错 没有路线 语音">常见问题与限制</a>
-                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.1 0.2.0 0.1.0">更新日志</a>
+                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.2 0.2.1 0.2.0 0.1.0">更新日志</a>
             </aside>
 
             <main class="wiki-body">
@@ -151,7 +152,7 @@
                         <tbody>
                         <tr>
                             <td>道路等级</td>
-                            <td>高速 · 公路 · 小路 · 铁路 · 水路 · 冰道（每个等级一个，颜色与它画出来的线一致）</td>
+                            <td>高速 · 公路 · 小路 · 铁路 · 水路 · 冰道（每个等级一个，颜色与它画出来的线一致，可以自己定，见<a href="#colors">下文</a>）</td>
                         </tr>
                         <tr>
                             <td>公共交通线路</td>
@@ -168,6 +169,13 @@
                     这是<strong>你自己的偏好，与存档无关</strong>：换一个存档、换一台服务器，显示偏好还是这一套。
                     它存在 <code>config/howtogo/map_filter.json</code> 里，和路网文件不在一起——
                     删掉这个文件只是让地图恢复「什么都画」，不会碰到你的路。
+                </p>
+                <h3>顺带：MTR Map Overlay 的两个开关也会被记住</h3>
+                <p>
+                    如果你还装了 MTR Map Overlay，它自己地图上的那两个「线路 / 轨道」开关（不是这块面板上的）
+                    以前每次开游戏都会回到「都画」。现在问道把它们记在
+                    <code>config/howtogo/mtr_overlay_toggles.json</code> 里：改了立刻保存，下一局进来还是上次那个样子。
+                    它自己的配置文件不动；删掉这个文件就不再记。没装那个模组时，这一段功能不存在。
                 </p>
 
                 <h2 id="zoom">缩小时会自动取舍</h2>
@@ -297,11 +305,13 @@
 
                 <h2 id="names">名字的大小与位置</h2>
                 <p>
-                    名字的<strong>字号跟着缩放走</strong>，但两个方向不一样：缩小时按比例变小，
-                    直到一个仍然看得清的下限（约字体的 <strong>0.55 倍</strong>）；放大时增长得<strong>很慢</strong>——
-                    大约到 <strong>38 倍</strong>缩放才到最大，最大也只有约 <strong>1.1 倍</strong>字体。
-                    原因是：名字是标签，不是测量结果。早早顶到最大字号，只会让所有缩放级别看起来一样，
-                    而且一屏字会比地图本身还抢眼。
+                    名字这一块在 0.2.2 里重做了一遍，而且是<strong>世界地图与网页地图共用同一套规则</strong>：
+                    同一张「已占位置」表、同一套字号与避让判断。所以屏幕上怎么排，网页地图里就怎么排，
+                    导出的 PNG 也一样。
+                </p>
+                <p>
+                    出发点只有一句：名字是标签，不是测量结果。它要落在自己标注的那条路上、那个点旁边，
+                    而不是浮在半空抢走地图本身的分量。下面这些规则都是这一句的推论。
                 </p>
                 <div class="table-wrap">
                     <table>
@@ -313,29 +323,63 @@
                         </thead>
                         <tbody>
                         <tr>
-                            <td>文字的显示门槛</td>
-                            <td>缩放低于 <code>0.5</code>（像素 / 块）就不画<strong>文字</strong>，但<strong>标记照画</strong>——缩小时正是最需要标记的时候。</td>
+                            <td>字号不超过路宽</td>
+                            <td>线上的名字<strong>不超过这条路画出来的宽度</strong>：宽路字大、窄路字小，名字永远落在路面里。
+                                路太细时（缩小的远景、小路、铁路）<strong>先不写名字</strong>，放大到够宽才出现。</td>
                         </tr>
                         <tr>
-                            <td>名字与目标一起缩放</td>
-                            <td>地点名到它标记的那一点的距离跟着字号走，所以缩小时名字会自动<strong>贴近</strong>标记，而不是悬在半空。</td>
+                            <td>长路会有好几个名字</td>
+                            <td>一段路很长时，沿路<strong>每隔约 <code>190</code> 像素</strong>写一个，每段最多 <code>8</code> 个。
+                                只写在屏幕上的<strong>可见段</strong>里；可见段比名字本身还短时，这一段就不写。</td>
                         </tr>
                         <tr>
-                            <td>线上的名字</td>
-                            <td>道路名与铁路名<strong>顺着线的方向</strong>写，并取字体行高的一半，让道路从字中间穿过，而不是浮在字旁边。</td>
+                            <td>名字之间不重叠</td>
+                            <td>地点名、铁路名、道路名排在同一张「已占位置」表上，按这个顺序找位置，<strong>排不下就不画</strong>。
+                                两个地点靠近时只显示一个，放大到两个名字框分开，才都显示。</td>
                         </tr>
                         <tr>
-                            <td>点标签</td>
-                            <td>地点名与车站名保持<strong>水平</strong>：它们是点标签，不是线上的名字。</td>
+                            <td>地点名按类型分级</td>
+                            <td>地点名的字号按类型分：资源点 <code>0.4</code>、普通地点 <code>0.55</code>、
+                                站点 <code>0.7</code>、商店 <code>1.0</code>，单位是<strong>像素 / 格</strong>。</td>
                         </tr>
                         <tr>
-                            <td>放不下就不写</td>
-                            <td>名字宽度超过它标注的<strong>整条路</strong>（不是单个路段——带弯的路是多个路段共用一个名字）时，整条名字不画，
-                                免得它比路还长、读起来像在标注旁边的东西。</td>
+                            <td>地点名避开道路</td>
+                            <td>默认写在标记<strong>下方</strong>；被占了就依次试上方、右方、左方、四个斜角，都不行才退一步。</td>
+                        </tr>
+                        <tr>
+                            <td>名字与标记同源</td>
+                            <td>地点名与地点标记来自<strong>同一份目的地列表</strong>——自己标记的地点、机械动力车站、MTR 车站，
+                                所以 MTR 的站名也会画出来。</td>
                         </tr>
                         </tbody>
                     </table>
                 </div>
+
+                <h2 id="colors">颜色可以自己定</h2>
+                <p>
+                    道路等级的颜色以前是写死的，现在可以自己定：<code>config/howtogo-client.toml</code> 里新增了
+                    <code>road_colors</code> 一节，六个道路等级各一个颜色，写法是 <code>#RRGGBB</code>，
+                    或者带透明度的 <code>#AARRGGBB</code>。
+                </p>
+                <p>
+                    这一份设置是<strong>唯一的一份</strong>：世界地图、导航小地图、目的地选择界面、图例、网页地图
+                    读的都是它，改一处，几处一起变——所以不会出现「地图上是这个颜色、图例里是另一个」。
+                </p>
+                <p>
+                    写错的值（不是颜色、位数不对）会被<strong>忽略</strong>并保留原来的颜色，日志里说一次；
+                    改完<strong>不用重启</strong>，下一次绘制就用新的。
+                </p>
+                <p>
+                    公共交通线路另有一节 <code>transit_line_colors</code>：铁路、水路、公路、冰道四个类型各一项，
+                    改的是<strong>线路本身的那条线</strong>和它名下的<strong>每一个站点标记</strong>；
+                    它下面的轨道仍按 <code>road_colors</code> 画——线是线，轨道是轨道。
+                    默认值就是模组一直用的那套配色，不配置它，看起来和以前一样；从 MTR 读进来的线路
+                    同样按类型取这一份颜色。
+                </p>
+                <p>
+                    这两节都在 <code>config/howtogo-client.toml</code> 里，完整清单见
+                    <a href="config.html">配置与数据文件</a>。
+                </p>
 
                 <h2 id="markers">地图上的标记</h2>
                 <div class="table-wrap">
@@ -356,7 +400,8 @@
                         <tr>
                             <td>线路站点</td>
                             <td>小方块，填的是<strong>线路自己的颜色</strong>，带一圈深色描边</td>
-                            <td>颜色取自线路的类型（铁路／水路／冰道／公路），所以同一条线的站点一眼能认出来。</td>
+                            <td>颜色取自线路的类型（铁路／水路／冰道／公路），所以同一条线的站点一眼能认出来；
+                                每个类型的颜色可以在 <code>transit_line_colors</code> 里改，见上面「颜色可以自己定」。</td>
                         </tr>
                         <tr>
                             <td>换乘站</td>
@@ -385,7 +430,7 @@
                 <p>
                     三处都正常还是空的，那就不是显示的问题，而是数据的问题：检查你是不是换了存档或服务器
                     （路网按世界名 / 服务器地址分开存，改了名字就会去新目录找，旧目录还在但不读了），
-                    或者那个只读图层的前置模组没有装。数据的组织方式见
+                    或者那个只读图层的前置模组没有装（阡陌交通的读法见 <a href="roadweaver.html">阡陌交通</a>）。数据的组织方式见
                     <a href="config.html">配置与数据文件</a>，改名后怎么找回见
                     <a href="migrate.html">迁移地图数据</a>，常见问题见 <a href="faq.html">常见问题与限制</a>。
                 </p>

@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>迁移地图数据 — HowToGo | 问道 Wiki</title>
-    <meta name="description" content="问道（HowToGo）地图数据迁移指南：config/howtogo 下的 sp_ / mp_ 目录名怎么由世界名与服务器地址算出来、哪些操作根本不用搬、改世界名 / 换服务器地址 / 换电脑 / 复制存档时按什么顺序复制 JSON，以及 .world 标记、中文名撞成下划线、同名世界共用数据的处理办法。">
+    <meta name="description" content="问道（HowToGo）地图数据迁移指南：config/howtogo 下的 sp_ / mp_ 目录名怎么由世界名与服务器地址算出来（0.2.2 起中文名转拼音）、哪些操作根本不用搬、改世界名 / 换服务器地址 / 换电脑 / 复制存档时按什么顺序复制 JSON、.world 记录与重名短哈希、升级自动改名与降级风险，以及用 .zip 压缩包导出导入整份地图存档。">
     <meta name="theme-color" content="#f4f8ff">
     <link rel="icon" href="../assets/img/mod-icon.png" type="image/png">
     <link rel="stylesheet" href="../assets/css/site.css">
@@ -66,6 +66,7 @@
                 <h4>进阶</h4>
                 <a href="transit.html" data-wiki-link data-keywords="公共交通 线路 站点 换乘 等车 线路配置">公共交通线路</a>
                 <a href="create.html" data-wiki-link data-keywords="机械动力 create 铁路 铁轨 车站 命名">机械动力铁路</a>
+                <a href="roadweaver.html" data-wiki-link data-keywords="阡陌交通 RoadWeaver 自动生成 道路 结构 村落 只读">阡陌交通</a>
                 <a href="mtr.html" data-wiki-link data-keywords="MTR 铁路 线路 只读 轨道标记 复制">MTR 集成</a>
                 <a href="display.html" data-wiki-link data-keywords="显示 面板 缩放 隐藏 图层 名字 字号">地图显示与缩放</a>
                 <a href="webmap.html" data-wiki-link data-keywords="浏览器地图 webmap 网页 端口 导出 PNG 离线">浏览器地图</a>
@@ -73,7 +74,7 @@
                 <a href="config.html" data-wiki-link data-keywords="配置 文件 toml 数据 存档 备份">配置与数据文件</a>
                 <a href="migrate.html" data-wiki-link data-keywords="迁移 搬家 改名 换电脑 存档 服务器地址 数据 文件夹 sp_ mp_ 世界名 目录 备份 丢失" aria-current="page">迁移地图数据</a>
                 <a href="faq.html" data-wiki-link data-keywords="常见问题 限制 报错 没有路线 语音">常见问题与限制</a>
-                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.1 0.2.0 0.1.0">更新日志</a>
+                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.2 0.2.1 0.2.0 0.1.0">更新日志</a>
             </aside>
 
             <main class="wiki-body">
@@ -87,10 +88,13 @@
                     问道把「在哪个世界画了什么」记在 <code>config/howtogo/</code> 下，而目录名是由世界名或服务器地址
                     <strong>算出来</strong>的，不是你随手起的名字。所以一改世界名、一换服务器地址、一搬游戏实例，
                     数据不会自己跟过去——它<strong>没有丢</strong>，只是模组按新名字去找，没找到。
-                    这一页讲目录名怎么算、哪些操作其实不用搬、要搬的时候按什么顺序做；
-                    「改名之后路没了」的常见情况都能在这里找回。这里说的是<strong>问道自己的数据</strong>——
-                    路网、地点与公共交通线路；Xaero 世界地图自己的缓存不在 <code>config/howtogo/</code> 里，
-                    也不该在这里搬。
+                    0.2.2 起这条规则变了一个地方：中文世界名不再变成一串下划线，而是转成<strong>拼音</strong>
+                    （<code>sp_新世界</code> → <code>sp_xin_shi_jie</code>）；升级时旧目录会自己改名过去，
+                    但<strong>降级</strong>回去会读不到。这一页讲目录名怎么算、哪些操作其实不用搬、要搬的时候按什么顺序做；
+                    「改名之后路没了」的常见情况都能在这里找回。如果你只是想把一整个世界搬到另一台电脑或发给朋友，
+                    0.2.2 也提供了<strong>用压缩包整份导出、导入</strong>的办法，见<a href="#archive">用压缩包搬家</a>。
+                    这里说的是<strong>问道自己的数据</strong>——路网、地点与公共交通线路；
+                    Xaero 世界地图自己的缓存不在 <code>config/howtogo/</code> 里，也不该在这里搬。
                 </p>
 
                 <div class="callout">
@@ -102,8 +106,9 @@
                         </svg>
                     </span>
                     <div>
-                        <p>一句话：<strong>名字决定目录</strong>。要搬数据，先让新名字把目录建出来，再把旧目录里的
-                            <code>.json</code> 复制进去——<code>.world</code> 标记留给游戏自己写。</p>
+                        <p>一句话：<strong>名字决定目录，记录决定归属</strong>。要搬数据，先让新名字把目录建出来，再把旧目录里的
+                            <code>.json</code> 复制进去——<code>.world</code> 标记留给游戏自己写。0.2.2 起中文名先转拼音；
+                            想整份搬走，也可以直接用压缩包（见<a href="#archive">用压缩包搬家</a>）。</p>
                     </div>
                 </div>
 
@@ -132,9 +137,14 @@
                         </thead>
                         <tbody>
                         <tr>
+                            <td>单人存档，世界名「新世界」</td>
+                            <td><code>sp_新世界</code></td>
+                            <td><code>sp_xin_shi_jie</code></td>
+                        </tr>
+                        <tr>
                             <td>单人存档，世界名「江南」</td>
                             <td><code>sp_江南</code></td>
-                            <td><code>sp___</code></td>
+                            <td><code>sp_jiang_nan</code></td>
                         </tr>
                         <tr>
                             <td>单人存档，世界名「My World」</td>
@@ -155,14 +165,26 @@
                     </table>
                 </div>
                 <p>
-                    算目录名时只保留 <code>A-Z</code>、<code>a-z</code>、<code>0-9</code>、<code>.</code>、
-                    <code>_</code>、<code>-</code>，其余<strong>每个字符各换成一个下划线</strong>。
-                    所以空格、冒号、中文都会变成下划线：中文世界名有几个字，目录名里就有几个下划线。
-                    注意这是「按字符替换」，不是「换成拼音」，也不是「截断」。
+                    算目录名分两步。第一步把中文转成<strong>拼音</strong>：汉字逐字转写、去掉声调，音节之间留一个空格——
+                    <code>新世界</code> 变成 <code>xin shi jie</code>。第二步只保留 <code>A-Z</code>、<code>a-z</code>、
+                    <code>0-9</code>、<code>.</code>、<code>_</code>、<code>-</code>，其余<strong>每个字符各换成一个下划线</strong>——
+                    拼音里的空格于是成了分隔用的下划线，<code>sp_新世界</code> 就成了 <code>sp_xin_shi_jie</code>。
                 </p>
                 <p>
-                    每个世界目录里再<strong>按维度分文件</strong>。维度名同样按上面的规则清洗，
-                    <code>:</code> 变成下划线，所以 <code>minecraft:overworld</code> 会变成 <code>minecraft_overworld</code>：
+                    纯 ASCII 的名字（英文世界名、服务器地址）<strong>不做拼音转写</strong>，原样进入第二步：
+                    空格、冒号仍然换下划线。所以对 <code>sp_My World</code> → <code>sp_My_World</code>、
+                    <code>mp_mc.example.net:25565</code> → <code>mp_mc.example.net_25565</code> 这类名字，
+                    结果和旧版本完全一样。<strong>这是 0.2.2 的破坏性变更</strong>：
+                    以前中文世界名是纯按字符替换，有几个字就有几个下划线，<code>sp_新世界</code> 是 <code>sp____</code>；
+                    现在换成拼音，既能一眼认出是哪个世界，也让「新世界」和「旧世界」不再指向同一个目录。
+                    名字特别长时会截断到文件系统能接受的长度，剩下的靠短哈希区分。
+                </p>
+                <p>
+                    每个世界目录里再<strong>按维度分文件</strong>。维度名<strong>不参与拼音转写</strong>，仍然是老规则：
+                    <code>:</code> 换成下划线，所以 <code>minecraft:overworld</code> 就是 <code>minecraft_overworld</code>。
+                    这是故意的——如果让维度名也跟着转，冒号会被 ICU 改成「冒号加空格」，
+                    文件名就变成了 <code>minecraft__overworld.json</code>，已有路网看起来就像「消失」了。
+                    目录名是给人看的，文件名是模组找自己数据用的，两套规则各管一件事：
                 </p>
                 <div class="table-wrap">
                     <table>
@@ -217,11 +239,19 @@
                     </table>
                 </div>
                 <p>
-                    每个世界目录里还有一个没有扩展名的 <code>.world</code> 文件，内容是「这个目录属于哪个世界」。
-                    它只为一件事存在：中文世界名清洗后都变成下划线，两个<strong>字数相同</strong>的不同中文名就会
-                    撞成同一个目录名（例如「江南」和「江北」都是 <code>sp___</code>）。有了它，第二个世界会改用
-                    <code>sp___-&lt;短哈希&gt;</code>，不会读到别人的路。这是 <strong>0.2.1 起</strong>才有的规则；
-                    以前留下的目录没有这个文件，会由第一个打开它的世界认领，所以升级后老路径还能原地继续用。
+                    每个世界目录里还有一个没有扩展名的 <code>.world</code> 文件，内容是「这个目录属于哪个世界」——
+                    写的是<strong>原始的世界 key</strong>（例如 <code>sp_新世界</code>、<code>sp_My New World</code>，
+                    中文、空格、大小写都原样保留），不是目录名。0.2.1 起就有这个文件；
+                    <strong>0.2.2 起它是目录归属的依据</strong>：模组先找记录对得上的目录，名字不对就把它改名到算出来的名字，
+                    实在改不了才继续用旧名字——数据跟着记录走，不跟着名字走。
+                </p>
+                <p>
+                    它同时负责区分撞车的名字：两个不同的世界名转写、清洗后相同（例如只差一个标点——<code>A/B</code> 与
+                    <code>A B</code> 都是 <code>A_B</code>；或者长名字截断后前缀相同），后来者会得到
+                    <code>&lt;目录名&gt;-&lt;短哈希&gt;</code>，不会读到别人的路。拼音让「江南」和「江北」这类
+                    同字数的中文名不再撞车（<code>sp_jiang_nan</code> 与 <code>sp_jiang_bei</code>）。
+                    0.2.2 之前留下的目录（0.2.1 的有记录、名字还是下划线；更早的没有记录、靠旧名字认领）
+                    都会在第一次被打开时改名到拼音名，见<a href="#upgrade">下一节</a>。
                 </p>
                 <p>
                     <code>config/howtogo/</code> 根目录下还有几个<strong>与存档无关</strong>的文件：
@@ -229,7 +259,41 @@
                     <code>map_filter.json</code>（地图显示面板的开关与位置）、
                     <code>mtr_line_marks.json</code>（MTR 线路的逐条轨道标记）。它们不属于任何一个世界，
                     搬单个世界时不用动；完整清单见 <a href="config.html#file-list">配置与数据文件</a>。
+                    另外根目录下还有两个<strong>传输目录</strong>：<code>exports/</code>（我的导出）与
+                    <code>backups/</code>（导入前的自动备份），见<a href="#archive">用压缩包搬家</a>。
                 </p>
+
+                <h2 id="upgrade">升级到 0.2.2：目录会自己改成拼音名</h2>
+                <p>
+                    升级不需要做任何事。第一次打开某个世界时，问道按新规则算出拼音目录名，然后看两件事：
+                </p>
+                <ul>
+                    <li><strong>已经有记录、且 <code>.world</code> 内容正是这个世界</strong>的目录：只要它的名字还是旧规则算的，
+                        就整目录改名到拼音名，文件跟着走。0.2.1 留下的 <code>sp____</code> 就是这样变成
+                        <code>sp_xin_shi_jie</code> 的；名字已经对上的则原地不动。</li>
+                    <li><strong>更早的、没有 <code>.world</code> 的目录</strong>：如果它的名字正好是旧规则算出来的
+                        （中文全是下划线），它就是这个世界的老目录，同样整目录改名到拼音名，并补上记录。</li>
+                </ul>
+                <p>
+                    两种情况都有兜底：拼音名已经被别的世界占用、或改名失败时，<strong>旧目录继续用</strong>，
+                    只补一个 <code>.world</code> 记录——「一个世界不能因为目录名改不好就丢掉它的路」。
+                    所以升级后如果看到目录名没变，不必手动改，它照常能读到。
+                </p>
+                <div class="callout warn">
+                    <span class="ico">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                             stroke-linecap="round">
+                            <path d="M12 4l9 16H3z"/>
+                            <path d="M12 10v4M12 17h.01"/>
+                        </svg>
+                    </span>
+                    <div>
+                        <p><strong>风险在降级。</strong>用 0.2.2 存过档以后再退回 0.2.1，旧版本按老规则（中文全是下划线）
+                            去找目录，找不到拼音名，那个世界的路网就是空的——文件还在，只是没人读。
+                            要退版本，先在 0.2.2 里导出压缩包（见<a href="#archive">用压缩包搬家</a>）或复制整个
+                            <code>config/howtogo/</code>，再把 JSON 放进旧规则会读的目录。</p>
+                    </div>
+                </div>
 
                 <h2 id="need">哪些操作要搬，哪些不用</h2>
                 <p>
@@ -253,7 +317,7 @@
                         </tr>
                         <tr>
                             <td>改世界的显示名（<code>level.dat</code> 里的 <code>LevelName</code>；有些工具的重命名会连它一起改）</td>
-                            <td>目录跟着新名字走</td>
+                            <td>它会去找按新名字算出的目录（旧目录不会自动跟过去）</td>
                             <td>按下面「搬运步骤」搬</td>
                         </tr>
                         <tr>
@@ -278,8 +342,8 @@
                         </tr>
                         <tr>
                             <td>更新模组、删掉模组 jar</td>
-                            <td>文件原样保留</td>
-                            <td>不用搬</td>
+                            <td>文件原样保留；升级到 0.2.2 时目录名会在第一次打开时改成拼音</td>
+                            <td>不用搬（升级自动改名；降级见上一节）</td>
                         </tr>
                         </tbody>
                     </table>
@@ -295,14 +359,17 @@
                     </span>
                     <div>
                         <p>两个<strong>世界名一字不差</strong>时，问道分不开它们，会共用同一个目录——这是它唯一
-                            <strong>不打算区分</strong>的撞车。名字不同但清洗后相同（典型是中文名）由
-                            <code>.world</code> 处理，不需要你动手。所以「两个不同的存档共用了路」只可能是同名，
-                            或者你还在用没有 <code>.world</code> 标记的旧版本。</p>
+                            <strong>不打算区分</strong>的撞车。名字不同、但转写清洗后相同的（只差标点，或长名字截断到同一前缀）
+                            由 <code>.world</code> 与短哈希处理，不需要你动手。所以「两个不同的存档共用了路」只可能是同名；
+                            如果确实不同名却共用，那个目录大概是 0.2.2 之前留下、还没被新版本打开过（没有 <code>.world</code> 记录）。</p>
                     </div>
                 </div>
 
                 <h2 id="steps">搬运步骤：备份 → 先建新目录 → 只复制 JSON</h2>
-                <p>下面这套顺序适用于所有情况，<strong>不要反过来做</strong>：</p>
+                <p>
+                    下面这套顺序适用于所有<strong>人手搬运</strong>的场景（改世界名、换服务器地址、换电脑），
+                    <strong>不要反过来做</strong>。单纯升级到 0.2.2 不用做这些——目录会自己改名：
+                </p>
                 <ol>
                     <li><strong>备份。</strong>把整个 <code>config/howtogo/</code> 复制一份到桌面或别的盘。
                         这里没有校验和、也没有自动备份，复制是唯一的后悔药。</li>
@@ -332,9 +399,11 @@
                     只改文件夹不用搬；改了世界名才需要。
                 </p>
                 <ul>
-                    <li>新名字是英文时，目录通常就是 <code>sp_NewName</code>。</li>
-                    <li>新名字是中文时，清洗后的目录名可能和旧的一模一样（都是下划线）。这时问道会给新世界一个
-                        <code>sp___-&lt;短哈希&gt;</code> 目录，把数据搬到那个目录里。</li>
+                    <li>新名字是英文时，目录通常是 <code>sp_NewName</code>（空格换下划线）。</li>
+                    <li>新名字是中文时，目录是<strong>拼音</strong>：例如「新世界」→ <code>sp_xin_shi_jie</code>、
+                        「江南」→ <code>sp_jiang_nan</code>。</li>
+                    <li>拼音名先到先得：如果新名字转写出来正好是另一个世界占着的目录名，问道会给新世界一个
+                        <code>&lt;拼音名&gt;-&lt;短哈希&gt;</code> 目录，把数据搬到那个目录里。</li>
                     <li>操作就是上一节的六步：进一次新世界 → 退出 → 把旧目录的 JSON 复制进新目录。</li>
                     <li>反悔很容易：旧目录<strong>没有被删</strong>，把 JSON 复制回去、或者把世界名改回去即可。</li>
                 </ul>
@@ -345,6 +414,7 @@
                     域名、IP、端口都算，大小写也算；<code>:</code> 会被换成下划线。例如填
                     <code>mc.example.net:25565</code>，目录是 <code>mp_mc.example.net_25565</code>。
                     服务器列表里那个「服务器名称」不参与目录名，改它没有影响。
+                    服务器地址是纯 ASCII，0.2.2 的拼音规则不影响它——这里的规则和以前完全一样。
                 </p>
                 <p>
                     换地址（换域名、换端口、从 IP 换成域名、合租服换了入口）时，按通用步骤做：
@@ -388,6 +458,10 @@
                     最好两边用同一个模组版本；跨大版本搬之前先备份。真的读不回来时（例如文件被改坏），
                     道路文件会被改名为 <code>.corrupt</code> 放到一边，不会静默消失。
                 </p>
+                <p>
+                    更省事的是用<strong>压缩包</strong>：在旧实例里导出 <code>.zip</code> 发给对方，他打开对应世界后导入即可
+                    （见<a href="#archive">用压缩包搬家</a>）——他不用关心目录名怎么算，也不用改任何文件名。
+                </p>
 
                 <h2 id="copies">场景四：复制存档以后，两个世界共用一份路</h2>
                 <p>
@@ -399,35 +473,79 @@
                 <ol>
                     <li>退出游戏，先备份当前共用的那个数据目录。</li>
                     <li>给副本改一个世界名（改 <code>level.dat</code> 里的 <code>LevelName</code>；只改文件夹名没有用），
-                        让两个世界的 key 不同。</li>
+                        让两个世界的 key 不同——中文名会得到一个新的拼音目录。</li>
                     <li>打开改名后的副本一次，让它建立自己的新目录，然后退出。</li>
                     <li>把原目录里的 JSON 复制到副本的新目录。此后的修改就各记各的了。</li>
                 </ol>
 
+                <h2 id="archive">用压缩包搬家</h2>
+                <p>
+                    0.2.2 新增了「地图存档」界面：<code>/howtogo data</code> 打开它，一个按钮把<strong>当前世界</strong>的道路、地点、
+                    铁路名称、公共交通线路与附属数据打成一个 <code>.zip</code> 放进 <code>config/howtogo/exports/</code>；
+                    另一个按钮把别人的 <code>.zip</code> 导入回来。指令也能做同样的事：<code>/howtogo export</code> 直接导出，
+                    <code>/howtogo import [压缩包]</code> 读指定文件；压缩包也可以直接拖进那个界面。
+                </p>
+                <p>
+                    它的好处是<strong>不用碰目录名</strong>：导出的是「这个世界的数据」，导入的是「你现在打开的世界」，
+                    中间那套世界名 → 拼音目录名的算法完全不用管。换电脑、给朋友、整份备份都适用。
+                </p>
+                <h3>导出与导入各做了什么</h3>
+                <ul>
+                    <li><strong>导出</strong>只打包当前世界目录里的数据文件，不碰 <code>config/howtogo/</code> 根目录那几个偏好文件，
+                        也不碰别的世界。</li>
+                    <li><strong>导入无视压缩包名与内部目录名</strong>：目录层级被剥掉，包里的 <code>.world</code> 记录改写成当前世界，
+                        数据写进当前世界的目录——所以收到别人发来的包，打开自己的世界导入就行。</li>
+                    <li><strong>覆盖前有警告</strong>：写明写进哪个世界、来源与时间、文件数、旧数据会先备份。
+                        确认后先备份到 <code>config/howtogo/backups/</code>，再<strong>整目录替换</strong>。</li>
+                    <li><strong>是替换，不是合并</strong>：包里没有的维度文件会被删掉。两份数据都想留，得先各自备份、选定一份，
+                        缺的部分重画。</li>
+                    <li><strong>备份能一键回滚</strong>：自动备份的文件名带 <code>-backup</code>，在「可导入的压缩包」列表里单独标黄，
+                        再导入它一次就回到导入之前。</li>
+                    <li><strong>替换是一次目录改名</strong>：新数据先在旁边建好再改名到位；旧目录先改名成
+                        <code>&lt;存档&gt;.replaced-&lt;时间&gt;</code>，删掉它的 <code>.world</code> 记录后再删除——
+                        万一删不掉，留下来的目录也不会冒充当前世界的数据。</li>
+                </ul>
+                <h3>它只接受认识的文件</h3>
+                <p>
+                    导入时只读 <code>.json</code>：<code>__MACOSX/</code>、<code>.DS_Store</code>、<code>.world</code>、
+                    <code>*.part</code>、<code>*.corrupt</code> 会被跳过；带 <code>..</code> 或绝对路径的条目不跟随；
+                    文件数与解压总大小有上限；没有任何可读数据的包会被直接拒绝，当前地图不动。
+                    列表里的来源分三种：导入文件夹、我的导出、备份。
+                    自检里也多了一项「地图存档压缩包」——它真的导出、导入一次并逐字节核对。
+                </p>
+                <div class="callout">
+                    <span class="ico">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                             stroke-linecap="round">
+                            <circle cx="12" cy="12" r="9"/>
+                            <path d="M12 8h.01M11 12h1v4h1"/>
+                        </svg>
+                    </span>
+                    <div>
+                        <p>压缩包是<strong>整目录替换</strong>，适合「整份搬走 / 整份恢复」。如果你只想把主世界的几份 JSON
+                            挪到另一个实例、又不想动那个世界原有的数据，仍然用上面的「搬运步骤」只复制 <code>.json</code>。</p>
+                    </div>
+                </div>
+
                 <h2 id="manual">手工改目录名，与 <code>.world</code> 的坑</h2>
                 <p>
-                    先记住一条：<strong>目录名不是自由命名的</strong>。它必须正好等于按世界 key 算出来的那个名字。
-                    如果只是为了让文件夹好看、随手把 <code>sp_...</code> 改成别的名字，问道下次会按原来的名字
-                    新建一个空目录，改名后的那一份就没人读了——数据还在，但看起来「没了」。
+                    先记住一条：<strong>目录名不是自由命名的</strong>。它是按世界 key 算出来的（中文转拼音、其余非法字符换下划线），
+                    而 0.2.2 起<strong>真正决定归属的是目录里的 <code>.world</code> 记录</strong>。
+                    所以手工改名字通常不会丢数据——模组会按记录把目录找回来，并在下次打开时把它改回按名字算出的那个。
+                    但没有好处，而且改名过程中如果目标名字已被占用，它会停在旧名字上，白折腾一趟。
                 </p>
                 <p>
-                    知道规则以后，直接改目录名当然也能成，但要注意 <code>.world</code>：
-                    它里面写的是<strong>原始世界 key</strong>（<code>sp_</code> / <code>mp_</code> 开头的那一整串，
-                    例如 <code>sp_My New World</code>，空格和中文原样保留，不是目录名里的下划线）。
-                    把一个带 <code>.world</code> 的目录改名成新名字后，内容还是旧世界名，
-                    问道会认为这个目录不属于当前世界，于是另建一个 <code>&lt;新名字&gt;-&lt;短哈希&gt;</code> 目录——
-                    看起来就是「改了文件夹名，数据反而没了」。所以稳妥的做法是这几条：
+                    0.2.2 的规则是「<strong>记录优先</strong>」：先找 <code>.world</code> 内容等于当前世界 key 的目录，
+                    找到就用它（名字不对就改名）；找不到记录，才按名字算、并按旧规则兜底认领。由此有三条：
                 </p>
                 <ul>
-                    <li><strong>推荐：</strong>按「搬运步骤」来，让游戏自己建目录、自己写 <code>.world</code>，
-                        你只复制 <code>.json</code>。</li>
-                    <li><strong>或者：</strong>改完目录名后，删掉里面的 <code>.world</code>（下次打开世界时它会被重新写）。
-                        前提是你接下来打开的就是目标世界；如果还有别的世界清洗后同名，先打开的那个会认领它。
-                        旧版本留下的目录本来就没有 <code>.world</code>，改名到正确名字后直接就能被认领，不用做别的。</li>
-                    <li><strong>也可以：</strong>用文本编辑器把 <code>.world</code> 的内容改成新的世界 key
-                        （<code>sp_</code> 或 <code>mp_</code> 开头的那一整串，不是目录名）。
-                        这要求一字不差：<code>sp_</code> / <code>mp_</code>、空格、大小写、端口里的冒号都要对上，
-                        并用不带 BOM 的 UTF-8 保存，否则等于没改。</li>
+                    <li><strong>推荐：</strong>按「搬运步骤」来，让游戏自己建目录、自己写 <code>.world</code>，你只复制 <code>.json</code>。</li>
+                    <li><strong>不要删 <code>.world</code>：</strong>删掉以后目录就「没有归属」了。它的名字如果正好是旧规则算出来的
+                        （中文全是下划线），第一个打开的世界会认领它；如果它是拼音名，问道不会自动认领
+                        （那可能是别的世界改名后留下的旧数据），宁可为当前世界另建一个带短哈希的目录——
+                        看起来就是「数据还在，但没了」。</li>
+                    <li><strong>整个目录改名可以，但没必要：</strong>带记录的目录改名后能被找回来；
+                        更稳的做法是别动它，想要一个好看的名字就在游戏里改世界名。</li>
                 </ul>
                 <p>
                     目录名后面带一段 <code>-1a2b3c4d</code> 这样的短哈希，不是坏了，是「这个名字已经被另一个世界认领了」。
@@ -444,10 +562,15 @@
                     <code>.json</code> 复制进新目录即可。注意先别在新世界继续画：复制旧文件会覆盖同名的道路文件，
                     如果已经画了新路，先把新文件备份出来再决定留哪份。
                 </p>
-
-                <h3>为什么多了一个 <code>sp___-1a2b3c4d</code> 这样的目录？</h3>
                 <p>
-                    世界名清洗后撞车了：另一个世界已经占着不带哈希的那个目录名。
+                    单纯<strong>升级到 0.2.2</strong> 不会遇到这种情况——旧目录会自动改名到拼音名；
+                    这一条说的是你手工改了世界名、换了服务器地址之后。
+                </p>
+
+                <h3>为什么多了一个带短哈希后缀的目录？</h3>
+                <p>
+                    名字撞车了：另一个世界已经占着不带哈希的那个目录名。0.2.2 里常见的是「转写清洗后相同」——
+                    两个名字只差一个标点（<code>A/B</code> 与 <code>A B</code>），或者长名字截断到同一前缀。
                     看两个目录里的 <code>.world</code>，把「属于当前世界」的那一个作为目标，数据搬进去。
                     旧的那份先留着，确认不需要再删。
                 </p>
@@ -455,20 +578,23 @@
                 <h3>我把整个文件夹复制过去了，为什么还是读不到？</h3>
                 <p>
                     多半是把旧的 <code>.world</code> 也一起复制了。它写着旧世界名，游戏因此认为这个目录属于别人，
-                    转而新建了一个哈希目录。保留目标目录自己的 <code>.world</code>，只复制 <code>.json</code>。
+                    转而新建了一个哈希目录。保留目标目录自己的 <code>.world</code>，只复制 <code>.json</code>；
+                    拿不准的话，就按「搬运步骤」让游戏自己把目录建出来。
                 </p>
 
                 <h3>两个不同名字的世界，却共用同一份路？</h3>
                 <p>
                     先确认「不同名字」是不是只改了存档文件夹。文件夹名的不同不改变世界名；两个世界名完全一样时，
-                    共用是预期的（见场景四）。如果确实是不同名却共用，看看是不是还在用没有 <code>.world</code> 标记的
-                    旧版本：升级后先打开你想保留数据的那个世界，它认领旧目录；另一个世界会得到哈希目录，再按需搬。
+                    共用是预期的（见场景四）。转写清洗后相同的名字会各自得到短哈希目录，不会共用；
+                    如果确实不同名却共用，那多半是 0.2.2 之前留下的旧目录还没被新版本打开过（没有 <code>.world</code> 记录），
+                    升级后第一次打开时就会按记录分开。
                 </p>
 
                 <h3>数据能合并吗？</h3>
                 <p>
                     不能自动合并。同一维度只有一个 <code>&lt;维度&gt;.json</code>，两张路网没有「取并集」的入口。
                     如果两边都有想保留的路，先各自备份，选一份作底，再把缺的路重画一遍。
+                    想让整份数据直接替换，可以用压缩包导入——但那是<strong>替换</strong>，不是合并（见<a href="#archive">用压缩包搬家</a>）。
                 </p>
 
                 <h3>目录里出现了 <code>.part</code> 或 <code>.corrupt</code> 文件</h3>
@@ -481,11 +607,13 @@
                 <h2 id="rules">几条规矩</h2>
                 <ul>
                     <li><strong>先备份。</strong>复制整个 <code>config/howtogo/</code>；想把设置一起带走，再加
-                        <code>config/howtogo-client.toml</code>。</li>
+                        <code>config/howtogo-client.toml</code>。只想整份搬走的话，导出压缩包更省事。</li>
                     <li><strong>关游戏再动文件。</strong>路网会在停手后自动写盘、离开世界时再存一次，
                         开着游戏替换文件可能被旧数据盖回去。</li>
                     <li><strong>复制 <code>.json</code>，不复制 <code>.world</code>；不要整个文件夹覆盖。</strong></li>
-                    <li><strong>目录名和地址要一字不差。</strong>服务器地址的大小写、端口、写 IP 还是写域名，都算不同的世界。</li>
+                    <li><strong>0.2.2 起中文目录名是拼音。</strong>升级时旧目录会自动改名，不用管；
+                        但用 0.2.2 存过档的别直接降级回 0.2.1——那边按老的下划线规则找目录，找不到。</li>
+                    <li><strong>服务器地址要一字不差。</strong>大小写、端口、写 IP 还是写域名，都算不同的世界。</li>
                     <li><strong>数据只在客户端。</strong>服务器上没有你的路，换电脑不会自动同步，也不会从服务器下回来。</li>
                     <li><strong>删模组 jar 不会删数据。</strong>反过来说，删掉 <code>config/howtogo/</code> 才会；
                         误删先看回收站和之前的备份。</li>

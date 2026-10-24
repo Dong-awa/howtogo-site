@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>HowToGo | 问道 — 我的世界道路标记与实时导航</title>
-    <meta name="description" content="问道（HowToGo）是一个 Minecraft 1.21.1 / NeoForge 的纯客户端模组：在 Xaero 世界地图上画路，然后像用地图软件一样选目的地、选交通方式、看路线再出发。支持机械动力铁路与 MTR 线路自动识别。">
+    <meta name="description" content="问道（HowToGo）是一个 Minecraft 1.20.1 – 26.3、Fabric / NeoForge 双平台的纯客户端模组：在 Xaero 世界地图上画路，然后像用地图软件一样选目的地、选交通方式、看路线再出发。支持机械动力铁路、MTR 线路与阡陌交通道路自动识别，主界面按 K，地图存档可导出导入。">
     <meta name="theme-color" content="#f4f8ff">
     <link rel="icon" href="assets/img/mod-icon.png" type="image/png">
     <link rel="stylesheet" href="assets/css/site.css">
@@ -54,19 +54,22 @@
         <section class="hero">
             <div class="wrap">
                 <div class="hero-copy reveal">
-                    <span class="eyebrow">Minecraft 1.21.1 · NeoForge 21.1.x · v0.2.1 · 纯客户端</span>
+                    <span class="eyebrow">Minecraft 1.20.1 – 26.3 · Fabric / NeoForge · v0.2.2 · 纯客户端</span>
                     <h1>在地图上画路，<br>然后像用<span>地图软件</span>一样出发</h1>
                     <p class="hero-lead">
                         问道（HowToGo）把 Xaero 世界地图变成一张真正能用的路网：画路、标记地点、
                         选目的地、选交通方式、看路线预览、跟着 HUD 走到终点。
-                        机械动力的铁轨和 MTR 的线路会被自动读进来，不用你一格一格画；
-                        路网还能一键在浏览器里打开，按层看清高架与隧道，并导出成图片。
+                        手画的路在地图上是一条<strong>平滑曲线</strong>；阡陌交通、机械动力与 MTR 的路与线路会被自动读进来，
+                        不用你一格一格画。世界里按 <kbd>K</kbd> 就能打开主界面看地图、换出行方式、开始或结束导航；
+                        整份路网与地点还能打成一个压缩包导出、导入。
                     </p>
                     <div class="hero-meta">
                         <span class="chip"><i class="dot"></i>Xaero 世界地图</span>
                         <span class="chip"><i class="dot"></i>机械动力铁路</span>
                         <span class="chip"><i class="dot"></i>MTR 线路</span>
+                        <span class="chip"><i class="dot"></i>阡陌交通</span>
                         <span class="chip"><i class="dot"></i>浏览器地图</span>
+                        <span class="chip"><i class="dot"></i>地图存档导出</span>
                         <span class="chip"><i class="dot"></i>无需装在服务器</span>
                     </div>
                     <div class="btn-row">
@@ -186,8 +189,8 @@
                     </div>
                     <div class="step reveal" data-delay="160">
                         <h3>选个目的地，出发</h3>
-                        <p>按 <kbd>Ctrl</kbd> + 左键直接在地图上点目的地，或拿导航仪右键打开选择界面。
-                            先看路线预览与预计时间，再按「导航到这里」，剩下的交给 HUD 与语音播报。</p>
+                        <p>按 <kbd>Ctrl</kbd> + 左键直接在地图上点目的地，或拿导航仪右键打开选择界面，也可以按 <kbd>K</kbd>
+                            打开主界面。先看路线预览与预计时间，再按「导航到这里」，剩下的交给 HUD 与语音播报。</p>
                     </div>
                 </div>
                 <div class="btn-row reveal" style="justify-content:center;margin-top:34px">
@@ -221,6 +224,7 @@
                         <ul class="card-list">
                             <li>路段交叉、差一格没接上，只要「看着连上了」就会被自动修好</li>
                             <li>地点分四类：地点 / 资源点 / 商店 / 站点</li>
+                            <li>画出来的线是平滑曲线：寻路、测距与存档里的整数顶点一行没动</li>
                         </ul>
                     </article>
 
@@ -236,6 +240,8 @@
                         <ul class="card-list">
                             <li>最快时间 ↔ 最短距离，可避开某类道路，可优先大路</li>
                             <li>先预览后出发；不拉直线，绕远或走不通就直说</li>
+                            <li>步行离开路面最多 32 格（<code>walk_offroad_blocks</code>），驾车不再越野</li>
+                            <li>世界里按 <kbd>K</kbd> 打开主界面：看地图、选目的地、结束导航、切换出行方式</li>
                             <li>HUD 面板 + 语音播报（转弯前、现在转弯、到达、偏航）</li>
                         </ul>
                     </article>
@@ -255,6 +261,7 @@
                             <li>站点来源：自己标记的站点 + 机械动力车站 + MTR 车站</li>
                             <li>接不上一站的站点直接标红，出发前就能看见</li>
                             <li>换乘站在两条线共用时显示为橙色方块</li>
+                            <li>线路按类型（铁路 / 水路 / 公路 / 冰道）取色，颜色可以自己改</li>
                         </ul>
                     </article>
 
@@ -273,6 +280,8 @@
                             <li>车站成为可导航的目的地</li>
                             <li>铁路只读，但可以整条命名，名字存在单独的文件里</li>
                             <li>画路时可以吸附到铁轨上，把路正好接上去</li>
+                            <li>贝塞尔曲线保留原采样再平滑，不再先四舍五入到方块</li>
+                            <li>端点相接的短轨道先拼成长段，选中、命名与寻路都变干净</li>
                         </ul>
                     </article>
 
@@ -285,11 +294,31 @@
                             </svg>
                         </div>
                         <h3>MTR 线路识别</h3>
-                        <p>装了 MTR，它的车站与线路会被读成问道自己的站点与线路：列车 / 缆车算铁路，船算水路。</p>
+                        <p>装了 MTR（4.0.4 及以上），它的车站与线路会被读成问道自己的站点与线路：列车 / 缆车算铁路，船算水路。</p>
                         <ul class="card-list">
                             <li>每条线路都能选择「沿这条线标记轨道」，让车程沿 MTR 真正铺的轨道计算</li>
                             <li>只读线路可一键「复制为我的」再随意修改</li>
                             <li>走出 MTR 同步范围也不会丢：读到过的车站、线路、轨道都会被记住</li>
+                            <li>同名车站按 256 格上限合并成一个地点：列表一条、地图一个标记</li>
+                            <li>MTR Map Overlay 的「线路 / 轨道」开关会被记住，下一局恢复</li>
+                        </ul>
+                    </article>
+
+                    <article class="card reveal" data-delay="180">
+                        <div class="card-ico">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                 stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 20l4-16M20 20L16 4"/>
+                                <path d="M12 5v3M12 12v3M12 19v1"/>
+                            </svg>
+                        </div>
+                        <h3>阡陌交通 RoadWeaver</h3>
+                        <p>装了阡陌交通，它自动生成的道路会被读进来、画在世界地图上、参与寻路，它连接的村落与小屋也成为目的地。
+                            全反射读取，没装也不会崩。</p>
+                        <ul class="card-list">
+                            <li>路一律按「小路」读，可用 <code>roadweaver_road_class</code> 强制一个等级</li>
+                            <li>路口就是它自己说过的路口：两条路共享点位才算连通，交叉而过的不猜</li>
+                            <li>联机在别人的服务器上时，这一局要先按一次它的路网地图（<kbd>H</kbd>）</li>
                         </ul>
                     </article>
 
@@ -306,7 +335,9 @@
                         <ul class="card-list">
                             <li>缩小地图时按等级自动取舍：小路 → 公路 → 水路 → 铁路，高速与冰道永不隐藏</li>
                             <li>道路<strong>按层叠放</strong>：高架压在自己跨过去的地面路之上，隧道在最下面</li>
-                            <li>名字的大小跟着缩放走，线上名字顺着线的方向写</li>
+                            <li>名字的字号不超过路的宽度，路太细时先不写；长路沿路每隔约 190 像素写一个</li>
+                            <li>地点名、铁路名、道路名共用一张「已占位置」表，排不下就不画</li>
+                            <li>每个道路等级的颜色都能在 <code>road_colors</code> 里自己定，改完不用重启</li>
                             <li>面板是屏幕覆盖层，不会被地图上的线路与文字盖住</li>
                         </ul>
                     </article>
@@ -321,12 +352,14 @@
                             </svg>
                         </div>
                         <h3>浏览器地图</h3>
-                        <p><code>/howtogo webmap</code> 在本机开一个小服务，把当前维度的路网画成浏览器里的俯视地图，
-                            地址以可点击的链接发在聊天栏；细节见 <a href="wiki/webmap.html">浏览器地图</a>。</p>
+                        <p><code>/howtogo webmap</code> 在本机开一个小服务，把<strong>游戏里那张地图</strong>画成浏览器里的俯视地图：
+                            阡陌交通、机械动力、MTR 的只读图层也在里面，按道路等级取色、带平滑曲线。细节见
+                            <a href="wiki/webmap.html">浏览器地图</a>。</p>
                         <ul class="card-list">
-                            <li>只监听 127.0.0.1：配置里没有能把它放到局域网上的开关</li>
+                            <li>只监听 127.0.0.1：配置里没有能把它放到局域网上的开关，读的始终是客户端自己那份</li>
+                            <li>只读图层会在鼠标读数与统计里标出来源，侧栏多一行「自动识别」</li>
                             <li>页面与 html2canvas 都在 jar 里，离线可用，可导出 2 倍分辨率 PNG</li>
-                            <li>按道路等级与层过滤，状态栏报光标下最近的路或地点</li>
+                            <li>手动启动不再弹「是否打开链接」，直接开系统默认浏览器</li>
                         </ul>
                     </article>
                 </div>
@@ -363,7 +396,7 @@
                             <tr>
                                 <td>XaeroLib</td>
                                 <td>必需</td>
-                                <td>随 World Map 一起提供</td>
+                                <td>由 World Map 提供；26.x 起随它以嵌套 jar 分发，不用单独下载</td>
                             </tr>
                             <tr>
                                 <td>Xaero's Minimap</td>
@@ -378,7 +411,12 @@
                             <tr>
                                 <td>MTR</td>
                                 <td>可选</td>
-                                <td>车站与线路自动识别</td>
+                                <td>车站与线路自动识别（4.0.4 及以上）</td>
+                            </tr>
+                            <tr>
+                                <td>阡陌交通 RoadWeaver</td>
+                                <td>可选</td>
+                                <td>它生成的道路、村落与小屋读进地图与目的地</td>
                             </tr>
                             <tr>
                                 <td>MCPhone</td>
@@ -398,8 +436,13 @@
                                 </svg>
                             </span>
                             <div>
-                                <p><strong>支持的版本：</strong>Minecraft <strong>1.21.1</strong>，NeoForge
-                                    <strong>21.1.x</strong>（21.1.0 ~ 21.1.x）。</p>
+                                <p><strong>支持的版本：</strong>Minecraft <strong>1.20.1 – 26.3</strong>，
+                                    <strong>Fabric</strong> 与 <strong>NeoForge</strong> 两条线。0.2.2 共
+                                    <strong>21 个构建</strong>（Fabric 11 个、NeoForge 10 个；1.20.1 没有 NeoForge），
+                                    <strong>不支持 Forge</strong>。</p>
+                                <p>下载文件名形如 <code>howtogo-0.2.2pre1+mc1.21.1-neoforge.jar</code>，
+                                    把对应版本的那一个放进 <code>mods/</code>。<strong>0.2.2 是预发布测试版</strong>：
+                                    21 个构建只做过编译验证与回归测试（873 项检查），没有在真实游戏里逐个走查。</p>
                                 <p>可选模组全部通过注册名或反射读取，因此版本不合也不会让游戏起不来——最差的结果是那个图层为空。</p>
                             </div>
                         </div>
@@ -414,6 +457,10 @@
                             <div>
                                 <p>数据存在客户端的 <code>config/howtogo/</code> 下，<strong>按存档 / 服务器分开</strong>：
                                     单人存档按存档名，多人按服务器地址。换服务器不会串数据。</p>
+                                <p>0.2.2 起中文存档的数据目录改用<strong>拼音</strong>命名（<code>sp_新世界</code> →
+                                    <code>sp_xin_shi_jie</code>），第一次打开某个世界时自动整目录改名，升级不用做任何事；
+                                    代价在降级：用 0.2.2 存过档再退回 0.2.1，那个世界的路网会是空的。
+                                    详见 <a href="wiki/migrate.html">数据目录与迁移</a>。</p>
                             </div>
                         </div>
                         <div class="btn-row">
@@ -431,7 +478,7 @@
                 <div class="section-head reveal">
                     <span class="eyebrow">Wiki</span>
                     <h2>教程按你上手时会遇到的顺序排好</h2>
-                    <p>从安装、画路，到导航、公交线路、机械动力与 MTR，再到配置与常见问题。</p>
+                    <p>从安装、画路，到导航、公交线路、机械动力、MTR 与阡陌交通，再到配置与常见问题。</p>
                 </div>
                 <div class="grid grid-3">
                     <a class="card reveal" href="wiki/install.html">
@@ -457,6 +504,10 @@
                     <a class="card reveal" data-delay="100" href="wiki/mtr.html">
                         <h3>MTR 集成</h3>
                         <p>读了什么、只读的边界在哪、轨道标记开关怎么用。</p>
+                    </a>
+                    <a class="card reveal" href="wiki/roadweaver.html">
+                        <h3>阡陌交通 RoadWeaver</h3>
+                        <p>它生成的路怎么读进来、路口怎么算连通、联机时为什么要按 H。</p>
                     </a>
                 </div>
                 <div class="btn-row reveal" style="justify-content:center;margin-top:38px">

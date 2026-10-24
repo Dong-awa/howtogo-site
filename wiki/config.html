@@ -66,6 +66,7 @@
                 <h4>进阶</h4>
                 <a href="transit.html" data-wiki-link data-keywords="公共交通 线路 站点 换乘 等车 线路配置">公共交通线路</a>
                 <a href="create.html" data-wiki-link data-keywords="机械动力 create 铁路 铁轨 车站 命名">机械动力铁路</a>
+                <a href="roadweaver.html" data-wiki-link data-keywords="阡陌交通 RoadWeaver 自动生成 道路 结构 村落 只读">阡陌交通</a>
                 <a href="mtr.html" data-wiki-link data-keywords="MTR 铁路 线路 只读 轨道标记 复制">MTR 集成</a>
                 <a href="display.html" data-wiki-link data-keywords="显示 面板 缩放 隐藏 图层 名字 字号">地图显示与缩放</a>
                 <a href="webmap.html" data-wiki-link data-keywords="浏览器地图 webmap 网页 端口 导出 PNG 离线">浏览器地图</a>
@@ -73,7 +74,7 @@
                 <a href="config.html" data-wiki-link data-keywords="配置 文件 toml 数据 存档 备份" aria-current="page">配置与数据文件</a>
                 <a href="migrate.html" data-wiki-link data-keywords="迁移 搬家 改名 换电脑 存档 服务器地址 数据 文件夹 sp_ mp_ 世界名 目录 备份 丢失">迁移地图数据</a>
                 <a href="faq.html" data-wiki-link data-keywords="常见问题 限制 报错 没有路线 语音">常见问题与限制</a>
-                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.1 0.2.0 0.1.0">更新日志</a>
+                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.2 0.2.1 0.2.0 0.1.0">更新日志</a>
             </aside>
 
             <main class="wiki-body">
@@ -94,7 +95,11 @@
                 <p>
                     客户端配置由 NeoForge 生成，文件是 <code>config/howtogo-client.toml</code>。
                     绝大多数人不需要打开这个文件：进 <strong>模组列表 → HowToGo | 问道 → 配置</strong>
-                    就是同一个文件的图形界面，每一项都带着英文注释说明它为什么存在。
+                    就是同一个文件的配置界面。0.2.2 起这个按钮真的能打开界面——它读的是生成
+                    <code>howtogo-client.toml</code> 的<strong>同一份声明</strong>，所以界面上列出的项、默认值、
+                    可填范围与注释，和文件里的完全一致，不会出现「界面上改了、文件里却没变」。
+                    每一项都有中英文标题，改完保存即时生效；<code>road_colors</code> /
+                    <code>transit_line_colors</code> 这两节在界面上改最方便。
                 </p>
                 <p>
                     这些值是在<strong>用到的时候</strong>才读的，所以改完保存即可，不必为此重启客户端；
@@ -168,6 +173,20 @@
                             <td>所选方式比直接走过去还慢、或者在该路网里根本没有解时，改按步行规划，
                                 并在读数里说明「为什么不是你要的方式」。真实存在的公交行程<strong>不会</strong>
                                 被这样替换——那时步行是作为另一种选择提出来的，不是顶替。关掉它，慢就慢，如实显示。
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>walk_offroad_blocks</code></td>
+                            <td><code>32</code>（0~4096）</td>
+                            <td>
+                                步行时最多允许<strong>离开道路走多远</strong>，单位是格，0.2.2 新增。
+                                超过这个距离的目的地或路尽头，直接判「没有路线」，不再画一条横穿地图的直线——
+                                以前这条路径没有上限，于是山那边的目的地也能得到一条「走过去」的假路线。
+                                数值越小越严格。驾车不再越野：它只允许「车还在路面上」的那点距离（最宽路面的半宽），
+                                停在路边可以、停在田里不行；公共交通的乘车段也只保留站台到轨道的接驳
+                                （<code>station_snap_blocks</code>，默认 32 格），超过就没有这段车程。
+                                近距端点的合并对步行<strong>只在地表层 0 生效</strong>：高架与地下的两截路要接，
+                                请自己补一个节点；车仍按同层规则。
                             </td>
                         </tr>
                         </tbody>
@@ -245,6 +264,28 @@
                             要享受新的默认值：自己改那一节，或者把整个 <code>[on_road_tolerance_blocks]</code> 删掉让游戏重写。</p>
                     </div>
                 </div>
+
+                <h2 id="colors">配色</h2>
+                <p>
+                    0.2.2 把颜色从代码里拿出来，分成两组，都写在 <code>config/howtogo-client.toml</code> 里，
+                    也都能在模组列表的配置界面里改。两组支持同样的写法：<code>#RRGGBB</code>，
+                    或者带透明度的 <code>#AARRGGBB</code>。写错的值<strong>被忽略</strong>（日志里说一次）并保留原来的颜色，
+                    不会让整份配置失效；改完即时生效，不用重启。
+                </p>
+                <h3><code>road_colors</code>：六个道路等级的颜色</h3>
+                <p>
+                    一节六项，分别对应高速、公路、小路、铁路、水路、冰道，各填一个颜色。
+                    改的是「路本身」的颜色，而且<strong>所有地方读同一份设置</strong>：世界地图、导航小地图、
+                    「选择目的地」界面、图例、浏览器地图都读它——所以网页地图与游戏里不会出现两套配色。
+                </p>
+                <h3><code>transit_line_colors</code>：四种线路类型的颜色</h3>
+                <p>
+                    一节四项，对应铁路、水路、公路、冰道四种线路类型。
+                    它改的是<strong>线路本身的线</strong>与这条线名下的<strong>每一个站点标记</strong>；
+                    线路底下那条轨道仍按 <code>road_colors</code> 画，两者互不影响。
+                    默认值就是模组一直使用的配色，不写这一节时和以前一模一样；
+                    从 MTR 读进来的线路同样按类型取色，与手画线路用同一套规则。
+                </p>
 
                 <h2 id="transit">公共交通与语音</h2>
                 <div class="table-wrap">
@@ -363,6 +404,63 @@
                     </div>
                 </div>
 
+                <h2 id="roadweaver">阡陌交通（RoadWeaver）</h2>
+                <p>
+                    装了<strong>阡陌交通（RoadWeaver）</strong>时，它自动生成的道路会被读进来：画在世界地图上、
+                    参与寻路，它连接的村落与小屋成为目的地。和机械动力、MTR 一样，这是一层<strong>只读图层</strong>：
+                    从你的路网文件里找不到它们，也不随地图导出。用法见 <a href="roadweaver.html">阡陌交通</a>，
+                    配置有五项：
+                </p>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>键</th>
+                            <th>默认值</th>
+                            <th>说明</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td><code>roadweaver_roads</code></td>
+                            <td><code>true</code></td>
+                            <td>整层道路（含路尽头的连接段）的总开关。关掉等于这一层清空，其他功能与图层都不受影响。</td>
+                        </tr>
+                        <tr>
+                            <td><code>roadweaver_road_class</code></td>
+                            <td><code>"auto"</code></td>
+                            <td>它铺的路按什么等级读。<code>"auto"</code> 就是一律按<strong>小路</strong>读：
+                                它铺的是土、砂砾与木板，路宽是「铺了几格」，不是「能不能开车」，所以不替它猜车道。
+                                填一个等级名可以强制成那个等级（例如全读成公路）。</td>
+                        </tr>
+                        <tr>
+                            <td><code>roadweaver_full_map</code></td>
+                            <td><code>true</code></td>
+                            <td>单人存档或把世界「对局域网开放」时，是否直接读它进程内的<strong>整个路网</strong>，
+                                不必先打开它自己的路网地图（<kbd>H</kbd>）。
+                                联机在别人的服务器上时这一项无事可做：只读得到它发给客户端的那一份，
+                                所以那一局要先按一次它的路网地图（<kbd>H</kbd>），之后它广播的局部更新会让图层自己更新。</td>
+                        </tr>
+                        <tr>
+                            <td><code>roadweaver_structures</code></td>
+                            <td><code>true</code></td>
+                            <td>它连接的村落与小屋要不要成为目的地。关掉只是它们不再出现在目的地列表里，道路照旧。</td>
+                        </tr>
+                        <tr>
+                            <td><code>roadweaver_routing</code></td>
+                            <td><code>true</code></td>
+                            <td>这些路参不参与寻路：步行、驾车（被强制成可开等级时）以及公共交通的步行接驳段。
+                                关掉后照旧画在地图上，只是不参与规划。</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p>
+                    路口按它自己的说法：两条路在同一个点才算连通，交叉而过、没有共享点位的不算（可能是立交，不猜）。
+                    路尽头的缺口会补一条同等级的直线连接段连到结构，画在地图上、参与寻路、随整层替换，但不写回。
+                    道路、连接段与结构从不写进你自己的路网文件，也不随地图导出。
+                </p>
+
                 <h2 id="mtr">MTR 集成</h2>
                 <div class="table-wrap">
                     <table>
@@ -398,7 +496,8 @@
                             <td>是否读取 <strong>MTR Map Overlay</strong>（模组 id <code>mtrmap</code>）从服务器抓回并缓存的那份
                                 <strong>整张网络快照</strong>（每条线、每个车站、每段轨道）。需要客户端与服务器都装了它。
                                 这是三种读取里唯一说得出「每条线走哪几段轨道」的一种，所以由它画出的线路沿着真正的铁路走。
-                                它只读服务器回答过的那份快照，抓不到就什么都不读（不会把 MTR 自己发的那段窗口读两遍）。</td>
+                                它只读服务器回答过的那份快照，抓不到就什么都不读（不会把 MTR 自己发的那段窗口读两遍）。
+                                它自己的「线路 / 轨道」两个地图开关会被问道记住，见下面的<a href="#files">数据文件</a>。</td>
                         </tr>
                         <tr>
                             <td><code>mtr_station_merge_blocks</code></td>
@@ -512,8 +611,11 @@
                 <p>
                     路网、线路和名字都在 <code>config/howtogo/</code> 下，首先<strong>按世界分开</strong>：
                     单人存档按世界名（<code>sp_&lt;世界名&gt;</code>），多人服务器按服务器地址（<code>mp_&lt;地址&gt;</code>）。
-                    目录名里只保留字母、数字与 <code>.</code> <code>_</code> <code>-</code>，其余字符各换成一个下划线，
-                    所以中文世界名会变成一串下划线。坐标只在一个维度里才有意义，所以文件名里还带着维度；
+                    0.2.2 起目录名里的中文按<strong>拼音</strong>写：<code>sp_新世界</code> 的目录是
+                    <code>sp_xin_shi_jie</code>（0.2.1 及以前是一串下划线），其余非法字符仍各换成一个下划线，
+                    ASCII 世界名原样保留。第一次打开某个世界时会自动整目录改名，升级不用做任何事；
+                    但<strong>降级有风险</strong>——用 0.2.2 存过档再退回 0.2.1，那个世界的路网会是空的。
+                    坐标只在一个维度里才有意义，所以文件名里还带着维度；
                     改名、换地址、换电脑时目录怎么跟着变，见 <a href="migrate.html">迁移地图数据</a>。
                 </p>
                 <div class="table-wrap">
@@ -543,12 +645,36 @@
                             <td><code>config/howtogo/&lt;存档&gt;/.world</code></td>
                             <td>这个目录属于哪个世界（原始世界名）。用来区分<strong>清洗后同名</strong>的中文世界名：
                                 不带哈希的目录由它记录归属，后来「清洗后同名、名字却不同」的世界才会拿到带短哈希的目录。
-                                详见 <a href="migrate.html">迁移地图数据</a>。</td>
+                                导入别人的压缩包时，包里的这条记录会被改写成当前世界，见
+                                <a href="migrate.html">迁移地图数据</a>。</td>
                         </tr>
                         <tr>
                             <td><code>config/howtogo/mtr_line_marks.json</code></td>
                             <td>MTR 线路逐条的<strong>轨道标记开关</strong>：在 <a href="transit.html">线路配置</a>界面里
                                 给每条 MTR 线路点过的答案（按 MTR 的线路 id 记），下次进游戏还是上次的选择。</td>
+                        </tr>
+                        <tr>
+                            <td><code>config/howtogo/mtr_overlay_toggles.json</code></td>
+                            <td><strong>MTR Map Overlay</strong> 自己那两个地图开关（「线路」/「轨道」）的记忆：
+                                0.2.2 起问道把它们记在这里，改了立刻保存、下一局恢复成上次的样子。
+                                它自己的配置文件不动；删掉这个文件就不再记（回到「都画」）。
+                                没装那个模组时整个功能不存在。</td>
+                        </tr>
+                        <tr>
+                            <td><code>config/howtogo/exports/</code></td>
+                            <td>「地图存档」界面导出的 <code>.zip</code> 默认写在这里，<code>/howtogo export</code> 也一样。
+                                一个包就是<strong>当前世界</strong>的道路、地点、铁路名称、公共交通线路与附属数据。</td>
+                        </tr>
+                        <tr>
+                            <td><code>config/howtogo/backups/</code></td>
+                            <td>导入别人的压缩包、<strong>覆盖之前</strong>把旧数据整目录备份到这里，文件名带
+                                <code>-backup</code>。它在「可导入的压缩包」列表里单独标黄，
+                                再导入它一次就回到导入之前。</td>
+                        </tr>
+                        <tr>
+                            <td><code>config/howtogo/&lt;存档&gt;.replaced-&lt;时间&gt;</code></td>
+                            <td>导入时旧目录的去处：新数据先在旁边建好，然后一次改名到位，旧目录改名到这里留着。
+                                确认新数据没问题之后，它是可以删的。</td>
                         </tr>
                         <tr>
                             <td><code>config/howtogo/route_preferences.json</code></td>
@@ -567,7 +693,7 @@
                     </table>
                 </div>
                 <p>
-                    机械动力与 MTR 的图层是<strong>只读</strong>的，从不写进这些文件：每次都是从那个模组重新读出来的。
+                    机械动力、MTR 与阡陌交通的图层是<strong>只读</strong>的，从不写进这些文件：每次都是从那个模组重新读出来的。
                     所以你在这些文件里找不到它们的轨道，也不该期待在那里改。
                 </p>
 
@@ -583,6 +709,17 @@
                     需要把 JSON 搬到新目录。每种情况的做法见 <a href="migrate.html">迁移地图数据</a>。
                 </p>
                 <p>
+                    0.2.2 起还多了一条不用手抄 JSON 的路：<code>/howtogo data</code> 打开「地图存档」界面，
+                    一个按钮把<strong>当前世界</strong>的道路、地点、铁路名称、公共交通线路与附属数据打成一个
+                    <code>.zip</code> 放进 <code>config/howtogo/exports/</code>，另一个按钮把别人的 <code>.zip</code> 导入回来；
+                    <code>/howtogo export</code> 直接导出，<code>/howtogo import [压缩包]</code> 读指定文件，
+                    压缩包也可以直接拖进界面。导入<strong>无视压缩包名与内部目录名</strong>，覆盖前有警告并先备份到
+                    <code>config/howtogo/backups/</code>，然后<strong>整目录替换而不是合并</strong>——
+                    包里没有的维度文件会被删掉。只接受认识的 <code>.json</code> 条目；
+                    没有任何可读数据的包会被拒绝，当前地图不动。完整说明见
+                    <a href="migrate.html">迁移地图数据</a>。
+                </p>
+                <p>
                     数据是<strong>客户端本地</strong>的：服务器上没有它，别的玩家也没有它。这既是「不用求服主」的原因，
                     也是「别人看不到你画的路」的原因。
                 </p>
@@ -591,7 +728,8 @@
                     <li>用 <strong>UTF-8</strong> 保存，否则中文名字会变成乱码。</li>
                     <li>改坏了最坏的结果是<strong>那一个文件读不回来</strong>：线路文件读不回来就是「没有线路」，
                         道路文件读不回来就是「这个维度还没有路」。它不会连累相邻的文件，也不会写坏游戏本体。</li>
-                    <li>改之前先复制一份。这些文件是人的数据，没有任何校验和或自动备份。</li>
+                    <li>改之前先复制一份。这些文件是人的数据，手工改动没有校验和，也不会自动备份
+                        （导入压缩包时的自动备份只覆盖导入这一条路）。</li>
                 </ul>
 
                 <div class="callout">

@@ -66,6 +66,7 @@
                 <h4>进阶</h4>
                 <a href="transit.html" data-wiki-link data-keywords="公共交通 线路 站点 换乘 等车 线路配置" aria-current="page">公共交通线路</a>
                 <a href="create.html" data-wiki-link data-keywords="机械动力 create 铁路 铁轨 车站 命名">机械动力铁路</a>
+                <a href="roadweaver.html" data-wiki-link data-keywords="阡陌交通 RoadWeaver 自动生成 道路 结构 村落 只读">阡陌交通</a>
                 <a href="mtr.html" data-wiki-link data-keywords="MTR 铁路 线路 只读 轨道标记 复制">MTR 集成</a>
                 <a href="display.html" data-wiki-link data-keywords="显示 面板 缩放 隐藏 图层 名字 字号">地图显示与缩放</a>
                 <a href="webmap.html" data-wiki-link data-keywords="浏览器地图 webmap 网页 端口 导出 PNG 离线">浏览器地图</a>
@@ -73,7 +74,7 @@
                 <a href="config.html" data-wiki-link data-keywords="配置 文件 toml 数据 存档 备份">配置与数据文件</a>
                 <a href="migrate.html" data-wiki-link data-keywords="迁移 搬家 改名 换电脑 存档 服务器地址 数据 文件夹 sp_ mp_ 世界名 目录 备份 丢失">迁移地图数据</a>
                 <a href="faq.html" data-wiki-link data-keywords="常见问题 限制 报错 没有路线 语音">常见问题与限制</a>
-                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.1 0.2.0 0.1.0">更新日志</a>
+                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.2 0.2.1 0.2.0 0.1.0">更新日志</a>
             </aside>
 
             <main class="wiki-body">
@@ -148,7 +149,7 @@
 
                 <h2 id="kind">线路类型决定它能跑在哪</h2>
                 <p>
-                    每条线路有一个<strong>类型</strong>，用的是本模组道路等级的同一套名字与颜色：
+                    每条线路有一个<strong>类型</strong>，用的是本模组道路等级的同一套名字：
                 </p>
                 <div class="table-wrap">
                     <table>
@@ -181,6 +182,15 @@
                 <p>
                     类型里<strong>没有「小路」</strong>，因为小路和公路本来就是同一条路的不同宽窄，一条公交线就是一条公路线；
                     而一条跑在小路上的线路，只会被走到。类型不是装饰：它决定了规划时这条线能骑哪些道路。
+                </p>
+
+                <h3 id="colors">线路的颜色可以自己定</h3>
+                <p>
+                    0.2.2 新增配置 <code>transit_line_colors</code>，铁路、水路、公路、冰道四个类型各一项颜色。
+                    它改的是<strong>线路本身的线</strong>与这条线名下的<strong>每一个站点标记</strong>；
+                    线路底下那条轨道仍按 <code>road_colors</code> 画，两者互不影响。不写这一节就用模组一直使用的那套配色，
+                    和以前一模一样；从 MTR 读进来的线路同样按类型取色。写法（<code>#RRGGBB</code> 或带透明度的
+                    <code>#AARRGGBB</code>）与其余配置见 <a href="config.html">配置与数据文件</a>。
                 </p>
 
                 <h2 id="broken">红色站点：真的断了才标红</h2>
@@ -257,7 +267,9 @@
                         <tr>
                             <td>③ MTR 车站</td>
                             <td>只读</td>
-                            <td>位置与名字来自 MTR，见 <a href="mtr.html">MTR 集成</a>。</td>
+                            <td>位置与名字来自 MTR，见 <a href="mtr.html">MTR 集成</a>。同名的多个车站会先按
+                                <code>mtr_station_merge_blocks</code>（默认 256 格）合并成一个地点再出现在这里：
+                                列表一条、地图一个标记，所以不会出现同一个站被列成好几条。</td>
                         </tr>
                         </tbody>
                     </table>
@@ -307,6 +319,14 @@
                     换乘是图上的另一种边：<strong>不同线路的站点相距 24 格以内</strong>就算同一个换乘点。
                     不是 0 格，因为玩家搭出来的换乘站很少正好一格：月台和旁边的公交站，对出行来说是同一个地方、对数据来说是两个点；
                     但也不会更大，否则「换乘」会悄悄变成「穿过半个城区」。两条线路停在同一格时，它们本来就是同一个节点，换乘不花代价。
+                </p>
+                <p>
+                    MTR 那边同名的多个车站现在是<strong>一个站点</strong>（合并规则见 <a href="mtr.html">MTR 集成</a>），
+                    所以换乘也算得干净了：早先「一个站台一个框」建出来的车站会被列成好几个同名站，
+                    于是同一个站里换线被当成两个相隔上百格的车站之间的换乘；合并后线路只停一次、地图只有一个标记，
+                    同一个站换线就是同一个节点，不再额外来一段步行接驳。
+                    不过名字一样不等于同一个站：两个同名车站相距超过 <code>mtr_station_merge_blocks</code>（默认 256 格）时，
+                    它们仍是两个地点、两次停靠——距离与名字两条都要满足。
                 </p>
                 <p>
                     地图上，<strong>被两条及以上线路共用的站点画成橙色方块</strong>，尺寸与普通站点标记相同。

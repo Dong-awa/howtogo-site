@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>浏览器地图 webmap — HowToGo | 问道 Wiki</title>
-    <meta name="description" content="问道（HowToGo）浏览器地图 webmap 教程：用 /howtogo webmap 在本机开一个本地地图服务，把当前维度的路网画成浏览器里的俯视 2D 地图；端口与自动启动配置、为什么只监听 127.0.0.1、按层与描边排出的遮挡关系、文字避让、导出 PNG 与自检。">
+    <meta name="description" content="问道（HowToGo）浏览器地图 webmap 教程：用 /howtogo webmap 在本机开一个本地地图服务，把当前维度整张游戏地图（含阡陌交通 / Create / MTR 只读图层）画成浏览器里的俯视 2D 地图；端口与自动启动配置、为什么只监听 127.0.0.1、按层与描边排出的遮挡关系、与游戏同一套的名字排版、2 倍分辨率导出 PNG 与自检。">
     <meta name="theme-color" content="#f4f8ff">
     <link rel="icon" href="../assets/img/mod-icon.png" type="image/png">
     <link rel="stylesheet" href="../assets/css/site.css">
@@ -66,6 +66,7 @@
                 <h4>进阶</h4>
                 <a href="transit.html" data-wiki-link data-keywords="公共交通 线路 站点 换乘 等车 线路配置">公共交通线路</a>
                 <a href="create.html" data-wiki-link data-keywords="机械动力 create 铁路 铁轨 车站 命名">机械动力铁路</a>
+                <a href="roadweaver.html" data-wiki-link data-keywords="阡陌交通 RoadWeaver 自动生成 道路 结构 村落 只读">阡陌交通</a>
                 <a href="mtr.html" data-wiki-link data-keywords="MTR 铁路 线路 只读 轨道标记 复制">MTR 集成</a>
                 <a href="display.html" data-wiki-link data-keywords="显示 面板 缩放 隐藏 图层 名字 字号">地图显示与缩放</a>
                 <a href="webmap.html" data-wiki-link data-keywords="浏览器地图 webmap 网页 端口 导出 PNG 离线" aria-current="page">浏览器地图</a>
@@ -73,7 +74,7 @@
                 <a href="config.html" data-wiki-link data-keywords="配置 文件 toml 数据 存档 备份">配置与数据文件</a>
                 <a href="migrate.html" data-wiki-link data-keywords="迁移 搬家 改名 换电脑 存档 服务器地址 数据 文件夹 sp_ mp_ 世界名 目录 备份 丢失">迁移地图数据</a>
                 <a href="faq.html" data-wiki-link data-keywords="常见问题 限制 报错 没有路线 语音">常见问题与限制</a>
-                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.1 0.2.0 0.1.0">更新日志</a>
+                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.2 0.2.1 0.2.0 0.1.0">更新日志</a>
             </aside>
 
             <main class="wiki-body">
@@ -85,16 +86,18 @@
                 <h1>浏览器地图</h1>
                 <p class="lead">
                     游戏里的世界地图是拿来<strong>操作</strong>的，浏览器地图是拿来<strong>看</strong>的：
-                    同一份路网，用一条命令送到浏览器标签页里，可以平移、缩放、按层过滤，还能导出一张带标题的 PNG。
+                    它画的就是游戏里那张地图——手画的路与铁路，加上阡陌交通、机械动力与 MTR 的只读图层——
+                    用一条命令送到浏览器标签页里，可以平移、缩放、按层过滤，还能导出一张带标题的 PNG。
                     它读的是这个客户端自己持有的数据——多人游戏里就是你自己画在本地的那一份——所以既不需要服务器配合，
-                    也不会把地图发给别人。
+                    也不会把地图发给别人；页面本身<strong>只读</strong>，不会改你的路网。
                 </p>
 
                 <h2 id="start">一条命令，一个标签页</h2>
                 <p>
-                    在游戏里执行 <code>/howtogo webmap</code>，问道会在本机开一个小型 HTTP 服务，
-                    然后把地址<strong>以可点击的链接发在聊天栏</strong>——点一下就用默认浏览器打开，
-                    走的是游戏自己的链接处理，和聊天里其它链接一样。已经在运行的话只报地址，不会开第二个。
+                    在游戏里执行 <code>/howtogo webmap</code>，问道会在本机开一个小型 HTTP 服务；
+                    服务启动成功后<strong>直接用系统默认浏览器把页面打开</strong>，不再先弹一个「是否打开链接」的确认框
+                    要你点一下。聊天栏里仍然留着一行<strong>纯文本地址</strong>，想复制、想再点一次都行。
+                    已经在运行的话只报地址，不会开第二个。
                 </p>
                 <div class="table-wrap">
                     <table>
@@ -107,7 +110,7 @@
                         <tbody>
                         <tr>
                             <td><code>/howtogo webmap</code><br>（与 <code>/howtogo webmap start</code> 相同）</td>
-                            <td>启动服务；已经在跑就只报一次地址。</td>
+                            <td>启动服务，成功后直接打开浏览器；已经在跑就只报一次地址。</td>
                         </tr>
                         <tr>
                             <td><code>/howtogo webmap stop</code></td>
@@ -215,7 +218,7 @@
                         </tr>
                         <tr>
                             <td><code>/api/roads</code></td>
-                            <td>当前维度的路网快照（JSON）。</td>
+                            <td>当前维度的路网快照（JSON）：含只读图层，每条路段带可选的 <code>curve</code> 与 <code>source</code>。</td>
                         </tr>
                         <tr>
                             <td><code>/api/status</code></td>
@@ -288,6 +291,15 @@
 
                 <h2 id="page">页面上能做什么</h2>
                 <p>
+                    页面画的是<strong>游戏里那张地图</strong>，不只是你手画的路：阡陌交通、机械动力与 MTR 的只读图层
+                    也在里面，按道路等级取色，并带上画出来的平滑曲线。载荷里每条路段还多一个可选的
+                    <code>source</code>（<code>ROADWEAVER</code> / <code>CREATE</code> / <code>MTR</code> /
+                    <code>ADDON</code>；玩家自己手画的没有这一项），页面用它把「只读」和来源写进鼠标读数与统计，
+                    所以侧栏的筛选下面多一行「自动识别」。只读图层各自怎么读，见
+                    <a href="roadweaver.html">阡陌交通</a>、<a href="create.html">机械动力铁路</a>与
+                    <a href="mtr.html">MTR 集成</a>。
+                </p>
+                <p>
                     左边一列是筛选、统计与导出，中间是画布，底部一条状态栏。
                     所有筛选都同时作用于屏幕与导出——图上看到的和导出的就是同一张。
                 </p>
@@ -318,7 +330,8 @@
                         </tr>
                         <tr>
                             <td>悬停</td>
-                            <td>状态栏显示光标坐标、当前缩放，以及<strong>鼠标下最近的一条路或一个地点</strong>。</td>
+                            <td>状态栏显示光标坐标、当前缩放，以及<strong>鼠标下最近的一条路或一个地点</strong>；
+                                那条路如果来自只读图层，还会标出它是自动识别来的、来自哪个来源。</td>
                         </tr>
                         </tbody>
                     </table>
@@ -358,24 +371,42 @@
                     层是平面地图看不出来的那一半：桥还是隧道，靠的就是这个顺序。游戏里同一套规则已经对齐，
                     细节见 <a href="display.html">地图显示与缩放</a>。
                 </p>
+                <p>
+                    路段带平滑曲线（<code>curve</code>）时，页面就用这条折线描边，所以描边的方向与画出来的线一致；
+                    没有 <code>curve</code> 的手画道路照旧按顶点画。网页地图与游戏里共用同一个描边过程，
+                    弯道外侧与接缝这两处不会一边补上、一边缺口。
+                </p>
 
                 <h2 id="labels">文字会挪位置，而不是压住别人</h2>
                 <p>
-                    路名<strong>沿路走</strong>：顺着道路方向旋转，并且永远不写成倒的；
-                    地点名默认写在<strong>标记下方</strong>（地图上的名字就该在钉子下面）。
-                    这个位置被占了就依次试上面、右面、左面、四个斜角，每个方向还有更远的一档距离——
-                    先试近的，放不下才往外挪一格，而不是把字叠在别人身上。
+                    名字的排布<strong>与游戏里的世界地图是同一套规则</strong>：同一张「已占位置」表、同一套字号与避让判断，
+                    所以网页里看到的文字位置，就是游戏里能找到的那个位置，导出时也不会重新排一次。
                 </p>
                 <p>
-                    所有方向都放不下时，<strong>这个标签就不画</strong>。一句压在别人身上的路名，比没有路名更难读。
-                    所有文字都带一圈底色描边，所以压在任何颜色的路上都读得清。
+                    <strong>线上的名字字号不超过这条路画出来的宽度</strong>：宽路字大、窄路字小，名字永远落在路面里；
+                    路太细时（缩小的远景、小路、铁路）先不写名字，放大到够宽才出现。一段路很长时，
+                    沿路每隔约 <code>190</code> 像素写一个，每段最多 <code>8</code> 个，并且只写在屏幕上的可见段里——
+                    可见段比名字本身还短，这一段就不写。
+                </p>
+                <p>
+                    地点名、铁路名、道路名排在同一张「已占位置」表上，按这个顺序找位置，<strong>排不下就不画</strong>；
+                    两个地点靠近时只显示一个，放大到两个名字框分开才都显示。
+                    地点名默认写在<strong>标记下方</strong>（地图上的名字就该在钉子下面），被占了就依次试上方、右方、左方、
+                    四个斜角，都不行才退一步。地点名的字号按类型分：资源点 <code>0.4</code>、普通地点 <code>0.55</code>、
+                    站点 <code>0.7</code>、商店 <code>1.0</code>（像素 / 格）。
+                </p>
+                <p>
+                    地点名避开的是<strong>真正画出来的线</strong>：有平滑曲线（<code>curve</code>）的路段按曲线避让，
+                    没有 <code>curve</code> 的手画道路照旧用顶点。所有方向都放不下时，<strong>这个标签就不画</strong>——
+                    一句压在别人身上的路名，比没有路名更难读。所有文字都带一圈底色描边，所以压在任何颜色的路上都读得清。
                 </p>
 
                 <h2 id="export">导出 PNG</h2>
                 <p>
                     导出用的是<strong>屏幕上那同一个绘制函数</strong>，只是按 <strong>2 倍分辨率</strong>重画一遍：
-                    同样的视野、同样的层序、同样的描边与填充顺序、同样的文字排布。所以导出的图与屏幕上看到的遮挡和文字位置
-                    一致，而不是「另一份大概像的实现」。图上方带一条标题栏：<strong>世界、维度、时间、统计与图例</strong>，
+                    同样的视野、同样的层序、同样的描边与填充顺序、同样的文字排布。所以导出的图与屏幕上看到的遮挡一致，
+                    <strong>名字的数量与位置也与屏幕一致</strong>——2 倍分辨率是把同一张图放大重画，
+                    不是换一块更大的画布重新排一次字。图上方带一条标题栏：<strong>世界、维度、时间、统计与图例</strong>，
                     文件名形如 <code>howtogo-minecraft_overworld-20261006-233000.png</code>。
                 </p>
                 <p>
@@ -421,8 +452,8 @@
                     </div>
                     <div class="card">
                         <h3>浏览器地图</h3>
-                        <p>一张大图：检查整片路网、按层看清高架与隧道、导出 PNG 发给别人，
-                            或者放在第二个屏幕上当参考图。</p>
+                        <p>一张大图：检查整片路网（含阡陌交通、机械动力与 MTR 的只读图层）、按层看清高架与隧道、
+                            导出 PNG 发给别人，或者放在第二个屏幕上当参考图。</p>
                     </div>
                 </div>
 
