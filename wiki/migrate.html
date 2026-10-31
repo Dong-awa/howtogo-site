@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>迁移地图数据 — HowToGo | 问道 Wiki</title>
-    <meta name="description" content="问道（HowToGo）地图数据迁移指南：config/howtogo 下的 sp_ / mp_ 目录名怎么由世界名与服务器地址算出来（0.2.2 起中文名转拼音）、哪些操作根本不用搬、改世界名 / 换服务器地址 / 换电脑 / 复制存档时按什么顺序复制 JSON、.world 记录与重名短哈希、升级自动改名与降级风险，以及用 .zip 压缩包导出导入整份地图存档。">
+    <meta name="description" content="问道（HowToGo）0.2.3 地图数据迁移：sp_ / mp_ 目录名怎么由世界名与服务器地址算出来（0.2.2 起中文名转拼音）、换地址 / 换电脑时怎么复制 JSON、.world 记录与重名短哈希、升级自动改名与降级风险，以及用 .zip 压缩包整份导出导入——0.2.3 起连地点详情一起带走。">
     <meta name="theme-color" content="#f4f8ff">
     <link rel="icon" href="../assets/img/mod-icon.png" type="image/png">
     <link rel="stylesheet" href="../assets/css/site.css">
@@ -78,7 +78,7 @@
                 <a href="config.html" data-wiki-link data-keywords="配置 文件 toml 数据 存档 备份">配置与数据文件</a>
                 <a href="migrate.html" data-wiki-link data-keywords="迁移 搬家 改名 换电脑 存档 服务器地址 数据 文件夹 sp_ mp_ 世界名 目录 备份 丢失" aria-current="page">迁移地图数据</a>
                 <a href="faq.html" data-wiki-link data-keywords="常见问题 限制 报错 没有路线 语音">常见问题与限制</a>
-                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.2 0.2.1 0.2.0 0.1.0">更新日志</a>
+                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.3 0.2.2 0.2.1 0.2.0 0.1.0">更新日志</a>
             </aside>
 
             <main class="wiki-body">
@@ -96,7 +96,8 @@
                     （<code>sp_新世界</code> → <code>sp_xin_shi_jie</code>）；升级时旧目录会自己改名过去，
                     但<strong>降级</strong>回去会读不到。这一页讲目录名怎么算、哪些操作其实不用搬、要搬的时候按什么顺序做；
                     「改名之后路没了」的常见情况都能在这里找回。如果你只是想把一整个世界搬到另一台电脑或发给朋友，
-                    0.2.2 也提供了<strong>用压缩包整份导出、导入</strong>的办法，见<a href="#archive">用压缩包搬家</a>。
+                    0.2.2 起也提供了<strong>用压缩包整份导出、导入</strong>的办法，见<a href="#archive">用压缩包搬家</a>；
+                    0.2.3 起压缩包还会带上<strong>地点详情</strong>（<code>place_details.json</code>）。
                     这里说的是<strong>问道自己的数据</strong>——路网、地点与公共交通线路；
                     Xaero 世界地图自己的缓存不在 <code>config/howtogo/</code> 里，也不该在这里搬。
                 </p>
@@ -239,6 +240,11 @@
                             <td><code>&lt;维度&gt;-rail-names.json</code></td>
                             <td>自动识别铁路的<strong>名称</strong>（按路段两端坐标记，所以能跟着铁路图层重建）。</td>
                         </tr>
+                        <tr>
+                            <td><code>place_details.json</code></td>
+                            <td><strong>地点详情</strong>：每个地点最多 512 字的描述、最多 16 个标签与一个收藏星标。
+                                整个存档一个文件，不按维度分；压缩包导出、导入会带着它。</td>
+                        </tr>
                         </tbody>
                     </table>
                 </div>
@@ -267,7 +273,7 @@
                     <code>backups/</code>（导入前的自动备份），见<a href="#archive">用压缩包搬家</a>。
                 </p>
 
-                <h2 id="upgrade">升级到 0.2.2：目录会自己改成拼音名</h2>
+                <h2 id="upgrade">升级到 0.2.2 及以后：目录会自己改成拼音名</h2>
                 <p>
                     升级不需要做任何事。第一次打开某个世界时，问道按新规则算出拼音目录名，然后看两件事：
                 </p>
@@ -509,6 +515,13 @@
                         <code>&lt;存档&gt;.replaced-&lt;时间&gt;</code>，删掉它的 <code>.world</code> 记录后再删除——
                         万一删不掉，留下来的目录也不会冒充当前世界的数据。</li>
                 </ul>
+                <p>
+                    0.2.3 起，压缩包还带着<strong>地点详情</strong>：它就是存档目录里的
+                    <code>place_details.json</code>，本身只是一个 <code>*.json</code>，和路网、线路、铁路名一起打包，
+                    导入时照原样写回去。覆盖完成之后，当前维度的路网、铁路名、线路<strong>和地点详情</strong>
+                    会立刻重读，不用重进世界。车站被拆、路径点被删之后留下的那些「未关联详情」也在同一份文件里，
+                    会随压缩包一起过来，导入时不会被筛掉。
+                </p>
                 <h3>它只接受认识的文件</h3>
                 <p>
                     导入时只读 <code>.json</code>：<code>__MACOSX/</code>、<code>.DS_Store</code>、<code>.world</code>、

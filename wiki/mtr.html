@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>MTR 集成 — HowToGo | 问道 Wiki</title>
-    <meta name="description" content="问道（HowToGo）的 MTR 集成教程：MTR 的车站与线路怎么读进来、附近的窗口与整张地图三种读取、同名车站怎么合并、线路类型怎么映射、站点为什么取站台、只读线路怎么复制、轨道标记开关的原理、支持哪些 MTR 版本。">
+    <meta name="description" content="问道（HowToGo）0.2.3 的 MTR 集成教程：MTR 车站与线路怎么读进来、窗口与整图几种读取、服务端整张路网同步（30 kB 分片，限 1.20.6 / 1.21.1）、与 MTR Map Overlay 并存时优先本模组读数、同名车站合并、线路类型映射、只读线路复制、轨道标记原理与支持的 MTR 版本。">
     <meta name="theme-color" content="#f4f8ff">
     <link rel="icon" href="../assets/img/mod-icon.png" type="image/png">
     <link rel="stylesheet" href="../assets/css/site.css">
@@ -78,7 +78,7 @@
                 <a href="config.html" data-wiki-link data-keywords="配置 文件 toml 数据 存档 备份">配置与数据文件</a>
                 <a href="migrate.html" data-wiki-link data-keywords="迁移 搬家 改名 换电脑 存档 服务器地址 数据 文件夹 sp_ mp_ 世界名 目录 备份 丢失">迁移地图数据</a>
                 <a href="faq.html" data-wiki-link data-keywords="常见问题 限制 报错 没有路线 语音">常见问题与限制</a>
-                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.2 0.2.1 0.2.0 0.1.0">更新日志</a>
+                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.3 0.2.2 0.2.1 0.2.0 0.1.0">更新日志</a>
             </aside>
 
             <main class="wiki-body">
@@ -92,7 +92,8 @@
                     装了 <strong>MTR（我的世界铁路）</strong> 时，问道会把它的车站与线路读进来，
                     变成自己的站点与公共交通线路——你不必为了导航，把已经建好的地铁网络再手画一遍。
                     自己开图（单人 / 对局域网开放）时读到的是<strong>整张铁路</strong>；联机时以 MTR 发到客户端的那一段为准，
-                    并合并记住。这一切都是<strong>反射只读</strong>的：问道的代码里没有任何一个 MTR 的类，
+                    并合并记住；0.2.3 起，服务端也装了本模组时，MTR 的<strong>整张路网</strong>会主动同步过来
+                    （见<a href="#server-sync">服务端同步</a>）。这一切都是<strong>反射只读</strong>的：问道的代码里没有任何一个 MTR 的类，
                     所以 MTR 没装、改了包名或换了版本，问道最多是读不到，不会编译不过，也不会崩。
                 </p>
 
@@ -142,7 +143,7 @@
                     <strong>合并保存</strong>下来——线路、车站、轨道三样都记——之后所有答案都从合并后的全量里取。
                 </p>
 
-                <h3>三种读取，合并成一份</h3>
+                <h3>四种读取，合并成一份</h3>
                 <div class="table-wrap">
                     <table>
                         <thead>
@@ -169,15 +170,23 @@
                             <td><strong>MTR Map Overlay</strong><br>（配置项 <code>mtr_map_overlay</code>，默认开）</td>
                             <td>客户端<strong>与服务器</strong>都装了 MTR Map Overlay（模组 id <code>mtrmap</code>）时。</td>
                             <td>那个模组向服务器要来并缓存在客户端的<strong>整张网络快照</strong>：每条线、每个车站、每段轨道。
-                                它也是三种读取里<strong>唯一说得出「每条线走哪几段轨道」</strong>的一种，
+                                它也是这几种读取里<strong>唯一说得出「每条线走哪几段轨道」</strong>的一种，
                                 所以由它画出来的线路是沿着真正的铁路走的，而不是在车站之间连直线。</td>
+                        </tr>
+                        <tr>
+                            <td><strong>服务端同步</strong><br>（配置项 <code>mtr_server_sync</code>，默认开）</td>
+                            <td>服务端装了本模组、并且服务端装了 MTR 时；只在 1.20.6 与 1.21.1 的节点上有。</td>
+                            <td>MTR 服务端<strong>正在模拟的整张路网</strong>：每个维度的全部车站、线路与轨道，
+                                打包压缩后按 30 kB 分片发给客户端。客户端自己不装 MTR 也能用，详见<a href="#server-sync">下一节</a>。</td>
                         </tr>
                         </tbody>
                     </table>
                 </div>
                 <p>
-                    三者<strong>合并</strong>成同一份数据，重复的部分以 MTR 自己给的说法为准。是否用得上后两种取决于你的玩法：
-                    自己开图有整张地图；在别人的服务器上则要靠 Map Overlay，而它需要服务器也装。
+                    四种读取<strong>合并</strong>成同一份数据，重复的部分以 MTR 自己给的说法为准。用得上哪几种取决于你的玩法：
+                    自己开图有整张地图；联机时先看服务端是不是也装了本模组（装了就有整网同步，限 1.20.6 / 1.21.1），
+                    再看两边是不是都装了 MTR Map Overlay——0.2.3 起它退成<strong>后备</strong>，
+                    只在问道自己没有任何更权威读数时才用。
                 </p>
                 <ul>
                     <li><strong>线路与车站</strong>按 MTR 自己的 id 记「最新的说法」：走回走过的地面会更新它们，
@@ -202,8 +211,9 @@
                         </svg>
                     </span>
                     <div>
-                        <p>结论分两种情况：<strong>自己开图</strong>（或两边都装了 MTR Map Overlay）时整张铁路一次到手；
-                            <strong>联机在别人的服务器上、又没有 Map Overlay</strong> 时，走出同步范围不会让线路消失，
+                        <p>结论分三种情况：<strong>自己开图</strong>（或两边都装了 MTR Map Overlay）时整张铁路一次到手；
+                            <strong>服务端也装了本模组</strong>时整张路网会同步过来（限 1.20.6 与 1.21.1 的节点）；
+                            <strong>联机在别人的服务器上、两边都没有</strong>时，走出同步范围不会让线路消失，
                             但从没靠近过的线路确实读不到——想让它出现，坐车或走路靠近一次即可。</p>
                     </div>
                 </div>
@@ -215,6 +225,53 @@
                     <code>config/howtogo/mtr_overlay_toggles.json</code>：改了立刻保存，下一局恢复成上次的样子。
                     它自己的配置文件<strong>不动</strong>；删掉这个文件就不再记，回到「都画」。
                     没装那个模组时整段功能不存在。
+                </p>
+
+                <h2 id="server-sync">服务端装了本模组时，MTR 的整张路网会同步过来</h2>
+                <p>
+                    MTR 自己的服务端只把玩家周围约 <strong>200 格</strong>的车站与线路发给客户端。所以联机时，
+                    没走到过的铁路问道一概不知道，去没去过的车站也规划不了——除非你自己开图，
+                    或者两边都装了 MTR Map Overlay。0.2.3 起多了第三条路：<strong>服务器上也装了本模组时，
+                    MTR 的整张路网会主动同步到客户端</strong>。
+                </p>
+                <p>
+                    做法是让服务端在本模组里读 MTR <strong>正在模拟的整张路网</strong>——每个维度的全部车站、线路与轨道，
+                    读取发生在 MTR 自己的线程上——打包压缩后按 <strong>30 kB 分片</strong>发给客户端。
+                    客户端每秒说一次 <code>hello</code>，服务端只回给说过 hello 的客户端，
+                    所以原版客户端、或者没装本模组的客户端连上服务器不会受到任何影响，也不会被发任何东西。
+                    路网每 <strong>10 秒</strong>检查一次，只有真的变了才重新编码、重发。
+                </p>
+                <p>
+                    客户端自己<strong>不装 MTR 也能用</strong>同步来的路网：目的地列表、地图标记、公交线路与路线规划都照常可用。
+                    前提是客户端的 <code>mtr_transit</code> 开着（关掉它连 hello 都不发），服务端则要装 MTR。
+                    同步下来的是问道自己术语里的完整读数，不包含「每条线跑在哪几段轨道上」这种映射，
+                    所以这些线路画到地图上时，仍然按车站序列在轨道上反推（也就是<a href="#marks">轨道标记</a>那套办法）。
+                </p>
+                <p>
+                    新增配置 <code>mtr_server_sync</code>（<strong>默认开</strong>）：关掉后客户端不再向服务端要数据，其它行为不变。
+                </p>
+                <div class="callout">
+                    <span class="ico">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                             stroke-linecap="round">
+                            <circle cx="12" cy="12" r="9"/>
+                            <path d="M12 8h.01M11 12h1v4h1"/>
+                        </svg>
+                    </span>
+                    <div>
+                        <p>这段同步<strong>只在 1.20.6 与 1.21.1 的节点上编译并启用</strong>；
+                            其它版本节点的代码里它是空实现，行为与之前完全一致。
+                            所以「服务端装了就一定有整张路网」只对这两个版本成立，别的版本仍然按上面几种读取来。</p>
+                    </div>
+                </div>
+
+                <h3>和 MTR Map Overlay 一起装时，优先用本模组的数据</h3>
+                <p>
+                    MTR Map Overlay 也会把整张网络快照缓存到客户端（见上面那张读取表）。0.2.3 起，
+                    两者并存时<strong>优先用本模组自己的读数</strong>：只要这个读数存在——服务端同步来的，
+                    或者自己开图时从本机模拟里读的——overlay 的快照就<strong>完全不读</strong>，
+                    免得同一批车站从两个可能不一致的读取器里出现两遍。只有两者都没有时
+                    （别人的服务器、服务端没装本模组），才退回去用 overlay 的。
                 </p>
 
                 <h2 id="lines">线路类型与站点</h2>
@@ -302,7 +359,8 @@
                 </p>
                 <p>
                     有一个例外：装了 <strong>MTR Map Overlay</strong> 时，它抓回的快照里直接写着每条线走哪几段轨道，
-                    那种情况下轨道不是反推出来的，而是<strong>查出来</strong>的。上面这套反推仍然是其它两种读取的工作方式。
+                    那种情况下轨道不是反推出来的，而是<strong>查出来</strong>的。上面这套反推仍然是窗口、整图与服务端同步
+                    这三种读取的工作方式——0.2.3 起同步下来的路网里也没有这层映射。
                 </p>
 
                 <h3>逐条线路的开关</h3>
@@ -421,9 +479,11 @@
                 </p>
                 <p>
                     还要分清两件事：版本支持说的是「读取器认得哪个 MTR」，而模组自己的构建是另一回事。
-                    0.2.2 的 21 个构建（11 Fabric + 10 NeoForge）都能在对应的 Minecraft 版本上装，
-                    但 <strong>MTR 读取只会在那个版本真的装了 MTR 时发生</strong>——没装，或者装的是 4.0.4 以下的版本，
-                    问道就是读不到，其余功能一件不少。
+                    0.2.3 一共 21 个构建（11 Fabric + 10 NeoForge），覆盖 1.20.1 ~ 1.21.11 与 26.1 ~ 26.3
+                    （1.20.1 只有 Fabric）；但 <strong>MTR 读取只会在那个版本真的装了 MTR 时发生</strong>——没装，
+                    或者装的是 4.0.4 以下的版本，问道就是读不到，其余功能一件不少。顺带一提，0.2.2 的 Fabric 构建
+                    其实一个都装不上（把 Minecraft 版本范围按 Maven 区间写法写进了 <code>fabric.mod.json</code>，
+                    而 Fabric 只认比较符写法），0.2.3 修好了；NeoForge 的构建不受影响。
                 </p>
                 <p>
                     这些结论不是读更新日志读出来的，而是<strong>量出来的</strong>：把那个版本的真 jar 放进回归测试的 classpath，
@@ -437,14 +497,16 @@
                 <h2 id="limits">限制与排错</h2>
                 <ul>
                     <li><strong>没装 MTR 时这一切都不存在，也没有任何副作用</strong>：图层为空，车站列表里没有这一项，其余功能照常。</li>
-                    <li>线路能读多远取决于玩法：自己开图有整张地图；联机时如果两边都没装 MTR Map Overlay，
+                    <li>线路能读多远取决于玩法：自己开图有整张地图；联机时服务端也装了本模组（限 1.20.6 / 1.21.1）
+                        就有整张路网；否则两边都装了 MTR Map Overlay 时用它缓存的快照；再没有，
                         就只有<strong>靠近过的</strong>线路与车站——问道记得住，所以走开不会丢，但从没靠近过的确实读不到。</li>
                     <li>线路类型不认识（例如飞机）就<strong>直接不处理</strong>，不会退化成铁路。</li>
                     <li>轨道标记是<strong>反推</strong>出来的：如果 MTR 的轨道在站点之间并不连通，
                         那一对相邻站点之间就规划不过去，这段标记会缺失，线路图上就会出现断口。
                         碰到这种情况，把该线的标记关掉，让它按你画的路走，通常是更好的答案。</li>
                     <li>看不到 MTR 的线路时，先确认：<code>mtr_transit</code> 没有关；自己开图时整张地图本来就该有，
-                        联机时两边是否都装了 MTR Map Overlay；如果都没有，你至少靠近过那条线。
+                        联机时服务端是否也装了本模组（1.20.6 / 1.21.1 上会整网同步），或者两边是否都装了 MTR Map Overlay；
+                        如果都没有，你至少靠近过那条线。
                         日志里 <code>[HowToGo] MTR import |</code> 开头的那一行会写明这次读到了多少站点、几条线路、
                         跳过了几条，以及<strong>累计记住了多少</strong>——那是判断「到底没读到，还是只是没画出来」最快的一条线索，
                         但这一行属于模组自己的诊断，<strong>要先在配置里把 <code>debug_log</code> 打开</strong>（默认关）；

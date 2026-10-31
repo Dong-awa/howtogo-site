@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>浏览器地图 webmap — HowToGo | 问道 Wiki</title>
-    <meta name="description" content="问道（HowToGo）浏览器地图 webmap 教程：用 /howtogo webmap 在本机开一个本地地图服务，把当前维度整张游戏地图（含阡陌交通 / Create / MTR 只读图层）画成浏览器里的俯视 2D 地图；端口与自动启动配置、为什么只监听 127.0.0.1、按层与描边排出的遮挡关系、与游戏同一套的名字排版、2 倍分辨率导出 PNG 与自检。">
+    <meta name="description" content="问道（HowToGo）浏览器地图 webmap 教程：用 /howtogo webmap 在本机开一个本地地图服务，把当前维度整张游戏地图（含阡陌交通 / Create / MTR 只读图层）画成浏览器里的俯视 2D 地图；端口与自动启动、为什么只监听 127.0.0.1、跟随界面主题（0.2.3）、点地点标记看详情卡与截断到 200 字的描述、按层与描边排出的遮挡、与游戏同一套的名字排版、2 倍分辨率导出 PNG 与自检。">
     <meta name="theme-color" content="#f4f8ff">
     <link rel="icon" href="../assets/img/mod-icon.png" type="image/png">
     <link rel="stylesheet" href="../assets/css/site.css">
@@ -78,7 +78,7 @@
                 <a href="config.html" data-wiki-link data-keywords="配置 文件 toml 数据 存档 备份">配置与数据文件</a>
                 <a href="migrate.html" data-wiki-link data-keywords="迁移 搬家 改名 换电脑 存档 服务器地址 数据 文件夹 sp_ mp_ 世界名 目录 备份 丢失">迁移地图数据</a>
                 <a href="faq.html" data-wiki-link data-keywords="常见问题 限制 报错 没有路线 语音">常见问题与限制</a>
-                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.2 0.2.1 0.2.0 0.1.0">更新日志</a>
+                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.3 0.2.2 0.2.1 0.2.0 0.1.0">更新日志</a>
             </aside>
 
             <main class="wiki-body">
@@ -222,7 +222,13 @@
                         </tr>
                         <tr>
                             <td><code>/api/roads</code></td>
-                            <td>当前维度的路网快照（JSON）：含只读图层，每条路段带可选的 <code>curve</code> 与 <code>source</code>。</td>
+                            <td>当前维度的路网快照（JSON）：含只读图层，每条路段带可选的 <code>curve</code> 与 <code>source</code>；
+                                每个地点带标签、收藏与<strong>截断到 200 字</strong>的描述，另外还带页面该用哪一套配色。</td>
+                        </tr>
+                        <tr>
+                            <td><code>/api/place?source=…&amp;id=…</code></td>
+                            <td>一个地点的<strong>完整详情</strong>，地点卡上的「查看完整详情」才请求它（路径本身是 <code>/api/place</code>，
+                                查询串说明要看哪个地点）。</td>
                         </tr>
                         <tr>
                             <td><code>/api/status</code></td>
@@ -236,6 +242,8 @@
                     响应也不缓存（<code>no-store</code>），所以刷新拿到的永远是这一版 jar 里的页面和数据，
                     不会出现「旧的 app.js 配新的数据」这种要对着一个你没在跑的版本排查的问题。
                     路径表是一对一映射，没有目录可查，也就无所谓目录穿越——它不是「检查过了」，而是根本没有目录可穿。
+                    表里的 API 路径不带查询串：<code>/api/place</code> 用 <code>?source=…&amp;id=…</code> 说要看哪一个地点——
+                    格式不对是 <strong>400</strong>，这个维度里没有那个地点是 <strong>404</strong>，世界还没加载是 <strong>503</strong>。
                 </p>
 
                 <h2 id="port">端口与自动启动</h2>
@@ -337,6 +345,11 @@
                             <td>状态栏显示光标坐标、当前缩放，以及<strong>鼠标下最近的一条路或一个地点</strong>；
                                 那条路如果来自只读图层，还会标出它是自动识别来的、来自哪个来源。</td>
                         </tr>
+                        <tr>
+                            <td>点地点标记</td>
+                            <td>弹出这个地点的卡片：名称、类型、来源、标签、收藏星与<strong>截断到 200 字</strong>的描述；
+                                「查看完整详情」再向游戏要全文（见下面<a href="#place-card">点开一个地点</a>）。</td>
+                        </tr>
                         </tbody>
                     </table>
                 </div>
@@ -359,6 +372,24 @@
                             和游戏里选中一条路时看到的是同一套读数。</p>
                     </div>
                 </div>
+
+                <h2 id="place-card">点开一个地点：详情卡</h2>
+                <p>
+                    0.2.3 起，点地图上的<strong>地点标记</strong>会弹出这个地点的卡片：名称、类型、来源、标签、收藏星，以及描述。
+                    卡片里的描述<strong>按 200 字截断</strong>——载荷随路网一起发，页面打开、刷新与每 5 秒的自动刷新都要取一次，
+                    每个地点都带全文的话它会变成载荷里最大的一块；截断时保留换行，卡片照常折行。
+                </p>
+                <p>
+                    要看全文就点卡片上的<strong>「查看完整详情」</strong>（描述被截断时才有这个按钮）：这一下页面才向游戏要
+                    这个地点的完整详情，走的是单独的 <code>/api/place</code> 请求，带上标记自己的来源与 id。
+                    这期间的失败是分开报的：地点在这中间被删掉是 <strong>404</strong>——卡片照实说这里已经没有这个地点，
+                    而不是画成一条空记录；世界还没加载是 <strong>503</strong>；请求本身不合法是 <strong>400</strong>。
+                </p>
+                <p>
+                    收藏的地点，标记上带一枚星形角标；侧栏统计里<strong>「地点」</strong>那一行在有收藏时补一句
+                    <strong>「收藏 N」</strong>（形如「地点 12（收藏 3）」），所以没点开也数得出来。
+                    描述、标签与收藏在哪里写，见 <a href="roads.html#place-details">地点详情：描述、标签与收藏</a>。
+                </p>
 
                 <h2 id="layers">谁压在谁上面</h2>
                 <p>
@@ -403,6 +434,24 @@
                     地点名避开的是<strong>真正画出来的线</strong>：有平滑曲线（<code>curve</code>）的路段按曲线避让，
                     没有 <code>curve</code> 的手画道路照旧用顶点。所有方向都放不下时，<strong>这个标签就不画</strong>——
                     一句压在别人身上的路名，比没有路名更难读。所有文字都带一圈底色描边，所以压在任何颜色的路上都读得清。
+                </p>
+
+                <h2 id="theme">跟随游戏里的界面主题</h2>
+                <p>
+                    0.2.3 起，网页地图跟着游戏里的<strong>界面主题</strong>（<code>ui_theme</code>）走：<code>dark</code> 是那套黑色、
+                    <code>light</code> 是白色，页面用哪一套由载荷里的 <code>theme</code> 字段决定。
+                    主题不是常量——<code>auto</code> 要问当前维度有没有天空、天空多亮，这是只有游戏线程才能回答的问题，
+                    所以它和等级颜色一起在 <code>/api/roads</code> 里读出来，<strong>随同一份载荷发过来</strong>。
+                </p>
+                <p>
+                    <strong>不另开接口，也不多一次轮询</strong>：页面本来就在打开、刷新和每 5 秒的自动刷新时取这份载荷，
+                    于是配色跟着地图走——下一份载荷到手时一起换，没在刷新的标签页里地图与配色也始终来自同一份载荷，
+                    不会一个新一个旧。另外，<code>auto</code> 在地狱、末地这类没有天空的维度永远是黑色，这一条在页面里也照旧。
+                </p>
+                <p>
+                    <strong>导出 PNG 用的是同一份两套配色</strong>：导出仍是同一个绘制函数按 2 倍分辨率重画，
+                    所以深色页面导不出浅色的图，屏幕上与图上是同一套颜色。三档主题与 <code>auto</code> 怎么读天光
+                    见 <a href="config.html">配置与数据文件</a>，游戏里的设置界面「界面外观」一组也能改。
                 </p>
 
                 <h2 id="export">导出 PNG</h2>

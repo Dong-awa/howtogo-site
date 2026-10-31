@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>地图显示与缩放 — HowToGo | 问道 Wiki</title>
-    <meta name="description" content="问道（HowToGo）地图显示教程：左上角「地图显示」面板怎么用、每个开关管什么、缩小地图时道路与地点按什么顺序自动取舍、道路的绘制顺序（按层与描边）、名字排版规则（字号不超过路宽、长路多个名字、互不重叠）、道路与线路颜色怎么自己定、地图上的标记分别是什么。">
+    <meta name="description" content="问道（HowToGo）0.2.3 地图显示教程：左上角「地图显示」面板怎么用、每个开关管什么、界面主题（白、黑、跟随天光）、缩小地图时道路与地点按什么顺序自动取舍、道路的绘制顺序（层与描边）与半透明急弯的修复、名字排版规则（字号不超过路宽、长路多个名字、互不重叠）、道路与线路颜色怎么自己定、地图上的标记分别是什么。">
     <meta name="theme-color" content="#f4f8ff">
     <link rel="icon" href="../assets/img/mod-icon.png" type="image/png">
     <link rel="stylesheet" href="../assets/css/site.css">
@@ -78,7 +78,7 @@
                 <a href="config.html" data-wiki-link data-keywords="配置 文件 toml 数据 存档 备份">配置与数据文件</a>
                 <a href="migrate.html" data-wiki-link data-keywords="迁移 搬家 改名 换电脑 存档 服务器地址 数据 文件夹 sp_ mp_ 世界名 目录 备份 丢失">迁移地图数据</a>
                 <a href="faq.html" data-wiki-link data-keywords="常见问题 限制 报错 没有路线 语音">常见问题与限制</a>
-                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.2 0.2.1 0.2.0 0.1.0">更新日志</a>
+                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.3 0.2.2 0.2.1 0.2.0 0.1.0">更新日志</a>
             </aside>
 
             <main class="wiki-body">
@@ -143,6 +143,25 @@
                             面板让位。想调显示，先按 <kbd>R</kbd> 退出编辑模式。</p>
                     </div>
                 </div>
+
+                <h2 id="theme">界面主题：白、黑与跟着天光</h2>
+                <p>
+                    这块面板、主界面、以及本模组所有自己画的界面，颜色都来自同一份主题——配置项
+                    <code>ui_theme</code>，三档：<code>dark</code>（一直是原来那套黑色界面）、
+                    <code>light</code>（白纸面、近黑文字，可点的东西用 Google 地图那套蓝）、
+                    <code>auto</code>（默认）。
+                </p>
+                <p>
+                    <code>auto</code> 读的<strong>不是时钟，而是世界天空亮度的实时值</strong>：白天白色、天黑黑色，
+                    雷雨把世界压暗时界面跟着暗。地狱、末地以及任何没有天空的维度<strong>永远是黑色</strong>——
+                    所以界面是在太阳真正落下的那一刻换色，而不是照一张写死的日出日落表。
+                </p>
+                <p>
+                    白色不是把黑色反过来：浅色界面盖在已经变暗的游戏画面上会像一个洞，所以那一套是照 Google 地图的浅色配色另画的。
+                    所有本模组界面（包括这块「地图显示」面板）以及浏览器地图，改完<strong>下一帧一起换</strong>，不用重启；
+                    它只是客户端设置，不改世界、不发服务器。完整说明见
+                    <a href="config.html#settings">配置与数据文件 · 设置界面</a>。
+                </p>
 
                 <h2 id="switches">有哪些开关</h2>
                 <div class="table-wrap">
@@ -305,6 +324,19 @@
                 <p>
                     <strong>网页地图（<code>/howtogo webmap</code>）是同一套规则</strong>：同样从低层往高层画、
                     同层先描边后填充、文字最后，所以屏幕上看到的遮挡关系，与导出的 PNG 一致。
+                </p>
+
+                <h3 id="stroke">急弯、路端与斜接（0.2.3 起）</h3>
+                <p>
+                    半透明道路上，急弯处曾经会出现一块更亮或更暗的「珠子」，路两端的半圆也像多混了一遍色——
+                    这两处是同一个错误：往 <code>QUADS</code> 缓冲里塞三角形时，退化四边形重复的是<strong>第二个</strong>角，
+                    同一组四个角换个顺序，就把同一个三角形正反各填了一遍，半透明色于是混了两次。现在所有扇形统一重复<strong>第三个</strong>角
+                    （第二个三角形没有面积），一块地面只上一次色。
+                </p>
+                <p>
+                    另外两处顺带收紧：急弯补齐原来用的是<strong>整个圆</strong>，它有一半压在自己那两笔上，现在只补两条横截面之间真正缺的那块扇形；
+                    斜接的容许长度从 <code>4</code> 个半宽（两倍路宽）收到 <code>2</code> 个半宽——以前急弯放大后能甩出一根长长的尖刺，
+                    现在这个角度直接画成圆角。世界地图与自绘地图用的是同一个门槛。
                 </p>
 
                 <h2 id="names">名字的大小与位置</h2>

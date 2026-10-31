@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>功能介绍 — HowToGo | 问道</title>
-    <meta name="description" content="问道（HowToGo）0.2.2 完整功能列表：道路绘制与维护（平滑曲线、按层叠放、道路层加减）、实时导航（含主界面 K）、公共交通线路、机械动力铁路与 MTR 自动识别、阡陌交通 RoadWeaver 只读图层、地图显示与颜色自定义、浏览器地图（webmap）、地图存档导出导入、目的地来源与数据存放。">
+    <meta name="description" content="问道（HowToGo）0.2.3 完整功能列表：道路绘制、实时导航与主界面 K、界面主题与游戏内设置、地点描述与标签、Xaero 小地图模式、MTR 服务端整网同步、公共交通、机械动力与 MTR 自动识别、阡陌交通只读图层、地图显示与配色、浏览器地图（webmap）、地图存档导出导入、目的地与数据存放。">
     <meta name="theme-color" content="#f4f8ff">
     <link rel="icon" href="assets/img/mod-icon.png" type="image/png">
     <link rel="stylesheet" href="assets/css/site.css">
@@ -57,8 +57,9 @@
                     <span class="eyebrow">功能介绍</span>
                     <h1 style="margin-bottom:.4em">它到底做了什么</h1>
                     <p style="font-size:1.06rem;color:var(--muted)">
-                        当前版本 <strong>v0.2.2</strong>（预发布测试版），面向 Minecraft <strong>1.20.1 – 26.3</strong>，
-                        <strong>Fabric</strong> 与 <strong>NeoForge</strong> 双平台，纯客户端。
+                        当前版本 <strong>v0.2.3</strong>（2026-10-31），面向 Minecraft <strong>1.20.1 – 26.3</strong>，
+                        <strong>Fabric</strong> 与 <strong>NeoForge</strong> 双平台共 <strong>21 个构建</strong>，纯客户端；
+                        服务端可选装，只为 MTR 整网同步。
                         一句话：把 Xaero 世界地图变成一张<strong>能规划、能导航</strong>的路网。
                         下面是全部功能，以及每一条背后的取舍——因为「为什么不那样做」往往比功能本身更重要。
                     </p>
@@ -220,6 +221,34 @@
                     <p><a href="wiki/navigate.html">详细教程：导航与 HUD →</a></p>
                 </div>
 
+                <!-- ================================================= 小地图模式 -->
+                <h2 id="xaero-minimap" class="reveal">Xaero 小地图导航模式（可选）</h2>
+                <div class="reveal">
+                    <p>
+                        0.2.3 起可以把导航地图画到 <strong>Xaero's Minimap</strong> 上：新配置 <code>map_display_mode</code>，
+                        <code>hud</code>（默认，本模组自带的小地图）或 <code>xaero_minimap</code>。选后者时本模组 HUD
+                        不再画自己的小地图——整张路网、路线与终点 / 起点标记都画进 Xaero 的小地图，屏幕上只留一张
+                        <strong>精简卡片</strong>：转向箭头、到转向处的距离、剩余里程与时间、进度条、目的地名。
+                    </p>
+                    <ul>
+                        <li><strong>两种模式读同一份读数</strong>：只是画到不同地方，不会出现「面板说左转、小地图说右转」。</li>
+                        <li><strong>路网始终画，路线只在导航时画</strong>：第一版覆盖层只画了导航路线圆点，路网根本没画
+                            （所以有人反馈「小地图上看不到路网」）；0.2.3 修好了，并去掉压住拐角的「下一个转向处」蓝色大点
+                            ——转向交给精简卡片的箭头。</li>
+                        <li><strong>为什么做成可选项而不是直接换掉</strong>：自带小地图不依赖任何别的模组，而 Xaero's Minimap
+                            是可选的；有它的玩家通常已经把屏幕布局安排好了，愿意换的人才换。</li>
+                        <li><strong>回退是明说的</strong>：没装 Xaero's Minimap、当前构建没针对它编译、或注册失败时自动退回 HUD，
+                            并在日志里写一行 <code>map display mode xaero_minimap is unavailable (...)</code> 说明是哪一种。</li>
+                        <li><strong>这次 21 个 jar 里只有 <code>1.21.1-neoforge</code> 真的编进了这一段</strong>：构建时
+                            <code>libs/</code> 里只有它那份小地图 jar，其它节点等于「没装小地图」的回退。
+                            Xaero's Minimap 不是硬依赖，没装不影响其它功能。</li>
+                        <li><strong>精简卡片位置可配</strong>：<code>compact_hud_anchor</code>（默认 <code>bottom_left</code>，
+                            避开 Xaero 默认在左上角的小地图）加 <code>compact_hud_offset_x</code> /
+                            <code>compact_hud_offset_y</code> 两个像素偏移。</li>
+                    </ul>
+                    <p><a href="wiki/navigate.html#xaero-minimap">详细教程：把导航地图画到 Xaero's Minimap 上 →</a></p>
+                </div>
+
                 <!-- ================================================= 公交 -->
                 <h2 id="transit" class="reveal">公共交通线路</h2>
                 <div class="reveal">
@@ -275,11 +304,22 @@
                     <p>
                         装了 MTR（<strong>4.0.4 及以上</strong>），它的车站与线路会被读成问道自己的站点与公共交通线路：
                         列车与缆车算铁路，船算水路，其它类型（例如飞机）不猜、直接不处理。
+                        0.2.3 起，服务端也装本模组（和 MTR）时，MTR 的整张路网会同步给客户端——没去过的车站也能规划
+                        （只 1.20.6 / 1.21.1）。
                     </p>
                     <ul>
                         <li><strong>读到过的都会被记住</strong>：MTR 发给客户端的数据可能只是一个窗口（联机时尤其如此），
                             问道把每次读到的<strong>合并记住</strong>，走出同步范围后线路不会凭空消失；
                             整图读取由 <code>mtr_full_map</code>（默认开）控制。</li>
+                        <li><strong>服务端整网同步（0.2.3，只 1.20.6 / 1.21.1）</strong>：MTR 自己的服务端只发玩家周围约 200 格的车站与线路，
+                            所以不联机开图、也没装 MTR Map Overlay 时，没走到过的铁路本模组一概不知道。服务端也装本模组（和 MTR）时，
+                            服务端读 MTR 正在模拟的整张路网（每个维度的全部车站、线路与轨道），打包压缩后按 <strong>30 kB 分片</strong>
+                            发给客户端；客户端每秒说一次 hello，服务端只回给说过 hello 的客户端，路网十秒检查一次、只有真变了才重发。
+                            客户端自己不装 MTR 也能用同步来的路网（目的地列表、地图标记、公交线路与路线规划都可用），但客户端的
+                            <code>mtr_transit</code> 要开着。新增配置 <code>mtr_server_sync</code>（默认开）：关掉后客户端不再向服务端要数据。</li>
+                        <li><strong>和 MTR Map Overlay 一起装时优先用本模组自己的数据</strong>：overlay 的快照退为后备，
+                            避免同一批车站从两个可能不一致的读取器里出现两遍；只有本模组没有自己的读数时（别人的服务器、服务端没装本模组）
+                            才用 overlay 的。</li>
                         <li><strong>同名车站会合并</strong>：同名（忽略大小写与首尾空格）且候车点相距不超过
                             <code>mtr_station_merge_blocks</code>（默认 <strong>256</strong> 格）的车站合成一个地点——
                             列表里一条、地图上一个标记、线路只停一次，位置取所有站台的中点。无名车站从不合并，
@@ -377,6 +417,29 @@
                     <p><a href="wiki/config.html">配置项一览 →</a></p>
                 </div>
 
+                <!-- ================================================= 界面主题 -->
+                <h2 id="ui-theme" class="reveal">界面主题（跟天光自动切换）</h2>
+                <div class="reveal">
+                    <p>
+                        0.2.3 起多了一套<strong>白色界面</strong>，默认<strong>跟着世界天空的亮度自动换色</strong>：
+                        白天白色、天黑黑色，雷雨把世界压暗时界面一起暗；地狱、末地以及任何没有天空的维度永远是黑色。
+                        <code>ui_theme</code> 三档：<code>dark</code>（一直是原来那套黑色）、<code>light</code>（白色）、
+                        <code>auto</code>（默认）。
+                    </p>
+                    <ul>
+                        <li><strong>读的是实时天空亮度，不是时钟</strong>：所以换色发生在太阳真正落下的那一刻，
+                            而不是照一张写死的日出日落表；中午登录的存档不会拿着「正午」的读数过一整夜。</li>
+                        <li><strong>所有本模组界面一起换</strong>：主界面、目的地选择、地图存档、导入、设置、地点详情、
+                            未关联详情、命名、线路配置、导航面板、精简卡片、世界地图上的地图显示面板，以及浏览器地图；
+                            改完下一帧生效，不用重启。</li>
+                        <li><strong>白色不是把黑色反过来</strong>：浅色界面盖在已经变暗的游戏画面上会像一个洞，所以浅色那套是
+                            照 Google 地图的浅色配色另画的——文字分四级灰、需要「像线条」的颜色改用更深的蓝，
+                            红色 / 橙色 / 绿色这些含义色都在白底上重新取过对比度。</li>
+                        <li><strong>只在客户端</strong>：不改世界、不发服务器；配置文件与设置界面里的「界面主题」是同一个值。</li>
+                    </ul>
+                    <p><a href="wiki/config.html#theme">详细教程：界面主题 →</a></p>
+                </div>
+
                 <!-- ================================================= 浏览器地图 -->
                 <h2 id="webmap" class="reveal">浏览器地图（webmap）</h2>
                 <div class="reveal">
@@ -447,11 +510,12 @@
                     <p>
                         世界里按 <kbd>K</kbd> 打开主界面：标题下是一张<strong>只能看的地图</strong>（拖动平移、滚轮以光标为中心缩放，
                         点它不会选点也不会开始导航），再下面是状态（出行方式、导航目的地与剩余距离 / 时间、路网规模）和按钮——
-                        选择目的地、结束导航、切换出行方式、地图存档、自检、浏览器地图、关闭。按键可以在「控制」里改。
+                        选择目的地、结束导航、切换出行方式、地图存档、自检、浏览器地图、设置、关闭。
+                        0.2.3 起标题栏多了「设置」，见下面那节<a href="#settings">游戏内设置界面</a>。按键可以在「控制」里改。
                     </p>
                     <ul>
                         <li><strong>导出</strong>：<code>/howtogo data</code> 打开「地图存档」界面，一个按钮把<strong>当前世界</strong>的道路、
-                            地点、铁路名称、公共交通线路与附属数据打成一个 <code>.zip</code> 放到
+                            地点（含描述与标签）、铁路名称、公共交通线路与附属数据打成一个 <code>.zip</code> 放到
                             <code>config/howtogo/exports/</code>；<code>/howtogo export</code> 直接导出。</li>
                         <li><strong>导入</strong>：另一个按钮把别人的 <code>.zip</code> 导回来，<code>/howtogo import [压缩包]</code>
                             读指定文件，压缩包也可以直接拖进界面。导入<strong>无视压缩包名与内部目录名</strong>：
@@ -466,6 +530,29 @@
                         <li><strong>自检也覆盖它</strong>：自检里多一项「地图存档压缩包」，真的导出、导入、逐字节核对。</li>
                     </ul>
                     <p><a href="wiki/migrate.html">详细教程：数据目录与迁移 →</a></p>
+                </div>
+
+                <!-- ================================================= 设置 -->
+                <h2 id="settings" class="reveal">游戏内设置界面</h2>
+                <div class="reveal">
+                    <p>
+                        0.2.3 起主界面（<kbd>K</kbd>）标题栏多了「<strong>设置</strong>」：把玩的时候才会改的
+                        <strong>十五项</strong>搬进游戏里，分五组——界面外观、导航 HUD、路线与出行、地图数据源、浏览器地图。
+                        每一项都有说明，列表可以滚轮滚动。
+                    </p>
+                    <ul>
+                        <li><strong>改一下立刻保存，没有「应用」按钮</strong>：主题、地图显示模式、精简卡片位置下一帧生效；
+                            数据源开关下一个客户端刻生效；步行越野、站点吸附、等车时间、是否回退步行下一次规划或导航判定生效；
+                            默认出行方式在这一局还没切换过方式时立即生效，浏览器地图自动启动下一次进入世界时生效。</li>
+                        <li><strong>为什么只搬这十五项</strong>：颜色要色板、逐级容差要解释、<code>webmap_port</code> 要数字框；
+                            而路线偏好、避开等级、优先大路、语音、只报站仍然由 <code>route_preferences.json</code> 覆盖，
+                            放进界面等于改一份看不见的第二值，所以干脆不放。</li>
+                        <li><strong>有依赖的项变灰并写明原因</strong>：精简卡片三项要 Xaero 小地图模式真的生效，
+                            <code>mtr_full_map</code> 要 MTR 读取开着；灰行下面写原因，不是消失。</li>
+                        <li><strong>「恢复默认值」要点两次</strong>：第一次只提醒，并且只恢复这一页的十五项。</li>
+                        <li>颜色、各级容差、方块 id、<code>webmap_port</code> 仍然留在 <code>howtogo-client.toml</code>。</li>
+                    </ul>
+                    <p><a href="wiki/config.html#settings">详细教程：游戏内设置 →</a></p>
                 </div>
 
                 <!-- ================================================= 目的地 -->
@@ -513,15 +600,44 @@
                     <p>
                         列表上方有搜索框；界面里同时可以切换交通方式、路线偏好与语音，改动会记住。
                         界面<strong>不暂停游戏</strong>——它是地图，不是菜单。
+                        0.2.3 起每个地点还能写描述、贴标签、标收藏；「只读」说的是地点本身的名称与类别属于那个模组，
+                        这些笔记是你自己的（见下节<a href="#place-details">地点详情</a>）。
                     </p>
+                </div>
+
+                <!-- ================================================= 地点详情 -->
+                <h2 id="place-details" class="reveal">地点详情（描述、标签与收藏）</h2>
+                <div class="reveal">
+                    <p>
+                        0.2.3 起每个地点都能写<strong>描述</strong>、贴<strong>标签</strong>、标<strong>收藏</strong>：
+                        描述最多 <strong>512 字、可换行</strong>；标签最多 <strong>16 个</strong>，每个最多 8 字，逗号分隔，
+                        自动去重、按码点截断（不会把 emoji 切成半个）；再加一个收藏星标。
+                    </p>
+                    <ul>
+                        <li><strong>四个入口</strong>：目的地列表里点中一个地点后的右栏详情卡；<kbd>K</kbd> 主界面地图上
+                            <strong>双击</strong>地点标记；编辑模式里地点面板的「更多…」（按<strong>草稿</strong>处理，
+                            点面板自己的「完成」才和名字、类型一起写进去）；网页地图上点地点标记。</li>
+                        <li><strong>为什么单独存一份</strong>：MTR 车站、Xaero 路径点、阡陌交通的结构根本不在本模组的路网里，
+                            笔记没法挂在道路节点上。一条记录按地点键存 <code>config/howtogo/&lt;存档&gt;/place_details.json</code>
+                            （按存档、不按维度），和路网一样 3 秒防抖 + 原子写，离开世界时也会写。</li>
+                        <li><strong>列表搜索也搜描述和标签</strong>：命中的行第二行显示描述摘要而不是坐标，
+                            只记得「那个能停车的店」也找得回来。</li>
+                        <li><strong>随地图存档一起导出导入</strong>：<code>place_details.json</code> 随地图存档压缩包一起打包；
+                            导入覆盖后当前维度的路网、铁路名、线路<strong>和地点详情</strong>立刻重读。</li>
+                        <li><strong>自动识别的地点不能在这里删</strong>（删了读取器下一秒又读回来），自己标的地点可以删、删要点两次。</li>
+                        <li><strong>未关联详情</strong>：车站被拆、路径点被删、模组卸载之后，详情不会自动消失，
+                            而是进「地图存档」界面底部的「未关联详情（N）」，每条写明来源与 id。</li>
+                    </ul>
+                    <p><a href="wiki/roads.html#place-details">详细教程：地点详情 →</a></p>
                 </div>
 
                 <!-- ================================================= 兼容 -->
                 <h2 id="compat" class="reveal">兼容性与数据</h2>
                 <div class="reveal">
                     <ul>
-                        <li><strong>纯客户端</strong>：服务器上不需要安装，也不会要求服务器装任何东西——唯一一个服务端入口只做一件事，
-                            注册导航仪物品，让配方在服务端也能解析。代价是别的玩家看不到你画的路。</li>
+                        <li><strong>纯客户端</strong>：服务器上不需要安装，也不会要求服务器装任何东西。0.2.3 起导航仪物品已移除——
+                            本模组不再注册任何物品，打开界面的入口只剩 <kbd>K</kbd>（Fabric 上也修好了），升级前存档里的导航仪会读不出来。
+                            服务端可选装，只为 MTR 整网同步（只 1.20.6 / 1.21.1）。代价是别的玩家看不到你画的路。</li>
                         <li><strong>可选模组全部是「软」依赖</strong>：通过方块注册名或反射读取，没装就是对应图层为空，其它功能照常。</li>
                         <li><strong>数据按存档分开</strong>：单人按存档名（<code>sp_</code>）、多人按服务器地址（<code>mp_</code>），
                             文件名里带维度，目录里还有一个 <code>.world</code> 记录指向它属于哪个世界。</li>
@@ -557,8 +673,10 @@
                             </svg>
                         </span>
                         <div>
-                            <p><strong>0.2.2 是预发布测试版。</strong>21 个构建（Fabric 11 个、NeoForge 10 个）
-                                只做过编译验证与回归测试（873 项检查），并没有在真实游戏里逐个走查。
+                            <p><strong>0.2.3 一共 21 个构建</strong>：11 个 Fabric + 10 个 NeoForge（1.20.1 只有 Fabric），
+                                全部通过编译与静态检查，纯逻辑回归 <strong>1005 项</strong>全过；其中 <strong>18 个节点</strong>
+                                用真实客户端跑了 9~10 项功能自检，Fabric 的 26.1 / 26.2 / 26.3 三个节点只验证到
+                                「客户端能启动、能进世界、路网读取正常」。可选模组的完整组合只在 1.21.1 NeoForge 上实测。
                                 遇到问题请附上日志、MC 版本与加载器版本。</p>
                             <p>完整变更见 <a href="wiki/changelog.html">更新日志</a>，
                                 安装与版本状态见 <a href="wiki/install.html">安装与前置</a>。</p>

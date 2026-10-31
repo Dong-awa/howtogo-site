@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>常见问题与限制 — HowToGo | 问道 Wiki</title>
-    <meta name="description" content="问道（HowToGo）常见问题与已知限制：支持哪些 Minecraft 版本与加载器、主界面 K 是干什么的、为什么报「没有路线」、步行为什么不再能直线穿过很远的野外、路为什么看起来是平滑曲线、地图存档能不能导出给别人、升级到 0.2.2 后数据目录为什么改名、怎么画高架与隧道、为什么日志里没有诊断输出（debug_log）、MTR 为什么缺站、换乘站为什么不融合、语音为什么读成中文、能否装在服务器上。">
+    <meta name="description" content="问道（HowToGo）常见问题与已知限制：支持哪些 Minecraft 版本、0.2.3 起导航仪物品为何移除、主界面 K 是干什么的、为什么报「没有路线」、界面主题为什么跟天光变色、Xaero 小地图上看不到路网、MTR 没去过的车站为什么规划不了、地点描述与标签存在哪、地图存档能导出吗、能否装在服务器上。">
     <meta name="theme-color" content="#f4f8ff">
     <link rel="icon" href="../assets/img/mod-icon.png" type="image/png">
     <link rel="stylesheet" href="../assets/css/site.css">
@@ -78,7 +78,7 @@
                 <a href="config.html" data-wiki-link data-keywords="配置 文件 toml 数据 存档 备份">配置与数据文件</a>
                 <a href="migrate.html" data-wiki-link data-keywords="迁移 搬家 改名 换电脑 存档 服务器地址 数据 文件夹 sp_ mp_ 世界名 目录 备份 丢失">迁移地图数据</a>
                 <a href="faq.html" data-wiki-link data-keywords="常见问题 限制 报错 没有路线 语音" aria-current="page">常见问题与限制</a>
-                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.2 0.2.1 0.2.0 0.1.0">更新日志</a>
+                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.3 0.2.2 0.2.1 0.2.0 0.1.0">更新日志</a>
             </aside>
 
             <main class="wiki-body">
@@ -92,28 +92,38 @@
                     这里的每一条都按「现象 → 原因 → 怎么办」写。大多数看起来像 bug 的事，
                     其实是问道在设计上选了「如实说做不到」，而不是画一条看起来能走、实际走不通的线；
                     明白它在坚持什么，剩下的就好办了。本页与站点其他页面一致，描述的是已发布的
-                    <strong>0.2.2</strong>——它是预发布测试版。
+                    <strong>0.2.3</strong>；测试范围与已知限制见下面的<a href="#version">版本与入口</a>。
                 </p>
 
                 <h2 id="version">版本与入口</h2>
 
                 <h3>支持哪些 Minecraft 版本？该装 Fabric 还是 NeoForge？</h3>
                 <p>
-                    0.2.2 一共 <strong>21 个构建</strong>：<strong>11 个 Fabric + 10 个 NeoForge</strong>。
+                    0.2.3 一共 <strong>21 个构建</strong>：<strong>11 个 Fabric + 10 个 NeoForge</strong>。
                     Fabric 覆盖 Minecraft <strong>1.20.1、1.20.4、1.20.6、1.21.1、1.21.4、1.21.6、1.21.8、1.21.11、26.1、26.2、26.3</strong>；
                     NeoForge 覆盖除 1.20.1 以外的其余十个版本——1.20.1 只有 Fabric，没有 NeoForge。
                     <strong>不支持 Forge</strong>：它的构建工具链与现有的冲突，已从仓库移除。
                 </p>
                 <p>
                     下载时选与你的加载器和 Minecraft 版本对应的那一个，文件名形如
-                    <code>howtogo-0.2.2pre1+mc1.21.1-neoforge.jar</code>，放进 <code>mods/</code>。
-                    另外 <strong>Xaero's World Map 是必需的</strong>（0.2.2 面向 1.40.0 及以上），所有道路、线路与路线都画在它上面；
+                    <code>howtogo-0.2.3+mc1.21.1-neoforge.jar</code>，放进 <code>mods/</code>。
+                    另外 <strong>Xaero's World Map 是必需的</strong>（0.2.3 多数节点要求 1.40.0 及以上，
+                    1.20.6 与 1.21.6 要求 1.39.0——这两版只出过 1.39.x 那一代），所有道路、线路与路线都画在它上面；
                     XaeroLib 从 26.x 起随 World Map 以嵌套 jar 分发，<strong>不需要单独下载</strong>。
                 </p>
                 <p>
-                    也要知道 <strong>0.2.2 是预发布测试版</strong>：21 个构建只做过编译验证与回归测试（873 项检查），
-                    没有在真实游戏里逐个版本走查。完整的版本矩阵、前置与安装步骤见 <a href="install.html">安装与前置</a>，
-                    每个版本改了什么见 <a href="changelog.html">更新日志</a>。
+                    测试情况如实说：21 个构建全部通过编译与静态检查（元数据、入口类、mixin、资源、语言键、
+                    依赖区间、class 版本、LICENSE），纯逻辑回归 <strong>1005 项</strong>全过。其中
+                    <strong>18 个节点</strong>用真实客户端跑了 9~10 项功能自检（路网、线路、规划、存档、地点详情、
+                    导出导入、网页地图、界面主题）；Fabric 的 <strong>26.1 / 26.2 / 26.3</strong> 三个节点只验证到
+                    「客户端能启动、能进世界、路网读取正常」——当时开发工具链（Loom 与 Fabric API 的命名空间）
+                    让开发环境的客户端起不来，所以没跑完整自检。
+                </p>
+                <p>
+                    可选模组的完整组合（Create、MTR、MTR Map Overlay、MCPhone、阡陌交通、Xaero 小地图与世界地图）
+                    只在 <strong>1.21.1 NeoForge</strong> 上实测；1.20.1 Fabric 的专用服务器也启动到了
+                    <code>Done</code>。完整的版本矩阵、前置与安装步骤见 <a href="install.html">安装与前置</a>，
+                    每个版本改了什么见 <a href="changelog.html">更新日志</a>；遇到问题请附上 <code>latest.log</code>。
                 </p>
 
                 <h3>按 <kbd>K</kbd> 打开的那个主界面是干什么的？</h3>
@@ -122,12 +132,74 @@
                     标题下是一张<strong>只能看的地图</strong>——拖动平移、滚轮以光标为中心缩放，点它不会选点、也不会开始导航；
                     它画着你的路、铁路、阡陌交通的路、地点标记、当前路线与玩家朝向。再往下是状态
                     （出行方式、导航目的地与剩余距离 / 时间、路网规模）和按钮：
-                    <strong>选择目的地、结束导航、切换出行方式、地图存档、自检、浏览器地图、关闭</strong>。
+                    <strong>选择目的地、结束导航、切换出行方式、地图存档、自检、浏览器地图、设置、关闭</strong>
+                    （设置界面见<a href="config.html#settings">配置与数据文件</a>）。
                     按键在「控制」里可以改。
                 </p>
                 <p>
                     两个细节：在世界地图里按 <kbd>K</kbd> 不会触发（那张地图有自己的按键）；
-                    0.2.2 里导航仪物品仍然存在，<kbd>K</kbd> 是新增的另一个入口，不是替换。
+                    <strong>0.2.3 起导航仪物品已移除，<kbd>K</kbd> 是唯一入口</strong>——0.2.2 的 <kbd>K</kbd>
+                    只在 NeoForge 上注册，Fabric 键位表里没有它（那时 Fabric 还能右键导航仪），物品删掉之后
+                    Fabric 就没有入口了，所以 0.2.3 两个加载器都注册并轮询同一个键位。
+                    升级前留在存档里的导航仪会因为物品 ID <code>howtogo:navigator</code> 不存在而读不出来，
+                    <kbd>K</kbd> 主界面、<code>/howtogo terminal</code> 与手机里的「问道导航」都还在。
+                </p>
+
+                <h3>升级到 0.2.3 后，存档里的导航仪读不出来了？</h3>
+                <p>
+                    是的，这是 0.2.3 的破坏性变更：<strong>导航仪物品已经整个移除</strong>——物品、配方、进度、
+                    创造模式标签页、语言与模型一起删掉，本模组现在不注册任何物品。物品 ID
+                    <code>howtogo:navigator</code> 不再存在，所以升级后日志里会报一行 unknown registry key，
+                    存档里已经拿到的导航仪读不出来。
+                </p>
+                <p>
+                    为什么删：右键导航仪打开的就是主界面（<kbd>K</kbd>）里「选择目的地」那一个，和本模组自己的
+                    界面重复。<strong>入口都还在</strong>：<kbd>K</kbd> 主界面、<code>/howtogo terminal</code>、
+                    手机里的「问道导航」。现在两个加载器都注册同一个 <kbd>K</kbd> 键位，Fabric 上按 <kbd>K</kbd>
+                    也真的能打开主界面了（0.2.2 的 <kbd>K</kbd> 只在 NeoForge 上注册）。
+                </p>
+
+                <h3>0.2.2 的 Fabric 版本为什么一个都装不上？</h3>
+                <p>
+                    0.2.2 的十一个 Fabric jar 把 Minecraft 版本范围按 <strong>Maven 的区间写法</strong>写进了
+                    <code>fabric.mod.json</code>（例如 <code>[1.21.11,1.21.12)</code>），而 Fabric 的
+                    <code>VersionPredicate</code> 只认 <code>&gt;=1.21.11 &lt;1.21.12</code> 这种比较符写法：
+                    它不报语法错，直接判每条区间都不满足，游戏里显示成「需要 <code>[1.21.11,1.21.12)</code>，
+                    但只找到了 1.21.11」。0.2.3 已按 Fabric 的语法写，十一个 Fabric jar 都能装了。
+                </p>
+                <p>
+                    0.2.3 顺带修好三处 0.2.2 的 Fabric 玩家根本碰不到的问题：1.21.11 起的鼠标 mixin 从来没应用上；
+                    <kbd>R</kbd>（切换道路编辑）与 <kbd>L</kbd>（线路配置）在世界地图上从没反应过；
+                    <code>/howtogo data</code>、<code>/howtogo export</code>、<code>/howtogo import</code>
+                    只有 NeoForge 有。现在两个加载器一致。
+                </p>
+
+                <h2 id="ui">界面与主题</h2>
+
+                <h3>界面一会儿白一会儿黑，正常吗？</h3>
+                <p>
+                    正常，这是 0.2.3 新增的界面主题在跟天光走。配置项 <code>ui_theme</code> 有三档：
+                    <code>dark</code>（一直是原来那套黑色）、<code>light</code>（白色）、<code>auto</code>（默认）。
+                    <code>auto</code> 读的不是时钟，而是<strong>世界天空亮度的实时值</strong>：白天白色、天黑黑色，
+                    雷雨把世界压暗时界面一起暗；地狱、末地以及任何声明没有天空的维度<strong>永远是黑色</strong>。
+                    所以换色发生在太阳真正落下的那一刻，而不是照一张写死的日出日落表。
+                </p>
+                <p>
+                    想固定就自己选：<kbd>K</kbd> 主界面 → 设置 → 界面外观 → 界面主题，或者直接改
+                    <code>config/howtogo-client.toml</code> 里的 <code>ui_theme</code>。所有本模组界面和浏览器地图
+                    一起换色，改完下一帧生效、不用重启；它只在客户端，不改世界、不发服务器。
+                    白色不是把黑色反过来：浅色那套是照 Google 地图的浅色配色另画的，因为浅色界面盖在已经变暗的
+                    游戏画面上会像一个洞。
+                </p>
+
+                <h3>26.3 上界面里的按钮点不动？</h3>
+                <p>
+                    <strong>0.2.2 的 26.3 节点上有这个问题，0.2.3 修了</strong>：26.3 把平台输入层换成了 SDL，
+                    鼠标键号<strong>从 1 开始</strong>（左键 1、中键 2、右键 3，之前 GLFW 是左 0、右 1、中 2），
+                    本模组自己画的那批按钮还在拿字面量 <code>0</code> 判断左键，于是每一次按键都答「不是左键」——
+                    面板照常画出来，点它没有反应。0.2.3 把 17 处字面量都换成 <code>MouseButton.LEFT</code>
+                    （26.1 / 26.2 是 0、26.3 是 1，跨版本同一个写法）；原版控件不受影响，因为它们问的是
+                    <code>InputConstants</code> 而不是数字。
                 </p>
 
                 <h2 id="noroute">为什么报「没有路线」</h2>
@@ -282,6 +354,16 @@
                     另外，驾车只是<strong>更慢</strong>（而不是无解）时，那条老规矩没变：说明原因并改为按步行规划。
                 </p>
 
+                <h3>高速上为什么老是播报「路况变化」？</h3>
+                <p>
+                    这是 0.2.3 修掉的问题。脚下道路的类型原本取「容差范围内最近的那条路」，而在路口附近两条路会争
+                    这个名额：高速自己的中线，和紧挨着它的匝道 / 辅路。谁更近往往只差一两格，而读数每个方块重算一次，
+                    于是一直待在高速上开车的玩家会反复被通知「路况变化：公路 → 高速」。0.2.3 给播报加了两道闸：
+                    <strong>读数要连续保持 5 tick</strong>（抖动一次不算），并且<strong>新路面要比当前认定的路面
+                    至少近 2 格</strong>才算真的换了路。速度、转向距离与逆行判定仍然读原来的「最近道路」，
+                    行为不变——只有播报变钝了。
+                </p>
+
                 <h2 id="draw">图层、高架与隧道</h2>
 
                 <h3>怎么让高架画在地面路之上？</h3>
@@ -331,8 +413,8 @@
                 <p>
                     因为问道是<strong>纯客户端</strong>模组：路网存在你自己的 <code>config/howtogo/</code> 里，
                     服务器上没有它，别的玩家也没有。这是设计选择——不用求服主装模组、不用争权限、也不用担心别人改你的路。
-                    想让朋友看到，把数据文件给他（见<a href="config.html#backup">备份与搬家</a>），或者用 0.2.2 的地图存档导出压缩包
-                    （见本页<a href="#mapsave">地图存档能导出给别人吗</a>）。
+                    想让朋友看到，把数据文件给他（见<a href="config.html#backup">备份与搬家</a>），或者用「地图存档」导出压缩包
+                    （0.2.2 起，见本页<a href="#mapsave">地图存档能导出给别人吗</a>）。
                 </p>
 
                 <h3>为什么路有名字，地图上却不显示？</h3>
@@ -347,6 +429,21 @@
                         缩小时正是最需要它指出「那儿有个东西」的时候。</li>
                     <li>也可能是名字没取上：先在编辑模式（<kbd>R</kbd>）里 <kbd>Shift</kbd> + 点击选中那条路，再按 <kbd>N</kbd> 命名。</li>
                 </ul>
+
+                <h3>Xaero 小地图上看不到路网？</h3>
+                <p>
+                    先确认显示模式：配置项 <code>map_display_mode</code> 默认是 <code>hud</code>（本模组自带的小地图），
+                    要选 <code>xaero_minimap</code> 才会把导航地图画到 Xaero's Minimap 上。0.2.3 修好了小地图模式
+                    看不到路网的问题：第一版覆盖层只画了导航路线圆点，路网根本没画；现在路网始终画、
+                    路线只在导航时画，并去掉了压住拐角的「下一个转向处」蓝色大点（转向交给精简卡片的箭头）。
+                </p>
+                <p>
+                    也要知道：这次 21 个 jar 里只有 <code>1.21.1-neoforge</code> 真的编进了这一段
+                    （构建时 <code>libs/</code> 里只有它那份小地图 jar），其它节点即使填了
+                    <code>xaero_minimap</code> 也会自动退回 HUD，并在日志里写一行
+                    <code>map display mode xaero_minimap is unavailable (...)</code> 说明是哪一种原因。
+                    Xaero's Minimap 不是硬依赖，没装不影响其它功能。
+                </p>
 
                 <h2 id="readonly">只读的图层与融合的标记</h2>
 
@@ -367,8 +464,9 @@
                     客户端与服务器都装了 <strong>MTR Map Overlay</strong> 时，它抓回的整张网络快照也会被读进来
                     （<code>mtr_map_overlay</code>，默认开）。两者都够不着时（联机在别人的服务器、两边都没装 Map Overlay），
                     才只有靠近过的内容——问道会把每次读到的东西合并记住（线路、车站、轨道），所以走出同步范围时线路不会凭空消失，
-                    但<strong>从没靠近过</strong>的车站确实读不到。
-                    另外，剩余不足两站的线路根本不会被列出来——一条没有行程可坐的线路只会回答「没有路线」。
+                    但<strong>从没靠近过</strong>的车站确实读不到；另外，剩余不足两站的线路根本不会被列出来——
+                    一条没有行程可坐的线路只会回答「没有路线」。0.2.3 起还有第三个来源：服务端也装本模组（和 MTR）时，
+                    整张路网会同步给客户端，见下一条。
                 </p>
                 <p>
                     还有一段历史值得交代：<strong>MTR 4.1 把入口类改名成了 <code>org.mtr.MTR</code></strong>
@@ -376,6 +474,23 @@
                     于是在 4.1 上它<strong>静默失效</strong>，模组退回窗口读取——玩家看到的就是「范围外的车站又读不到了」。
                     0.2.1 起三个拼法都试，读取器要求 MTR <strong>4.0.4 及以上</strong>。
                     详见 <a href="mtr.html#versions">支持哪些 MTR 版本</a>。
+                </p>
+
+                <h3>装了 MTR，没去过的车站为什么还是规划不了？</h3>
+                <p>
+                    MTR 自己的服务端只发玩家周围约 <strong>200 格</strong>的车站与线路，所以（不联机开图、
+                    也没装 MTR Map Overlay 时）没走到过的铁路，问道一概不知道，去没去过的车站也就规划不了。
+                    0.2.3 起可以<strong>服务端整网同步</strong>：服务端也装本模组（和 MTR）时，服务端读 MTR 正在模拟的
+                    整张路网——每个维度的全部车站、线路与轨道——打包压缩后按 <strong>30 kB 分片</strong>发给客户端。
+                    客户端每秒说一次 hello，服务端只回给说过 hello 的客户端；路网十秒检查一次，只有真变了才重发。
+                </p>
+                <p>
+                    三条边界：<strong>只在 1.20.6 与 1.21.1 的节点上编译并启用</strong>，其它版本节点是空实现、
+                    行为与之前完全一致；客户端自己不装 MTR 也能用同步来的路网（目的地列表、地图标记、公交线路与
+                    路线规划都可用），但客户端的 <code>mtr_transit</code> 要开着；新增配置 <code>mtr_server_sync</code>
+                    （默认开），关掉后客户端不再向服务端要数据。服主没装本模组时，仍然只有靠近过的内容——
+                    自己开图或装 MTR Map Overlay 也能拿到更多。0.2.3 起和 MTR Map Overlay 一起装时优先用本模组
+                    自己的数据，overlay 的快照退为后备，避免同一批车站从两个可能不一致的读取器里出现两遍。
                 </p>
 
                 <h3>换乘站为什么变成一个大方块？为什么有的又没融合？</h3>
@@ -460,8 +575,8 @@
 
                 <h3>地图存档能导出给别人吗？</h3>
                 <p>
-                    能。0.2.2 起 <code>/howtogo data</code> 会打开「地图存档」界面：一个按钮把<strong>当前世界</strong>的道路、地点、
-                    铁路名称、公共交通线路与附属数据打成一个 <code>.zip</code> 放进 <code>config/howtogo/exports/</code>，
+                    能。0.2.2 起 <code>/howtogo data</code> 会打开「地图存档」界面：一个按钮把<strong>当前世界</strong>的道路、地点
+                    （含描述与标签）、铁路名称、公共交通线路与附属数据打成一个 <code>.zip</code> 放进 <code>config/howtogo/exports/</code>，
                     另一个按钮把别人的 <code>.zip</code> 导入回来。指令也行：<code>/howtogo export</code> 直接导出，
                     <code>/howtogo import [压缩包]</code> 读指定文件，压缩包还能直接拖进界面。
                 </p>
@@ -496,13 +611,30 @@
                     <a href="migrate.html">迁移地图数据</a> 把 JSON 放到旧规则会读的目录里。
                 </p>
 
+                <h3>地点描述和标签存在哪？会跟着导出吗？</h3>
+                <p>
+                    存 <code>config/howtogo/&lt;存档&gt;/place_details.json</code>（按存档、不按维度——维度是键的一部分），
+                    和路网一样 3 秒防抖 + 原子写，离开世界时也会写。描述最多 512 字、可换行；标签最多 16 个，
+                    每个最多 8 字，逗号分隔、自动去重、按码点截断（不会把 emoji 切成半个）。
+                    <strong>会跟着导出</strong>：它本来就在存档目录里，随地图存档压缩包一起打包；导入覆盖后，
+                    当前维度的路网、铁路名、线路和地点详情立刻重读。
+                </p>
+                <p>
+                    另外两件要留意：列表搜索也搜描述和标签（命中的行第二行显示描述摘要，而不是坐标）；
+                    自动识别的地点不能在这里删（删了读取器下一秒又读回来），自己标的地点可以删、删要点两次。
+                    车站被拆、路径点被删、模组卸载之后，详情不会自动消失，而是进「地图存档」界面底部的
+                    「未关联详情（N）」，每条写明来源与 id。
+                </p>
+
                 <h2 id="server">服务器与联机</h2>
 
                 <h3>能装在服务器上吗？</h3>
                 <p>
-                    不需要，也不建议。问道是纯客户端模组（<code>dist = CLIENT</code>），服务端没有对应逻辑，
-                    装上去也不会多出任何功能。它读取 Xaero 的世界地图来渲染、把数据存在客户端，
-                    与服务器之间没有任何自定义通信，所以你在任何服务器里都能直接用它。
+                    一般情况下不需要。<strong>0.2.3 起服务端可以装，但只为一个功能</strong>：服务端也装本模组（和 MTR）时，
+                    MTR 正在模拟的整张路网会同步给客户端，没去过的车站也能规划——这也只发生在 1.20.6 与 1.21.1 的节点上。
+                    除这一项外，问道仍是纯客户端（<code>dist = CLIENT</code>）：它读取 Xaero 的世界地图来渲染、
+                    把数据存在客户端，其它逻辑仍然只在客户端跑。所以服主不装也能在任何服务器里直接用它——
+                    代价是服务端有 MTR 时，没去过的 MTR 车站读不到。
                 </p>
                 <p>
                     由此带来的一条推论：<strong>换一台电脑、换一个客户端实例，路网不会跟着走</strong>——
@@ -548,9 +680,9 @@
                         </tr>
                         <tr>
                             <td>MTR 的数据范围取决于玩法</td>
-                            <td>自己开图会读整张铁路；客户端与服务器都装了 MTR Map Overlay 时也能拿到整张快照。
-                                只有联机在别人的服务器、两边都没装它时，<strong>从没靠近过</strong>的车站与线路才确实读不到
-                                （读到过的会被记住）。</td>
+                            <td>自己开图会读整张铁路；客户端与服务器都装了 MTR Map Overlay 时也能拿到整张快照；
+                                0.2.3 起服务端也装本模组（和 MTR）时整张路网同步（<strong>只 1.20.6 / 1.21.1</strong>）。
+                                都没有时，<strong>从没靠近过</strong>的车站与线路才确实读不到（读到过的会被记住）。</td>
                         </tr>
                         <tr>
                             <td>模组自己的诊断默认不写日志</td>
@@ -568,6 +700,17 @@
                         <tr>
                             <td>小地图路标点数据源需要 Xaero's Minimap</td>
                             <td>没装时这个数据源为空，其余功能一切正常。</td>
+                        </tr>
+                        <tr>
+                            <td>Xaero 小地图导航模式只在部分构建编入</td>
+                            <td>只在构建时 <code>libs/</code> 里有小地图 jar 的节点启用，这次 21 个 jar 里只有
+                                <code>1.21.1-neoforge</code>；其它版本选 <code>xaero_minimap</code> 会回退到 HUD，
+                                并在日志里写明原因。</td>
+                        </tr>
+                        <tr>
+                            <td>自动识别的地点不能删除</td>
+                            <td>自动识别的地点删不掉（删了读取器下一秒又读回来）；自己标记的地点可以删、删要点两次。
+                                地点被拆掉后详情进「未关联详情（N）」，不会自动消失。</td>
                         </tr>
                         <tr>
                             <td>时间未本地化</td>

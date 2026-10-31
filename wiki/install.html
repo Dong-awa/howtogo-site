@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>安装与前置 — HowToGo | 问道 Wiki</title>
-    <meta name="description" content="问道（HowToGo）安装教程：0.2.2 支持的 Minecraft 1.20.1 ~ 1.21.11 与 26.x、Fabric 与 NeoForge 两种加载器、必需与可选前置模组、装到哪个目录、进游戏后先确认什么、数据文件放在哪、升级到 0.2.2 时存档目录的改名规则。">
+    <meta name="description" content="问道（HowToGo）安装教程：0.2.3 覆盖 Minecraft 1.20.1 ~ 1.21.11 与 26.1 ~ 26.3、21 个构建（11 Fabric + 10 NeoForge）、必需与可选前置模组、装到哪个目录、进游戏后先确认什么、数据文件放在哪、升级到 0.2.3 时要注意什么。">
     <meta name="theme-color" content="#f4f8ff">
     <link rel="icon" href="../assets/img/mod-icon.png" type="image/png">
     <link rel="stylesheet" href="../assets/css/site.css">
@@ -78,7 +78,7 @@
                 <a href="config.html" data-wiki-link data-keywords="配置 文件 toml 数据 存档 备份">配置与数据文件</a>
                 <a href="migrate.html" data-wiki-link data-keywords="迁移 搬家 改名 换电脑 存档 服务器地址 数据 文件夹 sp_ mp_ 世界名 目录 备份 丢失">迁移地图数据</a>
                 <a href="faq.html" data-wiki-link data-keywords="常见问题 限制 报错 没有路线 语音">常见问题与限制</a>
-                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.2 0.2.1 0.2.0 0.1.0">更新日志</a>
+                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.3 0.2.2 0.2.1 0.2.0 0.1.0">更新日志</a>
             </aside>
 
             <main class="wiki-body">
@@ -89,16 +89,20 @@
 
                 <h1>安装与前置</h1>
                 <p class="lead">
-                    问道是<strong>纯客户端</strong>模组：装在你自己的客户端就够了，服务器上不需要装它，
-                    它也不会向服务器要求任何东西。换句话说，在任何服务器里，你都能独自使用它；
+                    问道是<strong>纯客户端</strong>模组：装在你自己的客户端就够了，服务器上不装它也能正常玩，
+                    它也不会要求服务器配合什么。换句话说，在任何服务器里，你都能独自使用它；
                     你画的路、标的地点只存在于你的客户端。0.2.2 起同时提供
-                    <strong>Fabric</strong> 与 <strong>NeoForge</strong> 两种加载器的构建。
+                    <strong>Fabric</strong> 与 <strong>NeoForge</strong> 两种加载器的构建
+                    （0.2.2 的 11 个 Fabric 包因为元数据写法一个都装不上，0.2.3 已经修好）。
+                    0.2.3 起服务端也可以装：联机时服务端也装本模组（以及 MTR），才会把 MTR 正在模拟的
+                    整张路网同步给你（只在 1.20.6 与 1.21.1 的节点上可用）；不装也照样能玩，
+                    只是你没走到过的铁路问道就不知道。
                 </p>
 
                 <h2 id="version">版本要求</h2>
                 <p>
-                    0.2.2 覆盖 Minecraft <strong>1.20.1 到 1.21.11</strong> 以及 <strong>26.1 ~ 26.3</strong>，
-                    共 <strong>21 个构建</strong>（Fabric 11 个、NeoForge 10 个）。
+                    0.2.3 覆盖 Minecraft <strong>1.20.1 到 1.21.11</strong> 以及 <strong>26.1 ~ 26.3</strong>，
+                    共 <strong>21 个构建</strong>（Fabric 11 个、NeoForge 10 个；1.20.1 只有 Fabric）。
                     下载时挑与你游戏版本和加载器都对应的那一个：
                 </p>
                 <div class="table-wrap">
@@ -172,8 +176,9 @@
                 <p>
                     <code>✔</code> 表示有对应构建，<code>—</code> 表示这一版没有那个加载器的构建。
                     <strong>不支持 Forge</strong>：ForgeGradle 与当前的构建工具链冲突，Forge 的构建已从仓库移除。
-                    构建文件名形如 <code>howtogo-0.2.2pre1+mc1.21.1-neoforge.jar</code>，
+                    构建文件名形如 <code>howtogo-0.2.3+mc1.21.1-neoforge.jar</code>，
                     里面带着 Minecraft 版本与加载器，按名字对号入座即可。
+                    0.2.2 的包名里带着 <code>pre1</code> 后缀，0.2.3 的包名里没有它了。
                 </p>
 
                 <div class="callout warn">
@@ -185,8 +190,17 @@
                         </svg>
                     </span>
                     <div>
-                        <p>0.2.2 仍是<strong>预发布测试版</strong>：21 个构建都只做过<strong>编译验证与回归测试</strong>
-                            （873 项检查），没有在真实游戏里逐个走查过。遇到问题请附上 <code>latest.log</code>。</p>
+                        <p>0.2.3 一共 <strong>21 个构建</strong>：11 个 Fabric + 10 个 NeoForge，覆盖 Minecraft
+                            1.20.1 ~ 1.21.11 与 26.1 ~ 26.3（1.20.1 只有 Fabric）。21 个构建全部通过编译与静态检查
+                            （元数据、入口类、mixin、资源、语言键、依赖区间、class 版本、LICENSE），
+                            纯逻辑回归 <strong>1005 项</strong>全过。</p>
+                        <p>其中 <strong>18 个节点</strong>用真实客户端跑过 9~10 项功能自检（路网、线路、规划、存档、
+                            地点详情、导出导入、网页地图、界面主题）；Fabric 的 <strong>26.1 / 26.2 / 26.3</strong>
+                            三个节点只验证到「客户端能启动、能进世界、路网读取正常」——当时开发工具链（Loom 与
+                            Fabric API 的命名空间）让开发环境的客户端起不来，所以没跑完整自检。可选模组的完整组合
+                            （Create、MTR、MTR Map Overlay、MCPhone、阡陌交通、Xaero 小地图与世界地图）
+                            只在 <strong>1.21.1 NeoForge</strong> 上实测；1.20.1 Fabric 的专用服务器也启动到了
+                            <code>Done</code>。遇到问题请附上 <code>latest.log</code>。</p>
                     </div>
                 </div>
 
@@ -202,21 +216,40 @@
                         </thead>
                         <tbody>
                         <tr>
-                            <td><strong>0.2.2</strong></td>
-                            <td>已发布（预发布测试版）</td>
-                            <td>GitHub Release <code>v0.2.2</code>（2026-10-18），21 个构建。
+                            <td><strong>0.2.3</strong></td>
+                            <td>已发布</td>
+                            <td>GitHub Release <code>v0.2.3</code>（2026-10-31），21 个构建。
                                 本站的教程与功能说明描述的就是这一版。</td>
                         </tr>
                         <tr>
-                            <td>0.2.3</td>
-                            <td>开发中，<strong>未发布</strong></td>
-                            <td>代码已经提交到仓库的 <code>main</code> 分支，但<strong>还没有 Release</strong>——
-                                没有可直接下载的 0.2.3 构建。它已经在改一批东西（例如界面主题与游戏内设置、
-                                Xaero 小地图导航模式、MTR 数据同步、导航仪物品的去留），
-                                与 0.2.2 的差异记在 <a href="changelog.html">更新日志</a>的「未发布」一节。</td>
+                            <td>0.2.2</td>
+                            <td>上一版</td>
+                            <td>GitHub Release <code>v0.2.2</code>（2026-10-18），包名带 <code>pre1</code> 后缀。
+                                它的 11 个 Fabric 构建把 Minecraft 版本范围写成了 Fabric 不认的区间写法，
+                                于是一个都装不上；0.2.3 已经全部改好，用 Fabric 的话直接换 0.2.3。</td>
                         </tr>
                         </tbody>
                     </table>
+                </div>
+
+                <div class="callout warn">
+                    <span class="ico">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                             stroke-linecap="round">
+                            <path d="M12 4l9 16H3z"/>
+                            <path d="M12 10v4M12 17h.01"/>
+                        </svg>
+                    </span>
+                    <div>
+                        <p><strong>从 0.2.2 升到 0.2.3，先知道一件事：</strong>导航仪物品被移除了——物品、配方、
+                            进度、创造模式标签页、语言与模型一起删了，本模组不再注册任何物品，打开本模组界面的
+                            入口只剩 <kbd>K</kbd> 键。存档里已经拿到的导航仪会因为物品 ID
+                            <code>howtogo:navigator</code> 不存在而读不出来，升级日志里会报
+                            <code>unknown registry key</code>——这不影响存档本身，<kbd>K</kbd> 主界面、
+                            <code>/howtogo terminal</code> 与手机里的「问道导航」都还在。</p>
+                        <p>另外，<kbd>K</kbd> 键在 Fabric 上 0.2.3 才真正注册并生效；0.2.2 的 Fabric 玩家按它没有反应，
+                            这不是你的键位设置出了问题。</p>
+                    </div>
                 </div>
 
                 <h2 id="dependencies">需要哪些模组</h2>
@@ -233,20 +266,23 @@
                         <tr>
                             <td><strong>Xaero's World Map</strong></td>
                             <td>必需</td>
-                            <td>装与你的 Minecraft 版本对应的版本（0.2.2 面向 Xaero <strong>1.40.0</strong> 及以上，
-                                开发与测试用的是 1.47.x）。所有道路、线路与路线都渲染在它上面；
+                            <td>装与你的 Minecraft 版本对应的版本：1.20.6 与 1.21.6 的节点声明
+                                <code>[1.39.0,)</code>（这两个版本只出过 1.39.x 那一代），其余节点声明
+                                <code>[1.40.0,)</code>。所有道路、线路与路线都渲染在它上面；
                                 缺少时模组会在日志里报错并停用渲染层。</td>
                         </tr>
                         <tr>
                             <td>XaeroLib</td>
-                            <td>必需</td>
-                            <td>随 World Map 一起提供，不需要单独下载；26.x 的世界地图以嵌套 jar 分发它，
-                                运行时由世界地图交给本模组。</td>
+                            <td>26.x 必需</td>
+                            <td>26.x 起需要它，随 World Map 以嵌套 jar 一起分发，不用单独下载；
+                                1.39.x 那一代把它合在 World Map 里、没有独立 jar，所以 1.20.6 / 1.21.6
+                                的节点不单独要求它。</td>
                         </tr>
                         <tr>
                             <td>Fabric API</td>
                             <td>Fabric 必需</td>
-                            <td>用 Fabric 时需要 Fabric Loader 与 Fabric API；NeoForge 不需要它。</td>
+                            <td>用 Fabric 时需要 Fabric Loader（<strong>0.14.0 及以上</strong>）与 Fabric API；
+                                NeoForge 不需要它。</td>
                         </tr>
                         <tr>
                             <td>NeoForge</td>
@@ -256,7 +292,10 @@
                         <tr>
                             <td>Xaero's Minimap</td>
                             <td>可选</td>
-                            <td>装了以后，小地图上你插的路标点会出现在目的地列表里。</td>
+                            <td>装了以后，小地图上你插的路标点会出现在目的地列表里。0.2.3 起还能把整张路网、路线与
+                                终点/起点标记直接画到它的小地图上（<code>map_display_mode = xaero_minimap</code>，
+                                屏幕上只留一张精简卡片）；不过这次 21 个 jar 里只有 <code>1.21.1-neoforge</code>
+                                真的编进了这一段，其它节点选它只会回退到自带 HUD。</td>
                         </tr>
                         <tr>
                             <td>Create（机械动力）</td>
@@ -266,8 +305,10 @@
                         <tr>
                             <td>MTR（我的世界铁路）</td>
                             <td>可选</td>
-                            <td>读取 MTR 的车站与线路（读取器要求 MTR <strong>4.0.4 及以上</strong>），
-                                见 <a href="mtr.html">MTR 集成</a>。</td>
+                            <td>读取 MTR 的车站与线路（读取器要求 MTR <strong>4.0.4 及以上</strong>）。
+                                0.2.3 起，服务端也装本模组与 MTR 时，会把 MTR 正在模拟的整张路网
+                                （每个维度的全部车站、线路与轨道）同步给客户端——只在 1.20.6 与 1.21.1
+                                的节点上可用，见 <a href="mtr.html">MTR 集成</a>。</td>
                         </tr>
                         <tr>
                             <td>阡陌交通（RoadWeaver）</td>
@@ -284,6 +325,10 @@
                 </div>
 
                 <p>
+                    Java 也跟着节点走：按节点分别是 17 / 21 / 25，26.x 需要 Java 25。
+                </p>
+
+                <p>
                     所有可选模组都是通过<strong>方块注册名</strong>或<strong>反射</strong>读取的：
                     问道的构建脚本里没有任何一个的依赖。这让「没装」这件事变得无害——对应图层为空，
                     其它功能照常；也让它们换版本、改包名时，问道最多是读不到，而不是编译不过或直接崩。
@@ -296,7 +341,7 @@
                     <li>把与你 Minecraft 版本对应的 <strong>Xaero's World Map</strong> 放进 <code>mods/</code>；
                         26.x 不用另外找 XaeroLib，它随世界地图分发。</li>
                     <li>把对应构建放进同一个 <code>mods/</code>，例如 1.21.1 + NeoForge 就用
-                        <code>howtogo-0.2.2pre1+mc1.21.1-neoforge.jar</code>；Fabric 则用同一版本号里
+                        <code>howtogo-0.2.3+mc1.21.1-neoforge.jar</code>；Fabric 则用同一版本号里
                         <code>-fabric</code> 的那一个。</li>
                     <li>启动游戏。日志里出现 <code>[HowToGo] constructed</code> 就说明模组已经加载。</li>
                 </ol>
@@ -310,8 +355,10 @@
                         看不到它，多半是 Xaero 的世界地图没装或版本不对。</li>
                     <li>在世界地图上按 <kbd>R</kbd>，屏幕左下角出现绘制状态与路网统计、右下角出现快捷键列表，
                         说明编辑模式已经打开。</li>
-                    <li>按 <kbd>K</kbd> 打开主界面（0.2.2 新增），或者拿一个导航仪右键、按 <kbd>Ctrl</kbd> +
-                        左键点地图，确认选择目的地界面能打开。</li>
+                    <li>按 <kbd>K</kbd> 打开主界面（0.2.2 新增）：0.2.3 起导航仪物品已经移除，<kbd>K</kbd>
+                        是打开本模组界面的<strong>唯一入口</strong>，选择目的地、切换出行方式、开始或结束导航
+                        都在里面；Fabric 上也是 0.2.3 才真正注册了这个键位。也可以在世界地图上按
+                        <kbd>Ctrl</kbd> + 左键直接点目的地。</li>
                 </ol>
 
                 <div class="callout">
@@ -363,6 +410,10 @@
                             <td>自动识别铁路的名称（单独一个文件，因为铁路图层每秒重建）。</td>
                         </tr>
                         <tr>
+                            <td><code>place_details.json</code></td>
+                            <td>每个地点的描述、标签与收藏（0.2.3 起；按存档存、不按维度，3 秒防抖 + 原子写）。</td>
+                        </tr>
+                        <tr>
                             <td><code>route_preferences.json</code></td>
                             <td>上次选择的交通方式与路线偏好。</td>
                         </tr>
@@ -376,7 +427,8 @@
                         </tr>
                         <tr>
                             <td><code>exports/</code>、<code>backups/</code></td>
-                            <td>地图存档压缩包：导出的包与导入前的备份（0.2.2 起，见 <a href="migrate.html">迁移地图数据</a>）。</td>
+                            <td>地图存档压缩包：导出的包与导入前的备份（0.2.2 起，见 <a href="migrate.html">迁移地图数据</a>）。
+                                0.2.3 起包里还带着 <code>place_details.json</code>，导入回来地点详情一起恢复。</td>
                         </tr>
                         <tr>
                             <td><code>../howtogo-client.toml</code></td>

@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>画路、命名与地点 — HowToGo | 问道 Wiki</title>
-    <meta name="description" content="问道画路教程：进入编辑模式、六个道路等级、道路层（高架 / 地下）与连通规则、吸附与拆分、选择与拖动节点、命名规则、四种地点类型、删除与撤销，以及 repair_road_joins 如何把看起来连上的路修好。">
+    <meta name="description" content="问道画路教程：进入编辑模式、六个道路等级、道路层（高架 / 地下）与连通规则、吸附与拆分、选择与拖动节点、命名规则、四种地点类型，0.2.3 起的地点详情（512 字描述、16 个标签、收藏星与四个入口）、删除与撤销，以及 repair_road_joins 如何把看起来连上的路修好。">
     <meta name="theme-color" content="#f4f8ff">
     <link rel="icon" href="../assets/img/mod-icon.png" type="image/png">
     <link rel="stylesheet" href="../assets/css/site.css">
@@ -78,7 +78,7 @@
                 <a href="config.html" data-wiki-link data-keywords="配置 文件 toml 数据 存档 备份">配置与数据文件</a>
                 <a href="migrate.html" data-wiki-link data-keywords="迁移 搬家 改名 换电脑 存档 服务器地址 数据 文件夹 sp_ mp_ 世界名 目录 备份 丢失">迁移地图数据</a>
                 <a href="faq.html" data-wiki-link data-keywords="常见问题 限制 报错 没有路线 语音">常见问题与限制</a>
-                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.2 0.2.1 0.2.0 0.1.0">更新日志</a>
+                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.3 0.2.2 0.2.1 0.2.0 0.1.0">更新日志</a>
             </aside>
 
             <main class="wiki-body">
@@ -451,6 +451,84 @@
                     机械动力车站、MTR 车站），所以 MTR 的站名也会一起画出来；字号按类型分，
                     资源点最小、商店最大。裁剪与缩放的细节见
                     <a href="display.html">地图显示与缩放</a>。
+                </p>
+
+                <h2 id="place-details">地点详情：描述、标签与收藏</h2>
+                <p>
+                    0.2.3 起，每个地点除了名字与类型，还能带三样东西：一段<strong>描述</strong>、几个<strong>标签</strong>
+                    和一个<strong>收藏星</strong>。「那个能停车的店」这种记忆不是坐标，描述与标签就是写给以后的自己看的，
+                    也是列表搜得回来的依据。自己标的地点与自动识别出来的地点（机械动力车站、MTR 车站、Xaero 路径点等）都有这一份。
+                </p>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>字段</th>
+                            <th>限制</th>
+                            <th>说明</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td><strong>描述</strong></td>
+                            <td>最多 <strong>512 字</strong>，可以换行</td>
+                            <td>一段笔记，不是一篇文档。换行原样保留。</td>
+                        </tr>
+                        <tr>
+                            <td><strong>标签</strong></td>
+                            <td>最多 <strong>16 个</strong>，每个最多 <strong>8 字</strong></td>
+                            <td>逗号分隔，重复的自动去掉；超长的按<strong>码点</strong>截断，所以不会把 emoji 切成半个。</td>
+                        </tr>
+                        <tr>
+                            <td><strong>收藏</strong></td>
+                            <td>一个星标</td>
+                            <td>收藏不是标签，而是单独一个星标：网页地图的标记与统计会用到它（见
+                                <a href="webmap.html#place-card">网页地图上的地点卡</a>）。</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>四个入口</h3>
+                <ul>
+                    <li><strong>目的地列表的右栏详情卡</strong>：在目的地列表里点中一个地点，右栏下半部分就是它的详情卡——
+                        名称、来源、描述、标签、收藏，以及「编辑」「导航到这里」「返回列表」。</li>
+                    <li><strong><kbd>K</kbd> 主界面地图上双击地点标记</strong>：双击直接打开这个地点的详情。
+                        0.2.3 起导航仪物品已移除，<kbd>K</kbd> 是打开主界面的唯一入口。</li>
+                    <li><strong>编辑模式里地点面板的「更多…」</strong>：按 <kbd>N</kbd> 打开的地点面板底部有「更多…」。
+                        这个入口按<strong>草稿</strong>处理——描述、标签、收藏先留在面板里，点面板自己的「完成」才和名字、类型
+                        一起写进去；点「取消」三样一起丢，不会留下半份详情。</li>
+                    <li><strong>网页地图上点地点标记</strong>：卡片里的描述截断到 200 字，「查看完整详情」才向游戏要全文，
+                        详见 <a href="webmap.html#place-card">网页地图上的地点卡</a>。</li>
+                </ul>
+
+                <h3>存在哪、怎么带走</h3>
+                <p>
+                    详情不挂在路网上，而是单独一份 <code>config/howtogo/&lt;存档&gt;/place_details.json</code>：
+                    MTR 车站、Xaero 路径点、阡陌交通的结构原本就不在本模组的路网里，笔记没有道路节点可挂。
+                    它<strong>按存档存、不按维度</strong>——维度是地点键的一部分，所以同一个车站换个维度不会串到一起去。
+                </p>
+                <p>
+                    写盘和路网一样：<strong>3 秒防抖加原子写</strong>，离开世界时也会写一次，所以不会因为关游戏丢掉刚写的那一段。
+                    导出/导入的地图压缩包<strong>带着这份详情</strong>：它就是存档目录里的一个 <code>*.json</code>，
+                    导入覆盖后当前维度的路网、铁路名、线路和地点详情一起重读。文件位置与备份见
+                    <a href="config.html">配置与数据文件</a>。
+                </p>
+
+                <h3>搜索、删除与未关联详情</h3>
+                <p>
+                    列表搜索<strong>也搜描述和标签</strong>：命中的那一行第二行显示<strong>描述摘要</strong>而不是坐标，
+                    所以只记得「那个能停车的店」也找得回来。
+                </p>
+                <p>
+                    能不能删，看这个地点是怎么来的：<strong>自动识别的地点不能在这里删</strong>——删了读取器下一秒又读回来，所以干脆不给删；
+                    <strong>自己标的地点可以删，删要点两次</strong>。
+                </p>
+                <p>
+                    车站被拆、路径点被删、模组被卸载之后，那些地点的详情<strong>不会自动消失</strong>——删玩家写的东西才叫数据丢失。
+                    它们会进「地图存档」界面底部的<strong>「未关联详情（N）」</strong>：每条写明来源与 id，删除同样要点两次，
+                    点别的行会把确认取消。判定只认<strong>能证明的</strong>：Xaero 与阡陌交通读的是全量，不在列表里就是没了；
+                    MTR 与机械动力只把玩家附近的东西发给客户端，「不在窗口里」不等于「不存在」，所以只有整个来源不可用时才报。
                 </p>
 
                 <h2 id="edit">删除、撤销与修路</h2>

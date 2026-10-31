@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>配置与数据文件 — HowToGo | 问道 Wiki</title>
-    <meta name="description" content="问道（HowToGo）配置与数据文件详解：howtogo-client.toml 每一项配置的作用与默认值（含偏航容差、station_snap_blocks、debug_log、浏览器地图端口）、route_preferences.json 运行时偏好、按存档分开放置的路网与线路文件、备份与搬家、手工改文件的注意事项。">
+    <meta name="description" content="问道（HowToGo）0.2.3 配置与数据文件详解：howtogo-client.toml 每一项配置的作用与默认值（界面主题、地图显示模式、MTR 整网同步）、游戏内设置界面十五项、route_preferences.json 运行时偏好、place_details.json 地点详情、路网线路文件与备份。">
     <meta name="theme-color" content="#f4f8ff">
     <link rel="icon" href="../assets/img/mod-icon.png" type="image/png">
     <link rel="stylesheet" href="../assets/css/site.css">
@@ -78,7 +78,7 @@
                 <a href="config.html" data-wiki-link data-keywords="配置 文件 toml 数据 存档 备份" aria-current="page">配置与数据文件</a>
                 <a href="migrate.html" data-wiki-link data-keywords="迁移 搬家 改名 换电脑 存档 服务器地址 数据 文件夹 sp_ mp_ 世界名 目录 备份 丢失">迁移地图数据</a>
                 <a href="faq.html" data-wiki-link data-keywords="常见问题 限制 报错 没有路线 语音">常见问题与限制</a>
-                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.2 0.2.1 0.2.0 0.1.0">更新日志</a>
+                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.3 0.2.2 0.2.1 0.2.0 0.1.0">更新日志</a>
             </aside>
 
             <main class="wiki-body">
@@ -89,10 +89,11 @@
 
                 <h1>配置与数据文件</h1>
                 <p class="lead">
-                    问道的东西分成两堆：<strong>配置</strong>是「我习惯怎么走」——默认交通方式、偏好、容差、要不要读机械动力和 MTR，
-                    以及日志与浏览器地图怎么开；<strong>数据</strong>是「我在这个世界修了什么」——路网、地点、线路。配置在
-                    <code>config/howtogo-client.toml</code>，数据在 <code>config/howtogo/</code>，
-                    两堆都在你自己的客户端上，都按存档或按客户端分开，互相之间不会写坏。
+                    问道的东西分成两堆：<strong>配置</strong>是「我习惯怎么走」——默认交通方式、偏好、容差、界面主题、
+                    要不要读机械动力和 MTR，以及日志与浏览器地图怎么开；<strong>数据</strong>是「我在这个世界修了什么」——
+                    路网、地点、地点详情、线路。配置在 <code>config/howtogo-client.toml</code>，数据在
+                    <code>config/howtogo/</code>，两堆都在你自己的客户端上，都按存档或按客户端分开，互相之间不会写坏。
+                    0.2.3 起，配置里最常改的那一小撮在游戏里就能改，见下面的<a href="#settings">游戏内设置</a>。
                 </p>
 
                 <h2 id="where">配置放在哪、怎么改</h2>
@@ -104,11 +105,22 @@
                     可填范围与注释，和文件里的完全一致，不会出现「界面上改了、文件里却没变」。
                     每一项都有中英文标题，改完保存即时生效；<code>road_colors</code> /
                     <code>transit_line_colors</code> 这两节在界面上改最方便。
+                    0.2.3 把能打开的范围补全了：0.2.2 那句当时只对 26.x 的节点成立，1.20.6 与 1.21.x 那一段的
+                    NeoForge 只注册了配置、没注册界面，所以那些玩家点这个按钮没有反应；现在
+                    1.21.1 ~ 1.21.11 的 NeoForge 构建都能从这里打开。只有 1.20.6 仍然只有配置文件——
+                    那一版 NeoForge 里没有 <code>ConfigurationScreen</code> 这个类（<code>IConfigScreenFactory</code> 有），
+                    所以那一版只能在文件里改。
                 </p>
                 <p>
                     这些值是在<strong>用到的时候</strong>才读的，所以改完保存即可，不必为此重启客户端；
                     实在拿不准的时候重启一次总是安全的。配置是客户端本地的：你和朋友在同一台服务器上玩，
                     各自改各自的，谁也不会影响谁。
+                </p>
+                <p>
+                    0.2.3 起还有一个更近的入口：<strong>主界面（<kbd>K</kbd>）标题栏的「设置」</strong>，
+                    把玩的时候真会想改的十五项搬进了游戏，改一下立刻保存。它写的是同一份
+                    <code>howtogo-client.toml</code>，只是不收颜色、容差这类需要慢慢看的项，
+                    见下面的<a href="#settings">游戏内设置</a>。
                 </p>
 
                 <div class="callout">
@@ -121,7 +133,9 @@
                     </span>
                     <div>
                         <p>交通方式、路线偏好和语音开关还有第二个入口：「选择目的地」界面里可以直接点。
-                            那两个入口写的是不同的地方，见下面的<a href="#runtime">运行时偏好</a>。</p>
+                            那个入口写的是 <code>route_preferences.json</code>，与这里的配置文件不是同一处，
+                            见下面的<a href="#runtime">运行时偏好</a>。0.2.3 的游戏内<a href="#settings">设置界面</a>
+                            因此干脆没有放这几项——两个入口都写同一个开关，迟早会分不清哪一边说了算。</p>
                     </div>
                 </div>
 
@@ -197,6 +211,79 @@
                     </table>
                 </div>
 
+                <h2 id="hud">导航 HUD 与地图显示模式</h2>
+                <p>
+                    导航时那张带小地图的面板有两种画法：画在本模组自己的 HUD 里（<code>hud</code>，默认），
+                    或把地图那一半交给 <strong>Xaero's Minimap</strong>（<code>xaero_minimap</code>），
+                    本模组只留一张精简卡片。0.2.3 起由 <code>map_display_mode</code> 决定。
+                    这是客户端设置：不改世界、不发服务器。
+                </p>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>键</th>
+                            <th>默认值</th>
+                            <th>说明</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td><code>map_display_mode</code></td>
+                            <td><code>"hud"</code></td>
+                            <td>
+                                导航地图画在哪，0.2.3 新增。<code>"hud"</code>（默认）画在本模组自己的导航面板里：
+                                屏幕上角一张卡片，里面是随行进旋转的小地图（路网、路线、转向标记、终点）与下面的读数，
+                                不依赖任何别的模组。<code>"xaero_minimap"</code> 把地图那一半交给 Xaero's Minimap：
+                                整张路网、路线与终点/起点标记都画在它的小地图上，本模组的 HUD 只留一张精简卡片，
+                                上面是转向箭头、到转向处的距离、剩余里程与时间、进度条和目的地名。
+                                两种模式读<strong>同一份读数</strong>，只是画到不同地方，所以不会出现「面板说左转、小地图说右转」。
+                                选它需要装了 Xaero's Minimap、并且当前构建针对它编译过；没装、没编译、
+                                注册失败时自动用回 <code>"hud"</code>，并在日志里写一行
+                                <code>map display mode xaero_minimap is unavailable (...)</code> 说明是哪一种，而不是静默失效。
+                                Xaero's Minimap 不是硬依赖：这次发布的 21 个构建里只有 <code>1.21.1-neoforge</code>
+                                真的编进了这一段（构建时只有它那一份小地图 jar），其它节点选它时等于「没装小地图」的回退。
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>compact_hud_anchor</code></td>
+                            <td><code>"bottom_left"</code></td>
+                            <td>
+                                精简卡片挂在屏幕的哪个角：<code>top_left</code> / <code>top_right</code> /
+                                <code>bottom_left</code> / <code>bottom_right</code>。
+                                默认左下，因为 Xaero's Minimap 自己的默认角是左上，把卡片放下面两张不会压在一起，
+                                底边也不挡视线高度上的东西。聊天记录很长、或者把小地图挪到了左下的人，
+                                可以用它和下面两个偏移把卡片挪开。只在 <code>xaero_minimap</code> 真的生效时有用。
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>compact_hud_offset_x</code></td>
+                            <td><code>0</code>（-200~200）</td>
+                            <td>
+                                精简卡片从所选角的内边缘再往屏幕里挪多少像素，按当前 GUI 缩放算。
+                                <code>0</code> 是标准边距，正数往里挪，范围 -200~200。
+                                只在 <code>xaero_minimap</code> 真的生效时有用。
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>compact_hud_offset_y</code></td>
+                            <td><code>0</code>（-200~200）</td>
+                            <td>
+                                精简卡片从所选角的上边缘或下边缘再往里挪多少像素，单位同上。
+                                <code>0</code> 是标准边距，正数往里挪；范围 -200~200。
+                                只在 <code>xaero_minimap</code> 真的生效时有用。
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p>
+                    精简卡片是「只显示读数」的那张卡，只在 <code>xaero_minimap</code> 下存在：HUD 模式下地图与读数
+                    都在同一张面板里，没有第二个角要调。挂哪个角与两个像素偏移，也可以在游戏内的
+                    <a href="#settings">设置界面</a>里改，两者写的是同一份配置。面板上那些图层的开关存在另一个文件里，见
+                    <a href="display.html">地图显示与缩放</a>。
+                </p>
+
                 <h2 id="roads">路网修复与偏离判定</h2>
                 <div class="table-wrap">
                     <table>
@@ -268,6 +355,48 @@
                             要享受新的默认值：自己改那一节，或者把整个 <code>[on_road_tolerance_blocks]</code> 删掉让游戏重写。</p>
                     </div>
                 </div>
+
+                <h2 id="theme">界面主题</h2>
+                <p>
+                    0.2.3 新增 <code>ui_theme</code>：本模组的界面有三套配色，<code>"dark"</code> 是原来那套黑色，
+                    <code>"light"</code> 是白色，<code>"auto"</code>（默认）跟着天光切换。
+                    它管的是<strong>本模组画的所有界面</strong>——主界面、目的地列表、地图存档、设置、地点详情、
+                    线路配置、导航面板、精简卡片与浏览器地图都读同一套颜色，所以改一处不会有哪个窗口还是旧样子。
+                </p>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>键</th>
+                            <th>默认值</th>
+                            <th>说明</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td><code>ui_theme</code></td>
+                            <td><code>"auto"</code></td>
+                            <td>
+                                <code>"dark"</code>：一直是原来那套黑色，颜色值是原样搬过来的，一个像素没改。
+                                <code>"light"</code>：白色界面，白纸面、近黑文字，可点的东西用 Google 地图那套蓝，
+                                仍然只有文字与细线、扁平的样子。白色<strong>不是把黑色反过来</strong>——浅色界面盖在
+                                已经变暗的游戏画面上会像一个洞，所以文字分成四级灰、「看起来像线条」的颜色改用更深的蓝，
+                                「红色＝堵/错、橙色＝注意、绿色＝畅通」这些含义色都在白底上重新取过对比度。
+                                <code>"auto"</code>：读<strong>世界自己的天空亮度实时值</strong>，白天白、天黑黑、
+                                雷雨把世界压暗时界面跟着暗；地狱、末地与任何声明没有天空的维度<strong>永远是黑色</strong>。
+                                所以它是在太阳真正落下的那一刻换色，而不是照一张写死的日出日落表。
+                                这是客户端设置：不改世界、不发服务器，下一帧生效，不用重启，浏览器地图也一起换。
+                                <a href="#settings">设置界面</a>里的「界面主题」与这一项是同一个值。
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p>
+                    后面两节（<code>road_colors</code> / <code>transit_line_colors</code>）是<strong>你自己填的</strong>颜色，
+                    与这三套主题不是一回事：主题决定界面本体是黑是白，那两节决定路与线路画成什么颜色，
+                    所以浅色主题下也能给高速填一个刺眼的颜色。
+                </p>
 
                 <h2 id="colors">配色</h2>
                 <p>
@@ -482,7 +611,8 @@
                             <td>是否读取 MTR 的车站与线路，变成问道自己的站点与公共交通线路。
                                 读取是反射的、只在客户端发生，所以没装 MTR 时这一项不做任何事，两个方向都不需要依赖。
                                 MTR 的世界在它自己的服务端上，最基本的一次读取只是玩家附近的那一段窗口；
-                                另外两种读取（自己开图读整张铁路、装了 MTR Map Overlay 读它抓回的整张快照）见下面两项。
+                                另外三种读取（自己开图读整张铁路、服务端装了本模组时同步整张路网、
+                                装了 MTR Map Overlay 读它抓回的整张快照）见下面三项。
                                 线路按类型映射，列车与缆车算铁路、船算水路，其它类型（飞机，或 MTR 以后新加的类型）
                                 <strong>不猜</strong>，直接不处理。细节见 <a href="mtr.html">MTR 集成</a>。</td>
                         </tr>
@@ -501,7 +631,27 @@
                                 <strong>整张网络快照</strong>（每条线、每个车站、每段轨道）。需要客户端与服务器都装了它。
                                 这是三种读取里唯一说得出「每条线走哪几段轨道」的一种，所以由它画出的线路沿着真正的铁路走。
                                 它只读服务器回答过的那份快照，抓不到就什么都不读（不会把 MTR 自己发的那段窗口读两遍）。
+                                0.2.3 起它退为<strong>后备</strong>：只要本模组有自己更权威的读数（服务端同步来的，
+                                或自己开图时从本机模拟里读的），overlay 的数据就<strong>完全不读</strong>，
+                                免得同一批车站从两个可能不一致的读取器里各来一遍；两者都没有时（别人的服务器、
+                                服务端没装本模组）才用它。
                                 它自己的「线路 / 轨道」两个地图开关会被问道记住，见下面的<a href="#files">数据文件</a>。</td>
+                        </tr>
+                        <tr>
+                            <td><code>mtr_server_sync</code></td>
+                            <td><code>true</code></td>
+                            <td>
+                                是否向<strong>装了本模组（和 MTR）的服务器</strong>要整张路网，0.2.3 新增。
+                                开着时客户端进服会每秒说一次 hello，服务端把 MTR 正在模拟的<strong>每个维度的全部车站、
+                                线路与轨道</strong>打包压缩、按 30 kB 分片发回来；服务端只回给说过 hello 的客户端，
+                                所以没装本模组的客户端不会收到任何东西；路网十秒检查一次，只有真变了才重发。
+                                读到的路网优先于 MTR Map Overlay 的快照（那时 overlay 完全不读），也优先于 MTR
+                                自己发的那段约 200 格窗口。客户端自己没装 MTR 也能用同步来的路网，
+                                但本模组的 <code>mtr_transit</code> 仍然要开着（关掉它连 hello 都不发）。
+                                关掉这一项，客户端就不再向服务端要数据，其它行为与没有这个同步时一样。
+                                <strong>这个同步只在 1.20.6 与 1.21.1 的构建里编译并启用</strong>，
+                                其它版本节点是空实现，行为与之前完全一致。
+                            </td>
                         </tr>
                         <tr>
                             <td><code>mtr_station_merge_blocks</code></td>
@@ -597,6 +747,145 @@
                     它只用过一次，量出来的结论已经写进代码注释并由回归测试守着，所以连属性一起删了。
                 </p>
 
+                <h2 id="settings">游戏内设置</h2>
+                <p>
+                    0.2.3 起，主界面（<kbd>K</kbd>）标题栏上多了一个<strong>「设置」</strong>：以前只有在
+                    <code>howtogo-client.toml</code> 或模组列表里的完整配置界面里才能改的东西，现在游戏里就能点。
+                    它收的是「玩的时候真的会想改」的<strong>十五项</strong>，分五组——界面外观、导航 HUD、
+                    路线与出行、地图数据源、浏览器地图。每一项都有说明：把鼠标停在某一行上，列表下面固定的那条说明区
+                    会写出这一项是干什么的；窗口放不下时用滚轮滚（右边那条 2 像素的竖条只是位置提示，
+                    不是另一个可以拖的滚动条）。控件也都是本模组自己画的——圆角开关、点一下换一个值的选项片、
+                    <code>- 值 +</code> 步进器；黑色与白色两套各取各的颜色，所以在这里换界面主题，整页下一帧就跟着换色。
+                </p>
+                <p>
+                    <strong>改一下立刻保存，没有「应用」按钮</strong>：每一次改动都直接写进
+                    <code>config/howtogo-client.toml</code>——就是本文上半部分那同一个文件，说明区里回一句「已保存」。
+                    底部只有「返回」与「恢复默认值」两个按钮，后者<strong>要点两次</strong>：第一次只提醒
+                    「只恢复本页上的设置」，第二次才真的恢复，而且<strong>只恢复这一页的十五项</strong>——
+                    颜色、容差、方块 id 与端口那些留在文件里的值一个都不碰。生效时机按类分：
+                </p>
+                <ul>
+                    <li><strong>下一帧</strong>：界面主题、地图显示模式，以及精简卡片挂哪个角与两个像素偏移。</li>
+                    <li><strong>下一个客户端刻</strong>：地图数据源那几个开关。</li>
+                    <li><strong>下一次规划或导航判定</strong>：步行越野距离、站点吸附距离、等车时间，
+                        以及「所选方式更慢时是否改按步行」。</li>
+                    <li><strong>下一局或下一次进世界</strong>：默认出行方式在这一局还没切换过方式时立即生效，
+                        切换过就保住这一局的选择、下一次进游戏用新默认；浏览器地图的自动启动在下一次进入世界时生效，
+                        关掉它不会停掉已经在跑的那个服务。</li>
+                </ul>
+                <p>十五项按分组是这些，括号里是它们在 <code>howtogo-client.toml</code> 里的键：</p>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>界面上的项（键）</th>
+                            <th>这一项做什么</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <th colspan="2">界面外观</th>
+                        </tr>
+                        <tr>
+                            <td>界面主题（<code>ui_theme</code>）</td>
+                            <td>黑色、白色，或跟着世界天光在两者之间自动切换；所有本模组界面一起换，
+                                见<a href="#theme">界面主题</a>。</td>
+                        </tr>
+                        <tr>
+                            <td>地图显示模式（<code>map_display_mode</code>）</td>
+                            <td>导航地图画在本模组 HUD 里（<code>hud</code>，默认）还是 Xaero's Minimap 上
+                                （<code>xaero_minimap</code>），见<a href="#hud">导航 HUD</a>。</td>
+                        </tr>
+                        <tr>
+                            <th colspan="2">导航 HUD</th>
+                        </tr>
+                        <tr>
+                            <td>精简卡片挂哪个角（<code>compact_hud_anchor</code>）</td>
+                            <td>左上、右上、左下（默认）或右下；只在 <code>xaero_minimap</code> 真的生效时可用。</td>
+                        </tr>
+                        <tr>
+                            <td>横向偏移（<code>compact_hud_offset_x</code>）</td>
+                            <td>从所选角的内边缘再往屏幕里挪多少像素，默认 <code>0</code>。</td>
+                        </tr>
+                        <tr>
+                            <td>纵向偏移（<code>compact_hud_offset_y</code>）</td>
+                            <td>同上，纵向；两个偏移的步进都是 5 像素。</td>
+                        </tr>
+                        <tr>
+                            <th colspan="2">路线与出行</th>
+                        </tr>
+                        <tr>
+                            <td>默认出行方式（<code>default_travel_mode</code>）</td>
+                            <td>新一局从哪一种方式开始：步行、驾车、公共交通。</td>
+                        </tr>
+                        <tr>
+                            <td>所选方式更慢时改按步行（<code>fall_back_to_walking_when_slower</code>）</td>
+                            <td>关掉就慢也照实显示，见<a href="#travel">导航</a>。</td>
+                        </tr>
+                        <tr>
+                            <td>每次上车平均等待秒数（<code>transit_wait_seconds</code>）</td>
+                            <td>换乘与预计时间都按它算，见<a href="#transit">公共交通</a>。</td>
+                        </tr>
+                        <tr>
+                            <td>步行越野距离（<code>walk_offroad_blocks</code>）</td>
+                            <td>步行时最多离路走多远，超过就判「没有路线」。</td>
+                        </tr>
+                        <tr>
+                            <td>站点吸附距离（<code>station_snap_blocks</code>）</td>
+                            <td>离停靠的站多近算在站上、不判偏航，也是报站的距离基准。</td>
+                        </tr>
+                        <tr>
+                            <th colspan="2">地图数据源</th>
+                        </tr>
+                        <tr>
+                            <td>读机械动力轨道（<code>create_train_tracks</code>）</td>
+                            <td>机械动力的铁轨与车站当只读图层的总开关，见<a href="#create">机械动力铁路</a>。</td>
+                        </tr>
+                        <tr>
+                            <td>读 MTR（<code>mtr_transit</code>）</td>
+                            <td>把 MTR 的车站与线路读成问道自己的站点与线路，见<a href="#mtr">MTR 集成</a>。</td>
+                        </tr>
+                        <tr>
+                            <td>自己开图时读 MTR 整张铁路（<code>mtr_full_map</code>）</td>
+                            <td>自己开图时读 MTR 正在模拟的整张网络，不受约 200 格窗口限制。</td>
+                        </tr>
+                        <tr>
+                            <td>读阡陌交通的道路（<code>roadweaver_roads</code>）</td>
+                            <td>阡陌交通自动铺的路当只读图层（含路尽头的连接段），见<a href="#roadweaver">阡陌交通</a>。</td>
+                        </tr>
+                        <tr>
+                            <th colspan="2">浏览器地图</th>
+                        </tr>
+                        <tr>
+                            <td>世界加载后自动启动（<code>webmap_auto_start</code>）</td>
+                            <td>不必再敲 <code>/howtogo webmap</code>，见<a href="#webmap">浏览器地图</a>。</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p>
+                    <strong>有依赖的项不会消失，而是变灰并在说明区里写明原因。</strong>精简卡片那三项
+                    （挂哪个角、两个像素偏移）只在导航地图<strong>真的画在 Xaero 小地图上</strong>时可用——
+                    选了 <code>xaero_minimap</code>、却因为小地图不可用而退回 HUD 面板时，它们同样灰掉；
+                    「自己开图时读 MTR 整张铁路」在「读 MTR」关掉时不可用。灰掉的是控件，行还留在原处，
+                    原因就写在灰行下面——比让一行悄悄消失、玩家不知道自己在找的东西去哪了要好。
+                </p>
+                <p>
+                    没搬进界面的，是「一次调好就不再动」的那一批：颜色（<code>road_colors</code> /
+                    <code>transit_line_colors</code>）、各级容差（<code>on_road_tolerance_blocks</code>）、
+                    方块 id（<code>create_track_block_ids</code> / <code>create_station_block_ids</code>）与
+                    <code>webmap_port</code>。颜色要一块色板、逐级容差要一段解释、端口要一个数字框，
+                    硬塞进这样一页只会比文件更难读；它们的入口仍然是模组列表里的完整配置界面与文件本身。
+                </p>
+                <p>
+                    另外五项是<strong>故意</strong>不放的：路线偏好（<code>route_preference</code>）、
+                    避开等级（<code>avoid_road_classes</code>）、优先大路（<code>prefer_major_roads</code>）、
+                    语音（<code>voice_announcements</code>）、只报站（<code>transit_board_only</code>）。
+                    它们以 <code>config/howtogo/route_preferences.json</code> 为准（就是你在「选择目的地」界面里按的那一份），
+                    放进设置界面等于给它们再加一个「看不见的第二值」——那比没有这个开关更糟。要改这五项，
+                    还是在「选择目的地」界面里点，或者见下面的<a href="#runtime">运行时偏好</a>。
+                </p>
+
                 <h2 id="files">运行时偏好与数据文件</h2>
 
                 <h3 id="runtime">运行时偏好</h3>
@@ -605,6 +894,8 @@
                     <code>config/howtogo/route_preferences.json</code>，重启之后还保留。
                     <strong>这个文件不存在时，以上表的值为准</strong>——配置文件是初始值，这个文件是「你上次的选择」。
                     两者冲突时以这个文件为准，因为它是你后来按的。
+                    这五项（路线偏好、避开等级、优先大路、语音、只报站）因此没有放进 0.2.3 的游戏内
+                    <a href="#settings">设置界面</a>：放进去改也会被这个文件里记下的值盖住，等于改一份看不见的第二值。
                 </p>
                 <p>
                     想回到配置里的默认行为，删掉 <code>route_preferences.json</code> 即可；
@@ -613,13 +904,14 @@
 
                 <h3 id="file-list">文件都在哪</h3>
                 <p>
-                    路网、线路和名字都在 <code>config/howtogo/</code> 下，首先<strong>按世界分开</strong>：
+                    路网、线路、名字与地点详情都在 <code>config/howtogo/</code> 下，首先<strong>按世界分开</strong>：
                     单人存档按世界名（<code>sp_&lt;世界名&gt;</code>），多人服务器按服务器地址（<code>mp_&lt;地址&gt;</code>）。
                     0.2.2 起目录名里的中文按<strong>拼音</strong>写：<code>sp_新世界</code> 的目录是
                     <code>sp_xin_shi_jie</code>（0.2.1 及以前是一串下划线），其余非法字符仍各换成一个下划线，
                     ASCII 世界名原样保留。第一次打开某个世界时会自动整目录改名，升级不用做任何事；
                     但<strong>降级有风险</strong>——用 0.2.2 存过档再退回 0.2.1，那个世界的路网会是空的。
-                    坐标只在一个维度里才有意义，所以文件名里还带着维度；
+                    坐标只在一个维度里才有意义，所以文件名里还带着维度（<code>place_details.json</code> 是例外：
+                    地点详情按存档存，一份管这个存档的所有维度）；
                     改名、换地址、换电脑时目录怎么跟着变，见 <a href="migrate.html">迁移地图数据</a>。
                 </p>
                 <div class="table-wrap">
@@ -646,6 +938,17 @@
                                 所以名字是按「路段两端的坐标」记的，而不是绑在 id 上。</td>
                         </tr>
                         <tr>
+                            <td><code>config/howtogo/&lt;存档&gt;/place_details.json</code></td>
+                            <td>地点详情：每个地点的<strong>描述</strong>（最多 512 字、可换行）、<strong>标签</strong>
+                                （最多 16 个、每个最多 8 字）与<strong>收藏</strong>星标，0.2.3 新增。
+                                它是<strong>按存档、不按维度</strong>的：维度本来就是地点键的一部分，一个维度一个文件没有意义。
+                                写法与路网一样是 3 秒防抖 + 原子写（改完最多 3 秒落盘，离开世界时也会写），
+                                随「地图存档」导出的压缩包一起打包，导入时一起覆盖。
+                                车站被拆、路径点被删、模组被卸载之后，那些地点的详情不会自动消失，而是进
+                                「地图存档」界面底部的「未关联详情（N）」。描述、标签、收藏怎么录入，
+                                见 <a href="roads.html">画路、命名与地点</a>。</td>
+                        </tr>
+                        <tr>
                             <td><code>config/howtogo/&lt;存档&gt;/.world</code></td>
                             <td>这个目录属于哪个世界（原始世界名）。用来区分<strong>清洗后同名</strong>的中文世界名：
                                 不带哈希的目录由它记录归属，后来「清洗后同名、名字却不同」的世界才会拿到带短哈希的目录。
@@ -667,7 +970,7 @@
                         <tr>
                             <td><code>config/howtogo/exports/</code></td>
                             <td>「地图存档」界面导出的 <code>.zip</code> 默认写在这里，<code>/howtogo export</code> 也一样。
-                                一个包就是<strong>当前世界</strong>的道路、地点、铁路名称、公共交通线路与附属数据。</td>
+                                一个包就是<strong>当前世界</strong>的道路、地点、铁路名称、公共交通线路、地点详情与附属数据。</td>
                         </tr>
                         <tr>
                             <td><code>config/howtogo/backups/</code></td>
@@ -714,7 +1017,7 @@
                 </p>
                 <p>
                     0.2.2 起还多了一条不用手抄 JSON 的路：<code>/howtogo data</code> 打开「地图存档」界面，
-                    一个按钮把<strong>当前世界</strong>的道路、地点、铁路名称、公共交通线路与附属数据打成一个
+                    一个按钮把<strong>当前世界</strong>的道路、地点、铁路名称、公共交通线路、地点详情与附属数据打成一个
                     <code>.zip</code> 放进 <code>config/howtogo/exports/</code>，另一个按钮把别人的 <code>.zip</code> 导入回来；
                     <code>/howtogo export</code> 直接导出，<code>/howtogo import [压缩包]</code> 读指定文件，
                     压缩包也可以直接拖进界面。导入<strong>无视压缩包名与内部目录名</strong>，覆盖前有警告并先备份到

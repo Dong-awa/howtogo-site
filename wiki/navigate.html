@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>导航与 HUD — HowToGo | 问道 Wiki</title>
-    <meta name="description" content="问道导航教程：四种开始导航的方式、三种交通方式各自能走的道路等级与速度表、路线偏好（按等级权重）、高速上的搜索限制、先预览再出发、无解时的回退规则与驾车重计时、HUD 读数与转弯判定、语音播报与偏航容差。">
+    <meta name="description" content="问道（HowToGo）0.2.3 导航教程：三种开始导航的方式（导航仪物品已移除）、三种交通方式各自能走的道路等级与速度表、路线偏好（按等级权重）、高速上的搜索限制、先预览再出发、无解时的回退规则与驾车重计时、HUD 读数与转弯判定、把导航地图画到 Xaero's Minimap 上的小地图模式与精简卡片、语音播报与偏航容差。">
     <meta name="theme-color" content="#f4f8ff">
     <link rel="icon" href="../assets/img/mod-icon.png" type="image/png">
     <link rel="stylesheet" href="../assets/css/site.css">
@@ -78,7 +78,7 @@
                 <a href="config.html" data-wiki-link data-keywords="配置 文件 toml 数据 存档 备份">配置与数据文件</a>
                 <a href="migrate.html" data-wiki-link data-keywords="迁移 搬家 改名 换电脑 存档 服务器地址 数据 文件夹 sp_ mp_ 世界名 目录 备份 丢失">迁移地图数据</a>
                 <a href="faq.html" data-wiki-link data-keywords="常见问题 限制 报错 没有路线 语音">常见问题与限制</a>
-                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.2 0.2.1 0.2.0 0.1.0">更新日志</a>
+                <a href="changelog.html" data-wiki-link data-keywords="更新日志 版本 变更 0.2.3 0.2.2 0.2.1 0.2.0 0.1.0">更新日志</a>
             </aside>
 
             <main class="wiki-body">
@@ -94,7 +94,7 @@
                     所以它给的每一条路线都能在地图上指出它为什么这么走。
                 </p>
 
-                <h2 id="start">四种开始导航的方式</h2>
+                <h2 id="start">三种开始导航的方式</h2>
                 <div class="table-wrap">
                     <table>
                         <thead>
@@ -117,11 +117,6 @@
                             <td>不用。按键可以在「控制」里改；世界地图里按 <kbd>K</kbd> 不会触发（地图有自己的按键）。</td>
                         </tr>
                         <tr>
-                            <td>导航仪</td>
-                            <td>手持「道路导航仪」右键，打开「选择目的地」界面；鼠标悬停时 tooltip 显示当前行程。</td>
-                            <td>不用</td>
-                        </tr>
-                        <tr>
                             <td>MCPhone</td>
                             <td>装了 MCPhone 时，手机里会多出一个「问道导航」应用，作用等于一个打开选择界面的入口。</td>
                             <td>不用</td>
@@ -130,9 +125,16 @@
                     </table>
                 </div>
                 <p>
-                    导航仪由四角铁锭、四边纸、中心指南针合成（有序，九格全满），拿到指南针后配方会自动出现在配方书里。
-                    0.2.2 新增的 <kbd>K</kbd> 主界面是另一个入口：不必把导航仪拿在手上，按一下就能看状态、
-                    换出行方式、选目的地或结束导航，两条路最后都落在「选择目的地」上。
+                    0.2.2 新增的 <kbd>K</kbd> 主界面以前是第二个入口：不必把导航仪拿在手上，按一下就能看状态、
+                    换出行方式、选目的地或结束导航。0.2.3 起<strong>导航仪物品已经移除</strong>——物品与本模组自己的界面重复，
+                    于是物品、配方、进度、创造模式标签页、语言与模型一起删了，本模组现在不注册任何物品；
+                    <kbd>K</kbd> 成为唯一入口，<code>/howtogo terminal</code> 与手机里的「问道导航」都还在。
+                </p>
+                <p>
+                    老存档里已经拿到的导航仪会因为物品 ID <code>howtogo:navigator</code> 已经不存在而<strong>读不出来</strong>，
+                    升级日志里会报 unknown registry key。
+                    <kbd>K</kbd> 键在 Fabric 上也修好了（0.2.3 起）：以前它只在 NeoForge 上注册与读取，Fabric 的键位表里根本没有它，
+                    物品删掉后那等于 Fabric 玩家没有任何入口，所以两个加载器现在都注册并轮询同一个键位。
                 </p>
 
                 <h2 id="modes">交通方式：等级决定路线</h2>
@@ -227,10 +229,17 @@
                 <h2 id="highway">高速上的搜索限制</h2>
                 <p>
                     <strong>高速上不许原路折返</strong>：回到刚走过的那一段，或者走上它与同两个节点之间的另一段
-                    （一条路被画成一来一往两段时就是这样），在搜索里直接不成立。其余转弯卡在
-                    <strong>100 度</strong>以内——这个上限留住了高速真正会有的每个弯：直角路口是 90 度、
-                    分隔式高速在中央分隔带端头的掉头匝道、以及向外弯出去的匝道，同时挡掉它不会有的发夹弯、
-                    折返与掉头。
+                    （一条路被画成一来一往两段时就是这样），在搜索里直接不成立。高速自身折线内部的弯，
+                    以及高速与高速之间的路口，转弯卡在 <strong>100 度</strong>以内——这个上限留住了高速真正会有的每个弯：
+                    直角路口是 90 度、分隔式高速在中央分隔带端头的掉头匝道、以及向外弯出去的匝道，
+                    同时挡掉它不会有的发夹弯、折返与掉头。
+                </p>
+                <p>
+                    <strong>上下高速不在这一条里（0.2.3 起）。</strong>以前只要路口任一侧是高速，这个 100 度就生效，
+                    于是匝道以一百多度的角度接上（或离开）高速时——这几乎是匝道的常态——整条路线会被判成不可行：
+                    测试里「一条路以 104° 接进高速」与「高速以 104° 接出去」这两种形状，旧规则下都是<strong>无路可走</strong>。
+                    现在这条限制只用于高速与高速之间的路口，上下高速按普通转弯处理，因为匝道的形状属于匝道，
+                    而不是高速的掉头；高速与高速之间的发夹弯仍然被拒。
                 </p>
                 <p>
                     限制落在<strong>搜索</strong>里，而不是念白里：以前只是把「掉头」的提示改说成「继续前行到下一个路口」，
@@ -287,6 +296,8 @@
                     导航开始后，屏幕上的面板给出：<strong>旋转小地图</strong>（带北向指示）、<strong>转向箭头</strong>、
                     <strong>剩余距离与时间</strong>、<strong>进度条</strong>。文字读数是同一套数字的另一种写法，
                     例如「前往 家 | 剩余 840 米 · 约 1分40秒」。到达时显示「✔ 已到达 家」。
+                    这块自带的小地图只在默认的 <code>hud</code> 模式下画；如果装了 Xaero's Minimap、想让它来画，
+                    见下面<a href="#xaero-minimap">把导航地图画到 Xaero's Minimap 上</a>。
                 </p>
                 <p>
                     导航线分成「已走」与「未走」两种颜色；<strong>走完最后一段时整条按「已走」处理</strong>，
@@ -368,6 +379,65 @@
                     <strong>每个站点周围各自生效</strong>，所以从一个站台走到另一个站台换乘也不会被判成偏离。
                 </p>
 
+                <h2 id="xaero-minimap">把导航地图画到 Xaero's Minimap 上</h2>
+                <p>
+                    默认情况下，导航面板里自带一张旋转小地图。如果你装了 Xaero's Minimap，也可以交给它来画：
+                    配置项 <code>map_display_mode</code> 有两个值——<code>hud</code>（默认，就是上面那张自带小地图的导航面板）
+                    与 <code>xaero_minimap</code>。它也在 <kbd>K</kbd> 主界面的「设置 → 界面外观」里
+                    （细节见<a href="config.html#settings">设置界面</a>）；
+                    NeoForge 上改完下一帧生效，Fabric 的 JSON 配置与其它项一样在启动时读取。
+                </p>
+                <p>
+                    选 <code>xaero_minimap</code> 时，本模组的 HUD <strong>不再画自己的小地图</strong>：
+                    <strong>整张路网</strong>、导航路线与终点／起点标记都画进 Xaero 的小地图，屏幕上只留一张<strong>精简卡片</strong>——
+                    转向箭头、到转向处的距离、剩余里程与时间、进度条，以及目的地名。
+                    路网是始终画的，不只在导航时；路线只在导航时画。压在路线拐角上的「下一个转向处」蓝色大点不再画，
+                    因为它读起来像遮挡而不是提示，转向交给精简卡片的箭头来说。
+                </p>
+                <p>
+                    两种模式<strong>读的是同一份读数</strong>，只是画到不同地方，所以不会出现「面板说左转、小地图说右转」。
+                    为什么做成可选项而不是直接换掉：自带小地图不依赖任何别的模组，而 Xaero's Minimap 是可选的；
+                    有它的玩家通常已经把屏幕布局安排好了，愿意换的人才换。
+                </p>
+                <div class="callout">
+                    <span class="ico">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                             stroke-linecap="round">
+                            <circle cx="12" cy="12" r="9"/>
+                            <path d="M12 8h.01M11 12h1v4h1"/>
+                        </svg>
+                    </span>
+                    <div>
+                        <p><strong>回退是明说的</strong>：选了 <code>xaero_minimap</code>，但 Xaero's Minimap 没装、
+                            当前构建没有针对它编译、或者注册失败时，会自动用回 HUD 面板，并在日志里写一行
+                            <code>map display mode xaero_minimap is unavailable (...)</code> 说明是哪一种——
+                            而不是静默失效，也不会崩。</p>
+                    </div>
+                </div>
+                <h3>小地图上的路网是真正的折线</h3>
+                <p>
+                    画到小地图上的覆盖层最早只能画路线圆点，路网根本没画（玩家反馈「小地图上看不到路网」），0.2.3 起路网始终画、
+                    并且是折线：Xaero 的小地图元素扩展点只把一个元素摆到它自己的屏幕位置上，不把视口变换交给渲染方，
+                    所以每帧用几个不可见的标定元素（玩家所在点、+64/+16/+4 格的 X/Z 探针）反推出<strong>这一帧真实的屏幕变换</strong>——
+                    缩放、旋转、地图中心与边界都从 Xaero 自己的投影里量出来，不读它的私有字段——再把路网与路线按同一套变换投影成折线，
+                    再用四个超大偏移的探针（它们会被夹到地图边缘）量出小地图矩形做裁剪，所以线不会画到小地图外面。
+                    终点／起点标记也走同一套变换，不再依赖可选缩放比例的猜测。
+                </p>
+                <h3>精简卡片挂在哪里</h3>
+                <p>
+                    三个配置项：<code>compact_hud_anchor</code>（默认 <code>bottom_left</code>，因为 Xaero's Minimap 默认在左上角）、
+                    <code>compact_hud_offset_x</code> 与 <code>compact_hud_offset_y</code>（两个像素偏移）。
+                    选了 <code>xaero_minimap</code> 却回退到 HUD 时，这三项在设置界面里是灰的，因为精简卡片此时并没有画出来。
+                </p>
+                <h3>Xaero's Minimap 不是硬依赖</h3>
+                <p>
+                    Xaero's Minimap <strong>不是硬依赖</strong>：这一段只用 <code>compileOnly</code> 编译，
+                    两个加载器的 <code>depends</code> 里都没有它（Fabric 只在 <code>suggests</code> 里列了它）。
+                    没有提供小地图 jar 的版本节点直接不编译这段代码，功能在这些节点上就等于「没装小地图」时的回退——
+                    <strong>这次发布的 21 个 jar 里只有 <code>1.21.1-neoforge</code> 真的编进了这一段</strong>，
+                    因为构建时 <code>libs/</code> 里只有它那一份小地图 jar。
+                </p>
+
                 <h2 id="voice">语音播报</h2>
                 <p>
                     配置项 <code>voice_announcements</code>（默认关），或者「选择目的地」界面里的<strong>语音</strong>开关。
@@ -419,6 +489,18 @@
                             语音不可能比文字更早喊出「现在转弯」。面板、地图读数与语音读的是同一个数。</p>
                     </div>
                 </div>
+
+                <h3>「路况变化」播报变钝了（0.2.3 起）</h3>
+                <p>
+                    还有一类播报是脚下路面变了的「路况变化」（例如「公路 → 高速」）。它原来会在高速上莫名其妙地反复播报：
+                    读数取的是「容差范围内最近的那条路」，而路口附近高速自己的中线与紧挨着它的匝道／辅路会争这个名额，
+                    谁更近往往只差一两格；读数每个方块重算一次，于是一直待在高速上开车的人会被反复通知「路况变化」。
+                </p>
+                <p>
+                    现在播报加了两道闸：<strong>读数要连续保持 5 tick</strong>（抖动一次不算，和错误方向的判定同一套思路），
+                    并且<strong>新路面要比当前认定的路面至少近 2 格</strong>才算真的换了路。
+                    速度、转向距离与逆行判定仍然读原来的「最近道路」，行为不变——只有播报变钝了。
+                </p>
 
                 <div class="wiki-nav">
                     <a class="prev" href="roads.html">
